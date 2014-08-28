@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="com.salesforce"
+        version="2.3.0">
+
+  <name>SalesforceMobileSDK Plugins</name>
+  <description>SalesforceMobileSDK Plugins</description>
+  <license>Apache 2.0</license>
+  <keywords>salesforce,oauth,smartstore</keywords>
+  <repo>https://github.com/wmathurin/SalesforceMobileSDK-CordovaPlugin</repo>
+
+  <js-module src="www/com.salesforce.plugin.oauth.js" name="plugin.oauth"></js-module>
+  <js-module src="www/com.salesforce.plugin.sdkinfo.js" name="plugin.sdkinfo"></js-module>
+  <js-module src="www/com.salesforce.plugin.smartstore.js" name="plugin.smartstore">
+    <clobbers target="navigator.smartstore" />
+  </js-module>
+  <js-module src="www/com.salesforce.plugin.sfaccountmanager.js" name="plugin.sfaccountmanager"></js-module>
+  <js-module src="www/com.salesforce.util.bootstrap.js" name="util.bootstrap"></js-module>
+  <js-module src="www/com.salesforce.util.event.js" name="util.event"></js-module>
+  <js-module src="www/com.salesforce.util.exec.js" name="util.exec"></js-module>
+  <js-module src="www/com.salesforce.util.logger.js" name="util.logger"></js-module>
+  <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
+
+  <engines>
+	<engine name="cordova" version=">=3.5.0" />
+  </engines>
+
+  <dependency id="org.apache.cordova.device"/>
+  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/wmathurin/PushPlugin" />
+
+  <!-- ios -->
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <access origin="http://localhost"/> <!-- allow local pages -->
+      <access origin="https://*.force.com" />
+      <access origin="https://*.salesforce.com" />
+      <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
+      <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
+      <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
+      <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
+    </config-file>
+
+    <!-- Header files -->
+    <header-file src="src/ios/headers/SFAuthenticationManager.h" target-dir="salesforce"/>
+    <header-file src="src/ios/headers/SFCommunityData.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFDefaultUserManagementViewController.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFHybridViewConfig.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFHybridViewController.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFIdentityCoordinator.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFOAuthInfo.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFPushNotificationManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFUserAccount.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFUserAccountConstants.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
+	<header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
+
+    <!-- Source files -->
+    <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
+
+    <!-- Resource bundles -->
+    <resource-file src="src/ios/resources/Settings.bundle" />
+    <resource-file src="src/ios/resources/SalesforceSDKResources.bundle" />
+    <resource-file src="src/ios/resources/Images.xcassets" />
+
+    <!-- Libraries -->
+    <source-file src="src/ios/frameworks/libSalesforceCommonUtils.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceOAuth.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceSecurity.a" framework="true" />
+    <source-file src="src/ios/frameworks/libcrypto.a" framework="true" />
+    <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
+    <source-file src="src/ios/frameworks/libssl.a" framework="true" />
+
+    <!-- System frameworks -->
+    <framework src="libxml2.dylib" />
+    <framework src="libz.dylib" />
+    <framework src="AddressBook.framework" weak="true" />
+    <framework src="AddressBookUI.framework" weak="true" />
+    <framework src="CoreGraphics.framework" weak="true" />
+    <framework src="CoreLocation.framework" weak="true" />
+    <framework src="Foundation.framework" weak="true" />
+    <framework src="MessageUI.framework" weak="true" />
+    <framework src="MobileCoreServices.framework" weak="true" />
+    <framework src="QuartzCore.framework" weak="true" />
+    <framework src="Security.framework" weak="true" />
+    <framework src="SystemConfiguration.framework" weak="true" />
+    <framework src="UIKit.framework" weak="true" />
+    <framework src="AssetsLibrary.framework" weak="true" />
+  </platform>
+
+  <!-- android -->
+  <platform name="android">
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+      <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" android:label="@string/app_name" android:name="com.salesforce.androidsdk.ui.sfhybrid.SalesforceDroidGapActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
+        <intent-filter>
+          <action android:name="android.intent.action.MAIN" />
+          <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+      </activity>
+    </config-file>
+
+    <config-file target="res/xml/config.xml" parent="/*">
+      <access origin="http://127.0.0.1*"/> <!-- allow local pages -->
+      <access origin="https://*.force.com" />
+      <access origin="https://*.salesforce.com" />
+      <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SalesforceOAuthPlugin"/></feature>
+      <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SFAccountManagerPlugin"/></feature>
+      <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SDKInfoPlugin"/></feature>
+      <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.smartstore.phonegap.SmartStorePlugin"/></feature>
+    </config-file>
+
+    <config-file target="res/values/strings.xml" parent="/resources">
+      <string name="account_type">$PACKAGE_NAME.login</string>
+      <string name="app_package">$PACKAGE_NAME</string>
+    </config-file>
+
+    <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
+
+    <info>
+      You need to run: node plugins/com.salesforce/tools/postinstall-android.js {target-api (e.g. 19 for KitKat)} {use-smartstore (true or false)}
+    </info>
+
+  </platform>
+
+
+</plugin>
