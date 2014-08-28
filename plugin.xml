@@ -9,7 +9,7 @@
   <description>SalesforceMobileSDK Plugins</description>
   <license>Apache 2.0</license>
   <keywords>salesforce,oauth,smartstore</keywords>
-  <repo>https://github.com/wmathurin/SalesforceMobileSDK-CordovaPlugin</repo>
+  <repo>https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin</repo>
 
   <js-module src="www/com.salesforce.plugin.oauth.js" name="plugin.oauth"></js-module>
   <js-module src="www/com.salesforce.plugin.sdkinfo.js" name="plugin.sdkinfo"></js-module>
@@ -28,7 +28,7 @@
   </engines>
 
   <dependency id="org.apache.cordova.device"/>
-  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/wmathurin/PushPlugin" />
+  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin" />
 
   <!-- ios -->
   <platform name="ios">
