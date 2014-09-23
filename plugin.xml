@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="2.3.0">
+        version="2.3.1">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -59,10 +59,12 @@
     <header-file src="src/ios/headers/SFUserAccount.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountConstants.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
-	<header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
+    <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
+    <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
+    <source-file src="src/ios/classes/UIApplication+SalesforceHybridSDK.m" />
 
     <!-- Resource bundles -->
     <resource-file src="src/ios/resources/Settings.bundle" />
