@@ -24,47 +24,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.ui.sfhybrid;
+package com.salesforce.androidsdk.util.test;
 
-import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CordovaWebView;
-import org.apache.cordova.CordovaWebViewClient;
+import com.salesforce.androidsdk.util.EventsObservable.EventType;
 
-import android.webkit.WebView;
-
-public class SalesforceWebViewClient extends CordovaWebViewClient {
-
-    // The first non-reserved URL that's loaded will be considered the app's "home page", for caching purposes.
-    protected boolean foundHomeUrl = false;
-
-    protected SalesforceDroidGapActivity ctx;
-
-    /**
-     * Constructor.
-     * 
-     * @param cordova
-     * @param view
-     */
-    public SalesforceWebViewClient(CordovaInterface cordova, CordovaWebView view) {
-        super(cordova, view);
-        this.ctx = (SalesforceDroidGapActivity) cordova.getActivity();
-    }
-
-    @Override
-    public boolean shouldOverrideUrlLoading(final WebView view, String url) {
-    	if (SalesforceWebViewClientHelper.shouldOverrideUrlLoading(ctx, view, url)) {
-    		return true;
-        } else {
-        	return super.shouldOverrideUrlLoading(view,  url);
-        }
-    }
-    
-    @Override
-    public void onPageFinished(WebView view, String url) {
-        if (!this.foundHomeUrl && SalesforceWebViewClientHelper.onHomePage(ctx, view, url)) {
-            this.foundHomeUrl = true;
-        }
-
-        super.onPageFinished(view, url);
-    }
+/**
+ * Super class for tests of native application
+ */
+public abstract class NativeInstrumentationTestCase extends ForceAppInstrumentationTestCase {
+	
+	protected void login() {
+		super.login();
+		waitForEvent(EventType.RenditionComplete).getData();
+	}
 }

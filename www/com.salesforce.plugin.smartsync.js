@@ -26,33 +26,36 @@
 
 // Version this js was shipped with
 var SALESFORCE_MOBILE_SDK_VERSION = "3.0.0";
+var SERVICE = "com.salesforce.smartsync";
 
-var logger = require("com.salesforce.util.logger");
+var exec = require("com.salesforce.util.exec").exec;
 
-/**
- * Determine whether the device is online.
- */
-var deviceIsOnline = function() {
-    var connType;
-    if (navigator && navigator.connection) {
-        connType = navigator.connection.type;
-        logger.logToConsole("deviceIsOnline connType: " + connType);
-    } else {
-        logger.logToConsole("deviceIsOnline connType is undefined.");
-    }
-    
-    if (typeof connType !== 'undefined') {
-        // Cordova's connection object.  May be more accurate?
-        return (connType && connType != Connection.NONE && connType != Connection.UNKNOWN);
-    } else {
-        // Default to browser facility.
-        return navigator.onLine;
-    }
+var syncDown = function(target, soupName, options, successCB, errorCB) {
+    exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
+         "syncDown",
+         [{"target": target, "soupName": soupName, "options": options}]
+        );        
+};
+
+var syncUp = function(soupName, options, successCB, errorCB) {
+    exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
+         "syncUp",
+         [{"soupName": soupName, "options": options}]
+        );        
+};
+
+var getSyncStatus = function(syncId, successCB, errorCB) {
+    exec(SALESFORCE_MOBILE_SDK_VERSION, successCB, errorCB, SERVICE,
+         "getSyncStatus",
+         [{"syncId": syncId}]
+        );        
 };
 
 /**
  * Part of the module that is public
  */
 module.exports = {
-    deviceIsOnline: deviceIsOnline
+    syncDown: syncDown,
+    syncUp: syncUp,
+    getSyncStatus: getSyncStatus
 };
