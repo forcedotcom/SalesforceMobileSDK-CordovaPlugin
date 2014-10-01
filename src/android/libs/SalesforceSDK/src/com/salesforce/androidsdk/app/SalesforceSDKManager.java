@@ -85,12 +85,7 @@ public class SalesforceSDKManager {
     /**
      * Current version of this SDK.
      */
-    public static final String SDK_VERSION = "2.3.0";
-
-    /**
-     * Last phone version.
-     */
-    private static final int GINGERBREAD_MR1 = 10;
+    public static final String SDK_VERSION = "3.0.0.unstable";
 
     /**
      * Default app name.
@@ -123,6 +118,11 @@ public class SalesforceSDKManager {
     private AdminPrefsManager adminPrefsManager;
     private PushNotificationInterface pushNotificationInterface;
     private volatile boolean loggedOut = false;
+
+    /**
+     * PasscodeManager object lock.
+     */
+    private Object passcodeManagerLock = new Object();
 
     /**
      * Returns a singleton instance of this class.
@@ -454,11 +454,13 @@ public class SalesforceSDKManager {
      *
      * @return PasscodeManager instance.
      */
-    public synchronized PasscodeManager getPasscodeManager() {
-        if (passcodeManager == null) {
-            passcodeManager = new PasscodeManager(context);
-        }
-        return passcodeManager;
+    public PasscodeManager getPasscodeManager() {
+    	synchronized (passcodeManagerLock) {
+            if (passcodeManager == null) {
+                passcodeManager = new PasscodeManager(context);
+            }
+            return passcodeManager;
+		}
     }
 
 	/**
@@ -886,9 +888,7 @@ public class SalesforceSDKManager {
      * @return True if the application is running on a tablet.
      */
     public static boolean isTablet() {
-        if (Build.VERSION.SDK_INT <= GINGERBREAD_MR1) {
-            return false;
-        } else if ((INSTANCE.context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
+        if ((INSTANCE.context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
             return true;
         }
         return false;

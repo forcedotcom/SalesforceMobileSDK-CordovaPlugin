@@ -42,9 +42,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-import android.annotation.TargetApi;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -169,13 +167,9 @@ public class SalesforceDroidGapActivity extends CordovaActivity {
      * @param webView the default constructed web view object
      */
     protected CordovaWebViewClient makeWebViewClient(CordovaWebView webView) {
-        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-            return new SalesforceWebViewClient(this, webView);
-        } else {
-            return new SalesforceIceCreamWebViewClient(this, webView);
-        }
+        return new SalesforceIceCreamWebViewClient(this, webView);
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
@@ -213,18 +207,12 @@ public class SalesforceDroidGapActivity extends CordovaActivity {
     /**
      * Restarts the activity if the user has been switched.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void restartIfUserSwitched() {
 		if (client != null) {
             try {
     			RestClient currentClient = clientManager.peekRestClient();
     			if (currentClient != null && !currentClient.getClientInfo().userId.equals(client.getClientInfo().userId)) {
-    		        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
-        				this.recreate();
-    		        } else {
-    		        	this.onDestroy();
-    		        	this.onCreate(null);
-    		        }
+    				this.recreate();
     			}
     		} catch (AccountInfoNotFoundException e) {
             	Log.i("SalesforceDroidGapActivity.restartIfUserSwitched", "No user account found");
@@ -515,13 +503,7 @@ public class SalesforceDroidGapActivity extends CordovaActivity {
        cookieMgr.removeSessionCookie();
        SystemClock.sleep(250); // removeSessionCookies kicks out a thread - let it finish
        String accessToken = client.getAuthToken();
-
-       // Android 3.0+ clients want to use the standard .[domain] format. Earlier clients will only work
-       // with the [domain] format.  Set them both; each platform will leverage its respective format.
-       addSidCookieForInstance(cookieMgr,"salesforce.com", accessToken);
        addSidCookieForInstance(cookieMgr,".salesforce.com", accessToken);
-
-       // Log.i("SalesforceOAuthPlugin.setSidCookies", "accessToken=" + accessToken);
        cookieSyncMgr.sync();
    }
 
@@ -543,8 +525,8 @@ public class SalesforceDroidGapActivity extends CordovaActivity {
    private void addSidCookieForDomain(CookieManager cookieMgr, String domain, String sid) {
 	   String cookieStr = "sid=" + sid;
        cookieMgr.setCookie(domain, cookieStr);
-   }    
-    
+   }
+
    /**
     * @return credentials as JSONObject
     */
