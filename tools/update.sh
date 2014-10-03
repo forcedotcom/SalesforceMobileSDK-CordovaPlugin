@@ -178,6 +178,7 @@ echo "Copying and fixing needed headers to src/ios/headers"
 copy_and_fix AppDelegate+SalesforceHybridSDK.h headers
 copy_and_fix UIApplication+SalesforceHybridSDK.h headers
 copy_and_fix InitialViewController.h headers
+copy_and_fix SFSDKAppConfig.h headers
 copy_and_fix SFAuthenticationManager.h headers
 copy_and_fix SFCommunityData.h headers
 copy_and_fix SFDefaultUserManagementViewController.h headers
@@ -194,6 +195,7 @@ copy_and_fix SFPushNotificationManager.h headers
 copy_and_fix SFUserAccount.h headers
 copy_and_fix SFUserAccountConstants.h headers
 copy_and_fix SFUserAccountManager.h headers
+copy_and_fix SFUserAccountIdentity.h headers
 copy_and_fix SalesforceSDKManager.h headers
 copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
 copy_and_fix UIApplication+SalesforceHybridSDK.m classes
