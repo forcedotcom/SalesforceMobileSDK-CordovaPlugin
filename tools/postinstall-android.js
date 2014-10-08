@@ -40,7 +40,7 @@ var fixSDKProjectProperties = function(data) {
 // Function to fix AndroidManifest.xml
 var fixAndroidManifest = function(data) {
     // Fix application tag
-    var appName = "com.salesforce.androidsdk." + (useSmartStore  ? "smartstore.app.HybridAppWithSmartStore"  : "app.HybridApp");
+    var appName = "com.salesforce.androidsdk." + (useSmartStore  ? "smartsync.app.SmartSyncSDKManager"  : "app.HybridApp");
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
@@ -67,7 +67,7 @@ var fixProjectProperties = function(data) {
 //--------------------------------------
 // Doing actual post installation work
 //--------------------------------------
-var libProject = useSmartStore ? '../../plugins/com.salesforce/src/android/libs/SmartStore' : '../../plugins/com.salesforce/src/android/libs/SalesforceSDK';
+var libProject = useSmartStore ? '../../plugins/com.salesforce/src/android/libs/SmartSync' : '../../plugins/com.salesforce/src/android/libs/SalesforceSDK';
 var cordovaLibProject = '../../../../../../platforms/android/CordovaLib';
 
 console.log('Fixing application AndroidManifest.xml');
@@ -82,7 +82,7 @@ fixFile('plugins/com.salesforce/src/android/libs/SalesforceSDK/project.propertie
 console.log('Building cordova library');
 exec('ant debug', {cwd: path.resolve(process.cwd(), 'platforms/android/CordovaLib')});
 
-console.log('Updating application to use ' + (useSmartStore ? 'SmartStore' : ' SalesforceSDK') + ' library project ');
+console.log('Updating application to use ' + (useSmartStore ? 'SmartSync' : ' SalesforceSDK') + ' library project ');
 exec('android update project -p . -t "android-' + targetAndroidApi + '" -l ' + libProject, {cwd: path.resolve(process.cwd(), 'platforms/android')});
 
 console.log('Updating SalesforceSDK to use cordovaLib');
@@ -97,4 +97,9 @@ if (useSmartStore) {
     exec('android update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), 'plugins/com.salesforce/src/android/libs/SmartStore')});
     console.log('Building SmartStore library');
     exec('ant debug', {cwd: path.resolve(process.cwd(), 'plugins/com.salesforce/src/android/libs/SmartStore')});
+
+    console.log('Updating SmartSync library target android api');
+    exec('android update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), 'plugins/com.salesforce/src/android/libs/SmartSync')});
+    console.log('Building SmartSync library');
+    exec('ant debug', {cwd: path.resolve(process.cwd(), 'plugins/com.salesforce/src/android/libs/SmartSync')});
 }
