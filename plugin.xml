@@ -106,6 +106,7 @@
     <framework src="SystemConfiguration.framework" weak="true" />
     <framework src="UIKit.framework" weak="true" />
     <framework src="AssetsLibrary.framework" weak="true" />
+    <framework src="ImageIO.framework" weak="true" />
   </platform>
 
   <!-- android -->
