@@ -40,7 +40,7 @@ var fixSDKProjectProperties = function(data) {
 // Function to fix AndroidManifest.xml
 var fixAndroidManifest = function(data) {
     // Fix application tag
-    var appName = "com.salesforce.androidsdk." + (useSmartStore  ? "smartsync.app.SmartSyncSDKManager"  : "app.HybridApp");
+    var appName = "com.salesforce.androidsdk." + (useSmartStore  ? "smartsync.app.HybridAppWithSmartSync"  : "app.HybridApp");
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
