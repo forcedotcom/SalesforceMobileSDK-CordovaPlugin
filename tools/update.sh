@@ -150,6 +150,8 @@ echo "Copying SalesforceSDK library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/
 echo "Copying SmartStore library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/
+echo "Copying SmartSync library"
+cp -RL $ANDROID_SDK_FOLDER/libs/SmartSync src/android/libs/
 echo "Copying icu461.zip"
 cp $ANDROID_SDK_FOLDER/external/sqlcipher/assets/icudt46l.zip src/android/assets/
 echo "Copying sqlcipher"
@@ -164,6 +166,14 @@ echo "Copying SalesforceSDKCore library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCore-Debug.zip -d tmp
 echo "Copying SalesforceSecurity library"    
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSecurity-Debug.zip -d tmp
+echo "Copying MKNetworkKit library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/MKNetworkKit-iOS-Debug.zip -d tmp
+echo "Copying SalesforceNetworkSDK library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceNetworkSDK-Debug.zip -d tmp
+echo "Copying SalesforceRestAPI library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceRestAPI-Debug.zip -d tmp
+echo "Copying SmartSync library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
 echo "Copying SalesforceCommonUtils library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils  tmp
 echo "Copying openssl library"    
@@ -206,6 +216,10 @@ copy_lib libSalesforceHybridSDK.a
 copy_lib libSalesforceOAuth.a
 copy_lib libSalesforceSDKCore.a
 copy_lib libSalesforceSecurity.a
+copy_lib libMKNetworkKit-iOS.a
+copy_lib libSalesforceNetworkSDK.a
+copy_lib libSalesforceRestAPI.a
+copy_lib libSmartSync.a
 copy_lib libcrypto.a
 copy_lib libsqlcipher.a
 copy_lib libssl.a
