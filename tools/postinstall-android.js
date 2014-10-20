@@ -67,26 +67,27 @@ var fixProjectProperties = function(data) {
     return data + "manifestmerger.enabled=true\n";
 };
 
-var validatePostInstallPrerequisites = function() {
+var getAndroidSDKToolPath = function() {
     var androidHomeDir = process.env.ANDROID_HOME;
     if (typeof androidHomeDir !== 'string') {
         console.log('You must set the ANDROID_HOME environment variable to the path of your installation of the Android SDK.');
-        return false;
+        return null;
     }
 
     var androidExePath = path.join(androidHomeDir, 'tools', 'android');
     if (!fs.existsSync(androidExePath)) {
         console.log('The "android" utility does not exist at ' + androidExePath + '.  Make sure you\'ve properly installed the Android SDK.');
-        return false;
+        return null;
     }
 
-    return true;
+    return androidExePath;
 };
 
 //--------------------------------------
 // Doing actual post installation work
 //--------------------------------------
-if (!validatePostInstallPrerequisites()) {
+var androidExePath = getAndroidSDKToolPath();
+if (androidExePath === null) {
     process.exit(2);
 }
 
@@ -106,10 +107,10 @@ console.log('Building cordova library');
 exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('platforms', 'android', 'CordovaLib'))});
 
 console.log('Updating application to use ' + (useSmartStore ? 'SmartSync' : ' SalesforceSDK') + ' library project ');
-exec('android update project -p . -t "android-' + targetAndroidApi + '" -l ' + libProject, {cwd: path.resolve(process.cwd(), path.join('platforms', 'android'))});
+exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + libProject, {cwd: path.resolve(process.cwd(), path.join('platforms', 'android'))});
 
 console.log('Updating SalesforceSDK to use cordovaLib');
-exec('android update project -p . -t "android-' + targetAndroidApi + '" -l ' + cordovaLibProject, {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
+exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + cordovaLibProject, {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
 
 console.log('Building SalesforceSDK library');
 exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
@@ -117,12 +118,12 @@ exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.sa
 
 if (useSmartStore) {
     console.log('Updating SmartStore library target android api');
-    exec('android update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
+    exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
     console.log('Building SmartStore library');
     exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
 
     console.log('Updating SmartSync library target android api');
-    exec('android update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
+    exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
     console.log('Building SmartSync library');
     exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
 }
