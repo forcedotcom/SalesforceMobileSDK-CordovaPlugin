@@ -75,6 +75,10 @@ var getAndroidSDKToolPath = function() {
     }
 
     var androidExePath = path.join(androidHomeDir, 'tools', 'android');
+    var isWindows = (/^win/i).test(process.platform);
+    if (isWindows) {
+        androidExePath = androidExePath + '.bat';
+    }
     if (!fs.existsSync(androidExePath)) {
         console.log('The "android" utility does not exist at ' + androidExePath + '.  Make sure you\'ve properly installed the Android SDK.');
         return null;
