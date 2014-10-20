@@ -67,9 +67,29 @@ var fixProjectProperties = function(data) {
     return data + "manifestmerger.enabled=true\n";
 };
 
+var validatePostInstallPrerequisites = function() {
+    var androidHomeDir = process.env.ANDROID_HOME;
+    if (typeof androidHomeDir !== 'string') {
+        console.log('You must set the ANDROID_HOME environment variable to the path of your installation of the Android SDK.');
+        return false;
+    }
+
+    var androidExePath = path.join(androidHomeDir, 'tools', 'android');
+    if (!fs.existsSync(androidExePath)) {
+        console.log('The "android" utility does not exist at ' + androidExePath + '.  Make sure you\'ve properly installed the Android SDK.');
+        return false;
+    }
+
+    return true;
+};
+
 //--------------------------------------
 // Doing actual post installation work
 //--------------------------------------
+if (!validatePostInstallPrerequisites()) {
+    process.exit(2);
+}
+
 var libProject = useSmartStore ? path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync') : path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK');
 var cordovaLibProject = path.join('..', '..', '..', '..', '..', '..', 'platforms', 'android', 'CordovaLib');
 
