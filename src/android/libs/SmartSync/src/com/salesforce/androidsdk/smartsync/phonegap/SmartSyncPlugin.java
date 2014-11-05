@@ -27,23 +27,19 @@
 package com.salesforce.androidsdk.smartsync.phonegap;
 
 import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.util.Log;
 
 import com.salesforce.androidsdk.phonegap.ForcePlugin;
 import com.salesforce.androidsdk.phonegap.JavaScriptPluginVersion;
-import com.salesforce.androidsdk.smartstore.store.SmartStore;
 import com.salesforce.androidsdk.smartsync.manager.SyncManager;
+import com.salesforce.androidsdk.smartsync.manager.SyncManager.SyncUpdateCallback;
+import com.salesforce.androidsdk.smartsync.util.SyncOptions;
+import com.salesforce.androidsdk.smartsync.util.SyncState;
+import com.salesforce.androidsdk.smartsync.util.SyncTarget;
 
 /**
  * PhoneGap plugin for smart sync.
@@ -60,35 +56,6 @@ public class SmartSyncPlugin extends ForcePlugin {
 	private static final String SYNC_EVENT_TYPE = "sync";
 	private static final String DETAIL = "detail";
 
-	private BroadcastReceiver syncReceiver;
-
-	// Receiver
-	class SyncReceiver extends BroadcastReceiver {
-
-		private Activity ctx;
-
-		SyncReceiver(Activity ctx) {
-			this.ctx = ctx;
-		}
-		
-		@Override
-		public void onReceive(Context context, final Intent intent) {
-            ctx.runOnUiThread(new Runnable() {
-                public void run() {
-                	try {
-                		String syncAsString = intent.getStringExtra(SyncManager.SYNC_AS_STRING);
-	                	String js = "javascript:document.dispatchEvent(new CustomEvent(\"" + SYNC_EVENT_TYPE + "\", { \"" + DETAIL + "\": " + syncAsString + "}))";
-	                	webView.loadUrl(js);
-                	}
-                	catch (Exception e) {
-                		Log.e("SyncReceiver.onReceive", "Failed to dispatch event", e);
-                	}
-                }
-            });
-		}
-		
-	}
-	
 	/**
 	 * Supported plugin actions that the client can take.
 	 */
@@ -98,18 +65,6 @@ public class SmartSyncPlugin extends ForcePlugin {
 		getSyncStatus
 	}
 	
-	@Override
-	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-		super.initialize(cordova, webView);
-		syncReceiver = new SyncReceiver(cordova.getActivity());
-		cordova.getActivity().registerReceiver(syncReceiver, new IntentFilter(SyncManager.SYNC_INTENT_ACTION));
-	}
-
-	@Override
-	public void onDestroy() {
-		cordova.getActivity().unregisterReceiver(syncReceiver);
-	}
-
     @Override
     public boolean execute(String actionStr, JavaScriptPluginVersion jsVersion, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
     	final long start = System.currentTimeMillis();
@@ -162,11 +117,13 @@ public class SmartSyncPlugin extends ForcePlugin {
 		JSONObject options = arg0.optJSONObject(OPTIONS);
 
 		SyncManager syncManager = SyncManager.getInstance(null);
-		JSONObject sync = syncManager.recordSync(SyncManager.Type.syncUp, null, soupName, options);
-		callbackContext.success(sync);
-		
-		// Async
-		syncManager.runSync(sync.getLong(SmartStore.SOUP_ENTRY_ID));
+		SyncState sync = syncManager.syncUp(SyncOptions.fromJSON(options), soupName, new SyncUpdateCallback() {
+			@Override
+			public void onUpdate(SyncState sync) {
+				handleSyncUpdate(sync);
+			}
+		});
+		callbackContext.success(sync.asJSON());
 	}
 
 	/**
@@ -180,14 +137,15 @@ public class SmartSyncPlugin extends ForcePlugin {
 		JSONObject arg0 = args.getJSONObject(0);
 		JSONObject target = arg0.getJSONObject(TARGET);
 		String soupName = arg0.getString(SOUP_NAME);
-		JSONObject options = arg0.optJSONObject(OPTIONS);
 		
 		SyncManager syncManager = SyncManager.getInstance(null);
-		JSONObject sync = syncManager.recordSync(SyncManager.Type.syncDown, target, soupName, options);
-		callbackContext.success(sync);
-		
-		// Async
-		syncManager.runSync(sync.getLong(SmartStore.SOUP_ENTRY_ID));
+		SyncState sync = syncManager.syncDown(SyncTarget.fromJSON(target), soupName, new SyncUpdateCallback() {
+			@Override
+			public void onUpdate(SyncState sync) {
+				handleSyncUpdate(sync);
+			}
+		});
+		callbackContext.success(sync.asJSON());
 	}
 	
 	/**
@@ -202,8 +160,23 @@ public class SmartSyncPlugin extends ForcePlugin {
 		long syncId = arg0.getLong(SYNC_ID);
 		
 		SyncManager syncManager = SyncManager.getInstance(null);
-		JSONObject sync = syncManager.getSyncStatus(syncId);
+		SyncState sync = syncManager.getSyncStatus(syncId);
 		
-		callbackContext.success(sync);
+		callbackContext.success(sync.asJSON());
+	}
+	
+	private void handleSyncUpdate(final SyncState sync) {
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+            	try {
+            		String syncAsString = sync.asJSON().toString();
+                	String js = "javascript:document.dispatchEvent(new CustomEvent(\"" + SYNC_EVENT_TYPE + "\", { \"" + DETAIL + "\": " + syncAsString + "}))";
+                	webView.loadUrl(js);
+            	}
+            	catch (Exception e) {
+            		Log.e("SmartSyncPlugin.handleSyncUpdate", "Failed to dispatch event", e);
+            	}
+            }
+        });
 	}
 }
