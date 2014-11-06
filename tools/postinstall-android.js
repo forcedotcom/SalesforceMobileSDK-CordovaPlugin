@@ -3,13 +3,13 @@
 //--------------------------------------
 if (process.argv.length < 4) {
     console.log('Error missing arguments\n' + 
-                'Usage: node postinstall-android.js  <targetAndroidApi> <useSmartStore>\n' + 
+                'Usage: node postinstall-android.js  <targetAndroidApi> <useSmartStoreOrSmartSync>\n' + 
                 '*  targetAndroidApi: android api (e.g. 19 for KitKat etc)\n' + 
-                '*  useSmartStore: true | false\n');
+                '*  useSmartStoreOrSmartSync: true | false\n');
     process.exit(1);
 }
 var targetAndroidApi = process.argv[2];
-var useSmartStore = process.argv[3] == 'true';
+var useSmartStoreOrSmartSync = process.argv[3] == 'true';
 
 //--------------------------------------
 // Useful functions
@@ -40,7 +40,7 @@ var fixSDKProjectProperties = function(data) {
 // Function to fix AndroidManifest.xml
 var fixAndroidManifest = function(data) {
     // Fix application tag
-    var appName = "com.salesforce.androidsdk." + (useSmartStore  ? "smartsync.app.HybridAppWithSmartSync"  : "app.HybridApp");
+    var appName = "com.salesforce.androidsdk." + (useSmartStoreOrSmartSync  ? "smartsync.app.HybridAppWithSmartSync"  : "app.HybridApp");
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
@@ -95,7 +95,7 @@ if (androidExePath === null) {
     process.exit(2);
 }
 
-var libProject = useSmartStore ? path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync') : path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK');
+var libProject = useSmartStoreOrSmartSync ? path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync') : path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK');
 var cordovaLibProject = path.join('..', '..', '..', '..', '..', '..', 'platforms', 'android', 'CordovaLib');
 
 console.log('Fixing application AndroidManifest.xml');
@@ -110,7 +110,7 @@ fixFile(path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'Salesf
 console.log('Building cordova library');
 exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('platforms', 'android', 'CordovaLib'))});
 
-console.log('Updating application to use ' + (useSmartStore ? 'SmartSync' : ' SalesforceSDK') + ' library project ');
+console.log('Updating application to use ' + (useSmartStoreOrSmartSync ? 'SmartSync' : ' SalesforceSDK') + ' library project ');
 exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + libProject, {cwd: path.resolve(process.cwd(), path.join('platforms', 'android'))});
 
 console.log('Updating SalesforceSDK to use cordovaLib');
@@ -120,7 +120,7 @@ console.log('Building SalesforceSDK library');
 exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
 
 
-if (useSmartStore) {
+if (useSmartStoreOrSmartSync) {
     console.log('Updating SmartStore library target android api');
     exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
     console.log('Building SmartStore library');
