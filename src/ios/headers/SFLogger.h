@@ -20,6 +20,23 @@ typedef enum SFLogLevel {
 	SFLogLevelError,
 } SFLogLevel;
 
+typedef enum SFLogContext {
+    FeedSDKLogContext = 1,
+    PublisherSDKLogContext,
+    ChatterSDKLogContext,
+    SalesforceSearchSDKLogContext,
+    SalesforceFileSDKLogContext,
+    SalesforceNetworkSDKLogContext,
+    SalesforceRecordSDKLogContext,
+    LauncherSDKLogContext,
+    WorkGoalSDKLogContext,
+    LocalyticsContext,
+    S1PerformanceContext,
+    AuraIntegrationContext
+} SFLogContext;
+
+
+
 typedef void (^SFLogBlock) (NSString *msg);
 
 #define SFLogAssert(_cond, _desc, ...) \
@@ -49,6 +66,13 @@ if (!(_cond)) { \
  * @param ... The arguments to the message format string.
  */
 -(void)log:(SFLogLevel)level format:(NSString *)msg, ...;
+
+/**
+ * Analagous Log methods with the addition of context
+*/
+-(void)log:(SFLogLevel)level context:(SFLogContext)logContext msg:(NSString *)msg;
+-(void)log:(SFLogLevel)level context:(SFLogContext)logContext format:(NSString *)msg, ...;
+
 
 @end
 
@@ -87,8 +111,12 @@ if (!(_cond)) { \
  * @param cls The class associated with the log event.
  * @param level The level to log at.
  * @param msg The message to log.
+ * @param logContext The context of the log
  */
 + (void)log:(Class)cls level:(SFLogLevel)level msg:(NSString *)msg;
++ (void)log:(Class)cls level:(SFLogLevel)level context:(SFLogContext)logContext msg:(NSString *)msg;
+
+
 
 /**
  * Logs an assertion failure to a file.
@@ -107,8 +135,12 @@ if (!(_cond)) { \
  * @param level The minimum log level to log at.
  * @param msg The format message, and optional arguments to expand in the format.
  * @param ... The arguments to the message format string.
+ * @param logContext The context of the log
  */
 + (void)log:(Class)cls level:(SFLogLevel)level format:(NSString *)msg, ...;
++ (void)log:(Class)cls level:(SFLogLevel)level context:(SFLogContext)logContext format:(NSString *)msg, ...;
+
+
 
 /*!
  Sets the log level based on the user preferences.
@@ -130,4 +162,32 @@ if (!(_cond)) { \
  */
 + (BOOL)assertionRecordedAndClear;
 
+
+
+
+
+//Context Based Filtering
+//Two filters: blacklist, whitelist.
+
++ (void)setBlackListFilter;
++ (void)setWhiteListFilter;
+
++ (void)resetLoggingFilter; //back to original settings (set to blacklist filter; empty blacklist/whitelist)
+
+
+// black list formatter (logs with contexts on the black list will not be displayed )
++ (void)blackListFilterAddContext:(SFLogContext)logContext;
++ (void)blackListFilterRemoveContext:(SFLogContext)logContext;
+
+// white list formatter (ONLY logs with contexts on the white list will be displayed)
++ (void)whiteListFilterAddContext:(SFLogContext)logContext;
++ (void)whiteListFilterRemoveContext:(SFLogContext)logContext;
++ (void)filterByContext:(SFLogContext)logContext; //if you want to RESET the whitelist and filter only ONE context
+
+//contexts on respective filter
++ (NSArray *)contextsOnBlackList;
++ (NSArray *)contextsOnWhiteList;
+
++ (BOOL)isOnContextBlackList:(SFLogContext)logContext;
++ (BOOL)isOnContextWhiteList:(SFLogContext)logContext;
 @end
