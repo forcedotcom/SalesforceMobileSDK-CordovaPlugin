@@ -1,15 +1,5 @@
-//--------------------------------------
-// Reading arguments from command line
-//--------------------------------------
-if (process.argv.length < 4) {
-    console.log('Error missing arguments\n' + 
-                'Usage: node postinstall-android.js  <targetAndroidApi> <useSmartStoreOrSmartSync>\n' + 
-                '*  targetAndroidApi: android api (e.g. 19 for KitKat etc)\n' + 
-                '*  useSmartStoreOrSmartSync: true | false\n');
-    process.exit(1);
-}
-var targetAndroidApi = process.argv[2];
-var useSmartStoreOrSmartSync = process.argv[3] == 'true';
+var targetAndroidApi = 19;
+var useSmartStoreOrSmartSync = true;
 
 //--------------------------------------
 // Useful functions
@@ -113,7 +103,7 @@ exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('platforms', 'andr
 console.log('Updating application to use ' + (useSmartStoreOrSmartSync ? 'SmartSync' : ' SalesforceSDK') + ' library project ');
 exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + libProject, {cwd: path.resolve(process.cwd(), path.join('platforms', 'android'))});
 
-console.log('Updating SalesforceSDK to use cordovaLib');
+console.log('Updating SalesforceSDK to use CordovaLib');
 exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + cordovaLibProject, {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
 
 console.log('Building SalesforceSDK library');
