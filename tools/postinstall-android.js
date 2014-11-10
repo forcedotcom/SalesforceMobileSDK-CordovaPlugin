@@ -1,5 +1,6 @@
-var targetAndroidApi = 19;
 var useSmartStoreOrSmartSync = true;
+var targetAndroidApi = 19; 
+
 
 //--------------------------------------
 // Useful functions
