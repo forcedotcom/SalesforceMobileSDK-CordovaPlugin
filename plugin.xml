@@ -139,10 +139,7 @@
 
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
-    <info>
-      You need to run: node plugins/com.salesforce/tools/postinstall-android.js {target-api (e.g. 19 for KitKat)} {use-smartstore (true or false)}
-    </info>
-
+    <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
 
