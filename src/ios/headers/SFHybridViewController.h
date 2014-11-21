@@ -30,11 +30,6 @@
 #import "SFHybridViewConfig.h"
 
 /**
- The designator used to signify a hybrid component in the user agent.
- */
-extern NSString * const kSFMobileSDKHybridDesignator;
-
-/**
  The property key used to designate the "home" URL of the app, to be used if the app is
  offline and supports HTML5 offline caching.
  */
@@ -129,11 +124,7 @@ typedef void (^SFOAuthPluginAuthSuccessBlock)(SFOAuthInfo *, NSDictionary *);
 + (NSDictionary *)credentialsAsDictionary;
 
 /**
- Prepend a user agent string to the current one, based on device, application, and SDK
- version information.
- We are building a user agent of the form:
-   SalesforceMobileSDK/1.0 iPhone OS/3.2.0 (iPad) appName/appVersion Hybrid [Current User Agent]
- @return The user agent string for SF hybrid apps.
+ @return The user agent string for SF hybrid apps.  @see [SalesforceSDKManager sharedManager].userAgentString @/see
  */
 + (NSString *)sfHybridViewUserAgentString;
 
