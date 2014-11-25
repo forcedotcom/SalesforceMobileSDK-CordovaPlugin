@@ -224,7 +224,7 @@ copy_lib libcrypto.a
 copy_lib libsqlcipher.a
 copy_lib libssl.a
 echo "Copying Images.xcassets"
-cp -RL $IOS_SDK_FOLDER/shared/resources/ImagesHybrid.xcassets src/ios/resources/Images.xcassets
+cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
 echo "Copying Settings.bundle"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Settings.bundle src/ios/resources/
 echo "Copying SalesforceSDKResources.bundle"
