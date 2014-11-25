@@ -150,6 +150,8 @@ echo "Copying SalesforceSDK library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/
 echo "Copying SmartStore library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/
+echo "Copying SmartSync library"
+cp -RL $ANDROID_SDK_FOLDER/libs/SmartSync src/android/libs/
 echo "Copying icu461.zip"
 cp $ANDROID_SDK_FOLDER/external/sqlcipher/assets/icudt46l.zip src/android/assets/
 echo "Copying sqlcipher"
@@ -164,6 +166,14 @@ echo "Copying SalesforceSDKCore library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCore-Debug.zip -d tmp
 echo "Copying SalesforceSecurity library"    
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSecurity-Debug.zip -d tmp
+echo "Copying MKNetworkKit library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/MKNetworkKit-iOS-Debug.zip -d tmp
+echo "Copying SalesforceNetworkSDK library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceNetworkSDK-Debug.zip -d tmp
+echo "Copying SalesforceRestAPI library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceRestAPI-Debug.zip -d tmp
+echo "Copying SmartSync library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
 echo "Copying SalesforceCommonUtils library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils  tmp
 echo "Copying openssl library"    
@@ -173,9 +183,12 @@ cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher  tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
 cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
 cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
+cp $IOS_SDK_FOLDER/shared/hybrid/InitialViewController.*  tmp
 echo "Copying and fixing needed headers to src/ios/headers"
 copy_and_fix AppDelegate+SalesforceHybridSDK.h headers
 copy_and_fix UIApplication+SalesforceHybridSDK.h headers
+copy_and_fix InitialViewController.h headers
+copy_and_fix SFSDKAppConfig.h headers
 copy_and_fix SFAuthenticationManager.h headers
 copy_and_fix SFCommunityData.h headers
 copy_and_fix SFDefaultUserManagementViewController.h headers
@@ -192,19 +205,26 @@ copy_and_fix SFPushNotificationManager.h headers
 copy_and_fix SFUserAccount.h headers
 copy_and_fix SFUserAccountConstants.h headers
 copy_and_fix SFUserAccountManager.h headers
+copy_and_fix SFUserAccountIdentity.h headers
+copy_and_fix SalesforceSDKManager.h headers
 copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
 copy_and_fix UIApplication+SalesforceHybridSDK.m classes
+copy_and_fix InitialViewController.m classes
 echo "Copying needed libraries to src/ios/frameworks"
 copy_lib libSalesforceCommonUtils.a
 copy_lib libSalesforceHybridSDK.a
 copy_lib libSalesforceOAuth.a
 copy_lib libSalesforceSDKCore.a
 copy_lib libSalesforceSecurity.a
+copy_lib libMKNetworkKit-iOS.a
+copy_lib libSalesforceNetworkSDK.a
+copy_lib libSalesforceRestAPI.a
+copy_lib libSmartSync.a
 copy_lib libcrypto.a
 copy_lib libsqlcipher.a
 copy_lib libssl.a
 echo "Copying Images.xcassets"
-cp -RL $IOS_SDK_FOLDER/shared/resources/ImagesHybrid.xcassets src/ios/resources/Images.xcassets
+cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
 echo "Copying Settings.bundle"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Settings.bundle src/ios/resources/
 echo "Copying SalesforceSDKResources.bundle"

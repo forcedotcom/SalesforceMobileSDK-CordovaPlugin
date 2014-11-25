@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="2.3.4">
+        version="3.0.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -17,6 +17,7 @@
     <clobbers target="navigator.smartstore" />
   </js-module>
   <js-module src="www/com.salesforce.plugin.sfaccountmanager.js" name="plugin.sfaccountmanager"></js-module>
+  <js-module src="www/com.salesforce.plugin.smartsync.js" name="plugin.smartsync"></js-module>
   <js-module src="www/com.salesforce.util.bootstrap.js" name="util.bootstrap"></js-module>
   <js-module src="www/com.salesforce.util.event.js" name="util.event"></js-module>
   <js-module src="www/com.salesforce.util.exec.js" name="util.exec"></js-module>
@@ -28,7 +29,7 @@
   </engines>
 
   <dependency id="org.apache.cordova.device"/>
-  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin" />
+  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin#unstable" />
 
   <!-- ios -->
   <platform name="ios">
@@ -40,11 +41,14 @@
       <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
+      <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
     </config-file>
 
     <!-- Header files -->
     <header-file src="src/ios/headers/SFAuthenticationManager.h" target-dir="salesforce"/>
     <header-file src="src/ios/headers/SFCommunityData.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKAppConfig.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/InitialViewController.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFDefaultUserManagementViewController.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFHybridViewConfig.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFHybridViewController.h" target-dir="salesforce" />
@@ -59,12 +63,15 @@
     <header-file src="src/ios/headers/SFUserAccount.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountConstants.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFUserAccountIdentity.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
     <source-file src="src/ios/classes/UIApplication+SalesforceHybridSDK.m" />
+    <source-file src="src/ios/classes/InitialViewController.m" />
 
     <!-- Resource bundles -->
     <resource-file src="src/ios/resources/Settings.bundle" />
@@ -77,6 +84,10 @@
     <source-file src="src/ios/frameworks/libSalesforceOAuth.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSecurity.a" framework="true" />
+    <source-file src="src/ios/frameworks/libMKNetworkKit-iOS.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceNetworkSDK.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libcrypto.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
     <source-file src="src/ios/frameworks/libssl.a" framework="true" />
@@ -96,6 +107,7 @@
     <framework src="SystemConfiguration.framework" weak="true" />
     <framework src="UIKit.framework" weak="true" />
     <framework src="AssetsLibrary.framework" weak="true" />
+    <framework src="ImageIO.framework" weak="true" />
   </platform>
 
   <!-- android -->
@@ -117,6 +129,7 @@
       <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SDKInfoPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.smartstore.phonegap.SmartStorePlugin"/></feature>
+      <feature name="com.salesforce.smartsync"><param name="android-package" value="com.salesforce.androidsdk.smartsync.phonegap.SmartSyncPlugin"/></feature>
     </config-file>
 
     <config-file target="res/values/strings.xml" parent="/resources">
@@ -126,10 +139,7 @@
 
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
-    <info>
-      You need to run: node plugins/com.salesforce/tools/postinstall-android.js {target-api (e.g. 19 for KitKat)} {use-smartstore (true or false)}
-    </info>
-
+    <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
 

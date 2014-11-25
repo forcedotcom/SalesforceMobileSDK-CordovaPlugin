@@ -1,15 +1,6 @@
-//--------------------------------------
-// Reading arguments from command line
-//--------------------------------------
-if (process.argv.length < 4) {
-    console.log('Error missing arguments\n' + 
-                'Usage: node postinstall-android.js  <targetAndroidApi> <useSmartStore>\n' + 
-                '*  targetAndroidApi: android api (e.g. 19 for KitKat etc)\n' + 
-                '*  useSmartStore: true | false\n');
-    process.exit(1);
-}
-var targetAndroidApi = process.argv[2];
-var useSmartStore = process.argv[3] == 'true';
+var useSmartStoreOrSmartSync = true;
+var targetAndroidApi = 19; 
+
 
 //--------------------------------------
 // Useful functions
@@ -40,17 +31,20 @@ var fixSDKProjectProperties = function(data) {
 // Function to fix AndroidManifest.xml
 var fixAndroidManifest = function(data) {
     // Fix application tag
-    var appName = "com.salesforce.androidsdk." + (useSmartStore  ? "smartstore.app.HybridAppWithSmartStore"  : "app.HybridApp");
+    var appName = "com.salesforce.androidsdk." + (useSmartStoreOrSmartSync  ? "smartsync.app.HybridAppWithSmartSync"  : "app.HybridApp");
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
 
-        var applicationTag = '<application android:hardwareAccelerated="true" android:icon="@drawable/sf__hybrid__icon" android:label="@string/app_name" android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="' + appName + '">'
+        var applicationTag = '<application android:hardwareAccelerated="true" android:icon="@drawable/sf__icon" android:label="@string/app_name" android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="' + appName + '">'
         data = data.replace(/<application [^>]*>/, applicationTag);
 
         // Comment out first activity
         data = data.replace(/<activity/, "<!--<activity");
         data = data.replace(/<\/activity>/, "</activity>-->");
+
+        // Change min sdk version
+        data = data.replace(/android\:minSdkVersion\=\"10\"/, 'android:minSdkVersion="17"');
 
         // Change target api
         data = data.replace(/android\:targetSdkVersion\=\"19\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
@@ -92,7 +86,7 @@ if (androidExePath === null) {
     process.exit(2);
 }
 
-var libProject = useSmartStore ? path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore') : path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK');
+var libProject = useSmartStoreOrSmartSync ? path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync') : path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK');
 var cordovaLibProject = path.join('..', '..', '..', '..', '..', '..', 'platforms', 'android', 'CordovaLib');
 
 console.log('Fixing application AndroidManifest.xml');
@@ -107,19 +101,24 @@ fixFile(path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'Salesf
 console.log('Building cordova library');
 exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('platforms', 'android', 'CordovaLib'))});
 
-console.log('Updating application to use ' + (useSmartStore ? 'SmartStore' : ' SalesforceSDK') + ' library project ');
+console.log('Updating application to use ' + (useSmartStoreOrSmartSync ? 'SmartSync' : ' SalesforceSDK') + ' library project ');
 exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + libProject, {cwd: path.resolve(process.cwd(), path.join('platforms', 'android'))});
 
-console.log('Updating SalesforceSDK to use cordovaLib');
+console.log('Updating SalesforceSDK to use CordovaLib');
 exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + cordovaLibProject, {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
 
 console.log('Building SalesforceSDK library');
 exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
 
 
-if (useSmartStore) {
+if (useSmartStoreOrSmartSync) {
     console.log('Updating SmartStore library target android api');
     exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
     console.log('Building SmartStore library');
     exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
+
+    console.log('Updating SmartSync library target android api');
+    exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
+    console.log('Building SmartSync library');
+    exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
 }
