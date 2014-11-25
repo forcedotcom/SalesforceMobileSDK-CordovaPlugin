@@ -36,7 +36,7 @@ var fixAndroidManifest = function(data) {
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
 
-        var applicationTag = '<application android:hardwareAccelerated="true" android:icon="@drawable/sf__hybrid__icon" android:label="@string/app_name" android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="' + appName + '">'
+        var applicationTag = '<application android:hardwareAccelerated="true" android:icon="@drawable/sf__icon" android:label="@string/app_name" android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="' + appName + '">'
         data = data.replace(/<application [^>]*>/, applicationTag);
 
         // Comment out first activity
