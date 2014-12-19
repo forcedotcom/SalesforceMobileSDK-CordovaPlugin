@@ -65,6 +65,8 @@
     <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountIdentity.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
 

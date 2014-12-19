@@ -207,6 +207,8 @@ copy_and_fix SFUserAccountConstants.h headers
 copy_and_fix SFUserAccountManager.h headers
 copy_and_fix SFUserAccountIdentity.h headers
 copy_and_fix SalesforceSDKManager.h headers
+copy_and_fix SFAuthErrorHandler.h headers
+copy_and_fix SFAuthErrorHandlerList.h headers
 copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
 copy_and_fix UIApplication+SalesforceHybridSDK.m classes
 copy_and_fix InitialViewController.m classes
