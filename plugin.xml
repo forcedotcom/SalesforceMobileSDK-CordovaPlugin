@@ -90,6 +90,7 @@
     <source-file src="src/ios/frameworks/libSalesforceNetworkSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
     <source-file src="src/ios/frameworks/libcrypto.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
     <source-file src="src/ios/frameworks/libssl.a" framework="true" />
