@@ -174,6 +174,8 @@ echo "Copying SalesforceRestAPI library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceRestAPI-Debug.zip -d tmp
 echo "Copying SmartSync library"    
 unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
+echo "Copying SalesforceSDKCommon library"    
+unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
 echo "Copying SalesforceCommonUtils library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils  tmp
 echo "Copying openssl library"    
@@ -222,6 +224,7 @@ copy_lib libMKNetworkKit-iOS.a
 copy_lib libSalesforceNetworkSDK.a
 copy_lib libSalesforceRestAPI.a
 copy_lib libSmartSync.a
+copy_lib libSalesforceSDKCommon.a
 copy_lib libcrypto.a
 copy_lib libsqlcipher.a
 copy_lib libssl.a
