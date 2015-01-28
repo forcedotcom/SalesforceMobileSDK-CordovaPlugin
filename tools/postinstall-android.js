@@ -44,10 +44,10 @@ var fixAndroidManifest = function(data) {
         data = data.replace(/<\/activity>/, "</activity>-->");
 
         // Change min sdk version
-        data = data.replace(/android\:minSdkVersion\=\"17\"/, 'android:minSdkVersion="17"');
+        data = data.replace(/android\:minSdkVersion\=\"10\"/, 'android:minSdkVersion="17"');
 
         // Change target api
-        data = data.replace(/android\:targetSdkVersion\=\"21\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
+        data = data.replace(/android\:targetSdkVersion\=\"19\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
     }
 
     return data;
