@@ -86,8 +86,7 @@
     <source-file src="src/ios/frameworks/libSalesforceOAuth.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSecurity.a" framework="true" />
-    <source-file src="src/ios/frameworks/libMKNetworkKit-iOS.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceNetworkSDK.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceNetwork.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
