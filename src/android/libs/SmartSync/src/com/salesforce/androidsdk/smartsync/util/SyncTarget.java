@@ -26,110 +26,54 @@
  */
 package com.salesforce.androidsdk.smartsync.util;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.salesforce.androidsdk.smartsync.manager.SyncManager;
-
 /**
- * Target for sync i.e. set of objects to download from server
+ * Abstract super class for SyncUpTarget and SyncDownTarget
  */
 public abstract class SyncTarget {
 
-    // Constants
-	public static final String QUERY_TYPE = "type";
     public static final String ANDROID_IMPL = "androidImpl";
+    public static final String ID_FIELD_NAME = "idFieldName";
+    public static final String MODIFICATION_DATE_FIELD_NAME = "modificationDateFieldName";
 
-    // Fields
-	protected QueryType queryType;
-    protected int totalSize; // set during a fetch
+    private String idFieldName;
+    private String modificationDateFieldName;
 
-	/**
-	 * Build SyncTarget from json
-	 * @param target as json
-	 * @return
-	 * @throws JSONException 
-	 */
-	@SuppressWarnings("unchecked")
-	public static SyncTarget fromJSON(JSONObject target) throws JSONException {
-		if (target == null)
-			return null;
+    public SyncTarget() {
+        idFieldName = Constants.ID;
+        modificationDateFieldName = Constants.LAST_MODIFIED_DATE;
+    }
 
-		QueryType queryType = QueryType.valueOf(target.getString(QUERY_TYPE));
-
-        switch (queryType) {
-        case mru:     return MruSyncTarget.fromJSON(target);
-        case sosl:    return SoslSyncTarget.fromJSON(target);
-        case soql:    return SoqlSyncTarget.fromJSON(target);
-        case custom:
-        default:
-            try {
-                Class<? extends SyncTarget> implClass = (Class<? extends SyncTarget>) Class.forName(target.getString(ANDROID_IMPL));
-                Method method = implClass.getMethod("fromJSON", JSONObject.class);
-                return (SyncTarget) method.invoke(null, target);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-	}
-
-    /**
-     * @return query type of target
-     */
-
-	/**
-	 * @return json representation of target
-	 * @throws JSONException
-	 */
-	public abstract JSONObject asJSON() throws JSONException;
-
-    /**
-     * @param maxTimeStamp
-     * @return next record fetched
-     */
-
-    /**
-     * Start fetching records conforming to target
-     * If a value for maxTimeStamp greater than 0 is passed in, only records created/modified after maxTimeStamp should be returned
-     * @param syncManager
-     * @param maxTimeStamp
-     * @throws IOException, JSONException
-     */
-    public abstract JSONArray startFetch(SyncManager syncManager, long maxTimeStamp) throws IOException, JSONException;
-
-    /**
-     * Continue fetching records conforming to target if any
-     * @param syncManager
-     * @return null if there are no more records to fetch
-     * @throws IOException, JSONException
-     */
-    public abstract JSONArray continueFetch(SyncManager syncManager) throws IOException, JSONException;
-
-    /**
-     * @return number of records expected to be fetched - is set when startFetch() is called
-     */
-    public int getTotalSize() {
-        return totalSize;
+    public SyncTarget(JSONObject target) throws JSONException {
+        idFieldName = target != null && target.has(ID_FIELD_NAME) ? target.getString(ID_FIELD_NAME) : Constants.ID;
+        modificationDateFieldName = target != null && target.has(MODIFICATION_DATE_FIELD_NAME) ? target.getString(MODIFICATION_DATE_FIELD_NAME) : Constants.LAST_MODIFIED_DATE;
     }
 
     /**
-     * @return QueryType of this target
+     * @return json representation of target
+     * @throws JSONException
      */
-    public QueryType getQueryType() {
-        return queryType;
+    public JSONObject asJSON() throws JSONException {
+        JSONObject target = new JSONObject();
+        target.put(ANDROID_IMPL, getClass().getName());
+        target.put(ID_FIELD_NAME, idFieldName);
+        target.put(MODIFICATION_DATE_FIELD_NAME, modificationDateFieldName);
+        return target;
     }
 
     /**
-     * Enum for query type
+     * @return The field name of the ID field of the record.  Defaults to "Id".
      */
-    public enum QueryType {
-    	mru,
-    	sosl,
-    	soql,
-        custom
+    public String getIdFieldName() {
+        return idFieldName;
+    }
+
+    /**
+     * @return The field name of the modification date field of the record.  Defaults to "LastModifiedDate".
+     */
+    public String getModificationDateFieldName() {
+        return modificationDateFieldName;
     }
 }
