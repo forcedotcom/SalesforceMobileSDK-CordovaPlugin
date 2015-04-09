@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="3.1.2">
+        version="3.2.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -67,6 +67,7 @@
     <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
 
@@ -86,8 +87,7 @@
     <source-file src="src/ios/frameworks/libSalesforceOAuth.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSecurity.a" framework="true" />
-    <source-file src="src/ios/frameworks/libMKNetworkKit-iOS.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceNetworkSDK.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceNetwork.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
@@ -142,6 +142,7 @@
 
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
+    <hook type="before_plugin_install" src="tools/preinstall-android.js" />
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
