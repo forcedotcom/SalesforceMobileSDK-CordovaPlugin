@@ -1,3 +1,4 @@
+console.log("Running SalesforceMobileSDK plugin android post-install script");
 var useSmartStoreOrSmartSync = true;
 var targetAndroidApi = 21; 
 
@@ -122,3 +123,4 @@ if (useSmartStoreOrSmartSync) {
     console.log('Building SmartSync library');
     exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
 }
+console.log("Done running SalesforceMobileSDK plugin android post-install script");
