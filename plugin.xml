@@ -29,7 +29,7 @@
   </engines>
 
   <dependency id="org.apache.cordova.device"/>
-  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin#unstable" />
+  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin" />
 
   <!-- ios -->
   <platform name="ios">
