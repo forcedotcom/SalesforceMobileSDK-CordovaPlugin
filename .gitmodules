@@ -1,3 +1,0 @@
-[submodule "src/windows/SalesforceMobileSDK-Windows"]
-	path = src/windows/SalesforceMobileSDK-Windows
-	url = git@github.com:forcedotcom/SalesforceMobileSDK-Windows.git
