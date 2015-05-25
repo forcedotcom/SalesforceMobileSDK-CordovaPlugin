@@ -146,5 +146,12 @@
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
+<!-- windows -->
+  <platform name="windows">
+	<js-module src="src/windows/com.salesforce.plugin.oauthProxy.js" name="SalesforceOAuthProxy">
+            <runs/>
+        </js-module>
+        <framework src="src/windows/SalesforceMobileSDK-Windows/SalesforceSDK/Salesforce.SDK.Hybrid/Salesforce.SDK.Hybrid.csproj" custom="true" type="projectReference"/>
+  </platform>
 
 </plugin>
