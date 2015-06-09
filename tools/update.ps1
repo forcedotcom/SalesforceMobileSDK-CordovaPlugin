@@ -130,6 +130,16 @@ rm src -r -force
 echo "Creating android directories"
 mkdir src/android/libs -Force
 mkdir src/android/assets -Force
+echo "Creating Windows directories"
+mkdir src/windows -Force
+mkdir src/windows/WinMD -Force
+mkdir src/windows/WinMD/Store -Force
+mkdir src/windows/WinMD/Store/x86 -Force
+mkdir src/windows/WinMD/Store/x64 -Force
+mkdir src/windows/WinMD/Store/ARM -Force
+mkdir src/windows/WinMD/Phone -Force
+mkdir src/windows/WinMD/Phone/ARM -Force
+mkdir src/windows/WinMD/Phone/x86 -Force
 
 echo "*** Android ***"
 echo "Copying SalesforceSDK library"
@@ -144,20 +154,20 @@ echo "Copying sqlcipher"
 cp $ANDROID_SDK_FOLDER/external/sqlcipher/libs/* src/android/libs/SmartStore/libs/ -Recurse -Force  
 
 echo "*** Windows ***"
-echo "Copying windows files from $WINDOWS_SDK_FOLDER/CordovaPluginJavascript/*.js to src/windows/$WINDOWS_SDK_FOLDER"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/CordovaPluginJavascript/*.js src/windows/
-echo "Copying windows files from $WINDOWS_SDK_FOLDER/packages/Newtonsoft to src/windows/WinMD"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages/Newtonsoft.Json.6.0.5/lib/portable-net40+sl5+wp80+win8+wpa81/NewtonSoft.Json.dll src/windows/WinMD
-echo "Copying windows files from $WINDOWS_SDK_FOLDER/packages/SQLitePCL to src/windows/WinMD"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages/SQLitePCL.3.8.7.2/lib/portable-net45+sl50+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10/SQLitePCL.Ext.dll src/windows/WinMD
-echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Core/bin/Release/ to src/windows/WinMD"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Core/bin/Release/Salesforce.SDK.Core.dll src/windows/WinMD
-echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Hybrid/bin/Release/ to src/windows/WinMD"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Hybrid/bin/Release/Salesforce.SDK.Hybrid.winmd src/windows/WinMD
-echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Hybrid.SmartStore/bin/Release/ to src/windows/WinMD"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Hybrid.SmartStore/bin/Release/Salesforce.SDK.Hybrid.SmartStore.winmd src/windows/WinMD
-echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Hybrid.SmartSync/bin/Release/ to src/windows/WinMD"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Hybrid.SmartSync/bin/Release/Salesforce.SDK.Hybrid.SmartSync.winmd src/windows/WinMD
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/CordovaPluginJavascript/*.js to src/windows/" 
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/CordovaPluginJavascript/*.js src/windows/ -Force
+echo "Copying windows files for NewtonSoft.Json from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/NewtonSoft.Json.dll src/windows/WinMD
+echo "Copying windows files for Sqlite.Ext from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/SQLitePCL.Ext.dll src/windows/WinMD
+echo "Copying windows files for SDK.Core from $WINDOWS_SDK_FOLDER/DLLs/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Salesforce.SDK.Core.dll src/windows/WinMD
+echo "Copying windows files for Hybrid WinMD from $WINDOWS_SDK_FOLDER/DLLs/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Salesforce.SDK.Hybrid.winmd src/windows/WinMD
+echo "Copying windows files for Hybrid SmartStore from $WINDOWS_SDK_FOLDER/DLLs/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Salesforce.SDK.Hybrid.SmartStore.winmd src/windows/WinMD
+echo "Copying windows files for Hybrid SmartSync from $WINDOWS_SDK_FOLDER/DLLs/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Salesforce.SDK.Hybrid.SmartSync.winmd src/windows/WinMD
 echo "Copying windows files for sqlite from $WINDOWS_SDK_FOLDER/DLLs/Store to src/windows/WinMD/Store"
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/sqlite3.dll src/windows/WinMD/Store/x86
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/sqlite3.dll src/windows/WinMD/Store/x64

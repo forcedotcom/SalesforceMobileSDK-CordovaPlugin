@@ -149,7 +149,26 @@
 	<js-module src="src/windows/com.salesforce.plugin.oauthProxy.js" name="SalesforceOAuthProxy">
             <runs/>
         </js-module>
-        <framework src="src/windows/SalesforceMobileSDK-Windows/SalesforceSDK/Salesforce.SDK.Hybrid/Salesforce.SDK.Hybrid.csproj" custom="true" type="projectReference"/>
+	<js-module src="src/windows/com.salesforce.plugin.accountmanagerProxy.js" name="SalesforceAccountManagerProxy">
+            <runs/>
+        </js-module>
+	<js-module src="src/windows/com.salesforce.plugin.smartstoreProxy.js" name="SalesforceSmartStoreProxy">
+            <runs/>
+        </js-module>
+        <framework src="src/windows/WinMD/Salesforce.SDK.Hybrid.winmd" custom="true" />
+	<framework src="src/windows/WinMD/Salesforce.SDK.Hybrid.SmartStore.winmd" custom="true" />
+	<framework src="src/windows/WinMD/SQLitePCL.Ext.dll" custom="true" />
+	<framework src="src/windows/WinMD/NewtonSoft.dll" custom="true" />
+	<framework src="src/windows/WinMD/Salesforce.SDK.Core.dll" custom="true" />
+	<framework src="src/windows/WinMD/Store/ARM/Salesforce.SDK.SmartStore.dll" custom="true" arch="ARM" />
+	<framework src="src/windows/WinMD/Store/x86/Salesforce.SDK.SmartStore.dll" custom="true" arch="x86" />
+	<framework src="src/windows/WinMD/Store/x64/Salesforce.SDK.SmartStore.dll" custom="true" arch="x64" />
+	<framework src="src/windows/WinMD/Store/ARM/Salesforce.SDK.SmartSync.dll" custom="true" arch="ARM" />
+	<framework src="src/windows/WinMD/Store/x86/Salesforce.SDK.SmartSync.dll" custom="true" arch="x86" />
+	<framework src="src/windows/WinMD/Store/x64/Salesforce.SDK.SmartSync.dll" custom="true" arch="x64" />
+	<framework src="src/windows/WinMD/Store/ARM/Salesforce.SDK.sqlite3.dll" custom="true" arch="ARM" />
+	<framework src="src/windows/WinMD/Store/x86/Salesforce.SDK.sqlite3.dll" custom="true" arch="x86" />
+	<framework src="src/windows/WinMD/Store/x64/Salesforce.SDK.sqlite3.dll" custom="true" arch="x64" />
   </platform>
 
 </plugin>
