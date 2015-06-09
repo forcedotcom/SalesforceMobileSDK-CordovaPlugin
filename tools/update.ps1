@@ -183,3 +183,8 @@ cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/ARM/Salesforce.SDK.SmartSync.dll
 echo "--- Shared ---"
 echo "Copying split cordova.force.js out of bower_components"
 cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
+
+echo "--- Clean Up ---"
+echo "Removing SalesforceSDK Library"
+
+
