@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="3.2.0">
+        version="3.3.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -29,7 +29,7 @@
   </engines>
 
   <dependency id="org.apache.cordova.device"/>
-  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin#unstable" />
+  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin" />
 
   <!-- ios -->
   <platform name="ios">
@@ -91,9 +91,7 @@
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
-    <source-file src="src/ios/frameworks/libcrypto.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
-    <source-file src="src/ios/frameworks/libssl.a" framework="true" />
 
     <!-- System frameworks -->
     <framework src="libxml2.dylib" />
@@ -146,5 +144,12 @@
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
+<!-- windows -->
+  <platform name="windows">
+	<js-module src="src/windows/com.salesforce.plugin.oauthProxy.js" name="SalesforceOAuthProxy">
+            <runs/>
+        </js-module>
+        <framework src="src/windows/SalesforceMobileSDK-Windows/SalesforceSDK/Salesforce.SDK.Hybrid/Salesforce.SDK.Hybrid.csproj" custom="true" type="projectReference"/>
+  </platform>
 
 </plugin>
