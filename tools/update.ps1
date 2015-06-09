@@ -144,9 +144,41 @@ echo "Copying sqlcipher"
 cp $ANDROID_SDK_FOLDER/external/sqlcipher/libs/* src/android/libs/SmartStore/libs/ -Recurse -Force  
 
 echo "*** Windows ***"
-echo "Copying windows files from $WINDOWS_SDK_FOLDER to src/windows/$WINDOWS_SDK_FOLDER"
-cp $WINDOWS_SDK_FOLDER src/windows/ -Recurse -Force
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/CordovaPluginJavascript/*.js to src/windows/$WINDOWS_SDK_FOLDER"
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/CordovaPluginJavascript/*.js src/windows/
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/packages/Newtonsoft to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages/Newtonsoft.Json.6.0.5/lib/portable-net40+sl5+wp80+win8+wpa81/NewtonSoft.Json.dll src/windows/WinMD
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/packages/SQLitePCL to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages/SQLitePCL.3.8.7.2/lib/portable-net45+sl50+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10/SQLitePCL.Ext.dll src/windows/WinMD
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Core/bin/Release/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Core/bin/Release/Salesforce.SDK.Core.dll src/windows/WinMD
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Hybrid/bin/Release/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Hybrid/bin/Release/Salesforce.SDK.Hybrid.winmd src/windows/WinMD
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Hybrid.SmartStore/bin/Release/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Hybrid.SmartStore/bin/Release/Salesforce.SDK.Hybrid.SmartStore.winmd src/windows/WinMD
+echo "Copying windows files from $WINDOWS_SDK_FOLDER/Salesforce.SDK.Hybrid.SmartSync/bin/Release/ to src/windows/WinMD"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/Salesforce.SDK.Hybrid.SmartSync/bin/Release/Salesforce.SDK.Hybrid.SmartSync.winmd src/windows/WinMD
+echo "Copying windows files for sqlite from $WINDOWS_SDK_FOLDER/DLLs/Store to src/windows/WinMD/Store"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/sqlite3.dll src/windows/WinMD/Store/x86
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/sqlite3.dll src/windows/WinMD/Store/x64
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/ARM/sqlite3.dll src/windows/WinMD/Store/ARM
+echo "Copying windows files for sqlite from $WINDOWS_SDK_FOLDER/DLLs/Phone to src/windows/WinMD/Phone"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/x86/sqlite3.dll src/windows/WinMD/Phone/x86
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/ARM/sqlite3.dll src/windows/WinMD/Phone/ARM
+echo "Copying windows files for SmartStore from $WINDOWS_SDK_FOLDER/DLLs/Store to src/windows/WinMD/Store"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/Salesforce.SDK.SmartStore.dll src/windows/WinMD/Store/x86
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/Salesforce.SDK.SmartStore.dll src/windows/WinMD/Store/x64
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/ARM/Salesforce.SDK.SmartStore.dll src/windows/WinMD/Store/ARM
+echo "Copying windows files for SmartStore from $WINDOWS_SDK_FOLDER/DLLs/Phone to src/windows/WinMD/Phone"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/x86/Salesforce.SDK.SmartStore.dll src/windows/WinMD/Phone/x86
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/ARM/Salesforce.SDK.SmartStore.dll src/windows/WinMD/Phone/ARM
+echo "Copying windows files for SmartSync from $WINDOWS_SDK_FOLDER/DLLs/Store to src/windows/WinMD/Store"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Store/x86
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Store/x64
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/ARM/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Store/ARM
+echo "Copying windows files for SmartSync from $WINDOWS_SDK_FOLDER/DLLs/Phone to src/windows/WinMD/Phone"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/x86/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Phone/x86
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/ARM/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Phone/ARM
 
 echo "--- Shared ---"
 echo "Copying split cordova.force.js out of bower_components"
