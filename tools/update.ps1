@@ -186,3 +186,5 @@ cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
 
 echo "--- Clean Up ---"
 echo "Removing SalesforceSDK Library"
+
+

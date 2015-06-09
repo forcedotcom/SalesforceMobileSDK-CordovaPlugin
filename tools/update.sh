@@ -37,13 +37,13 @@ parse_opts ()
 
     valid_branch_regex='^[a-zA-Z0-9_][a-zA-Z0-9_]*(/[a-zA-Z0-9_][a-zA-Z0-9_]*)?$'
     if [[ "${OPT_BRANCH}" =~ $valid_branch_regex ]]
-    then
-        # No action
-        :
-    else
-        echo "${OPT_BRANCH} is not a valid branch name.  Should be in the format <[remote/]branch name>"
-        exit 2
-    fi
+   	 then
+   	     # No action
+    	    :
+   	 else
+    	    echo "${OPT_BRANCH} is not a valid branch name.  Should be in the format <[remote/]branch name>"
+      	  exit 2
+    	fi
 }
 
 # Helper functions
@@ -109,6 +109,8 @@ IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git"
 IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
 SHARED_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Shared.git"
 SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
+WINDOWS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Windows.git"
+WINDOWS_SDK_FOLDER="SalesforceMobileSDK-Windows"
 
 parse_opts "$@"
 
@@ -117,6 +119,7 @@ cd ${ROOT_FOLDER}
 
 update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
 update_repo "${ANDROID_SDK_FOLDER}" "${ANDROID_SDK_REPO_PATH}"
+update_repo "${WINDOWS_SDK_FOLDER}" "${WINDOWS_SDK_REPO_PATH}"
 update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}"
 
 if [ "$OPT_BUILD" == "yes" ]
@@ -144,6 +147,7 @@ mkdir -p src/ios/headers
 mkdir -p src/ios/frameworks
 mkdir -p src/ios/classes
 mkdir -p src/ios/resources
+mkdir -p src/windows/$WINDOWS_SDK_FOLDER
 
 echo "*** Android ***"
 echo "Copying SalesforceSDK library"
@@ -176,8 +180,6 @@ echo "Copying SalesforceSDKCommon library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
 echo "Copying SalesforceCommonUtils library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils  tmp
-echo "Copying openssl library"    
-cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/openssl  tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher  tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
@@ -223,9 +225,7 @@ copy_lib libSalesforceNetwork.a
 copy_lib libSalesforceRestAPI.a
 copy_lib libSmartSync.a
 copy_lib libSalesforceSDKCommon.a
-copy_lib libcrypto.a
 copy_lib libsqlcipher.a
-copy_lib libssl.a
 echo "Copying Images.xcassets"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
 echo "Copying Settings.bundle"
@@ -237,6 +237,10 @@ echo "*** Shared ***"
 echo "Copying split cordova.force.js out of bower_components"
 cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
 
+echo "*** Windows ***"
+echo "Copying windows files from $WINDOWS_SDK_FOLDER to src/windows/$WINDOWS_SDK_FOLDER"
+cp -RL $WINDOWS_SDK_FOLDER src/windows/
+cp src/windows/$WINDOWS_SDK_FOLDER/SalesforceSDK/CordovaPluginJavascript/*.js src/windows/
 echo "*** Cleanup ***"
 rm -rf tmp
 
