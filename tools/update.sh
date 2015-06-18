@@ -180,8 +180,6 @@ echo "Copying SalesforceSDKCommon library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
 echo "Copying SalesforceCommonUtils library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils  tmp
-echo "Copying openssl library"    
-cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/openssl  tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher  tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
@@ -227,9 +225,7 @@ copy_lib libSalesforceNetwork.a
 copy_lib libSalesforceRestAPI.a
 copy_lib libSmartSync.a
 copy_lib libSalesforceSDKCommon.a
-copy_lib libcrypto.a
 copy_lib libsqlcipher.a
-copy_lib libssl.a
 echo "Copying Images.xcassets"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
 echo "Copying Settings.bundle"

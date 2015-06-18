@@ -191,6 +191,7 @@ cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/x86/Salesforce.SDK.SmartSync.dll
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/ARM/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Phone/ARM
 echo "Copying windows source files to src/windows/src"
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/* src/windows/src/ -Recurse -Force
+
 echo "--- Shared ---"
 echo "Copying split cordova.force.js out of bower_components"
 cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/

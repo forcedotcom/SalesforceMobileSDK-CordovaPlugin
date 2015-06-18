@@ -82,6 +82,7 @@ public class SyncManager {
     private static Map<String, SyncManager> INSTANCES = new HashMap<String, SyncManager>();
 
     // Members
+    private Set<Long> runningSyncIds = new HashSet<Long>();
     public final String apiVersion;
     private final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 	private SmartStore smartStore;
@@ -142,22 +143,27 @@ public class SyncManager {
         if (account == null) {
             account = SalesforceSDKManagerWithSmartStore.getInstance().getUserAccountManager().getCurrentUser();
         }
-
         if (smartStore == null) {
             smartStore = SmartSyncSDKManager.getInstance().getSmartStore(account, communityId);
         }
-
         String uniqueId = (account != null ? account.getUserId() : "") + ":"
                     + smartStore.getDatabase().getPath();
-
-
         SyncManager instance = INSTANCES.get(uniqueId);
         if (instance == null) {
-            RestClient restClient = SalesforceSDKManager.getInstance().getClientManager().peekRestClient(account);
+            RestClient restClient = null;
+
+            /*
+             * If account is still null, there is no user logged in, which means, the default
+             * RestClient should be set to the unauthenticated RestClient instance.
+             */
+            if (account == null) {
+                restClient = SalesforceSDKManager.getInstance().getClientManager().peekUnauthenticatedRestClient();
+            } else {
+                restClient = SalesforceSDKManager.getInstance().getClientManager().peekRestClient(account);
+            }
             instance = new SyncManager(smartStore, restClient);
             INSTANCES.put(uniqueId, instance);
         }
-
         return instance;
     }
 
@@ -213,15 +219,16 @@ public class SyncManager {
      * @throws JSONException
      */
     public SyncState reSync(long syncId, SyncUpdateCallback callback) throws JSONException {
+        if (runningSyncIds.contains(syncId)) {
+            throw new SmartSyncException("Cannot run reSync:" + syncId + ": still running");
+        }
+
         SyncState sync = SyncState.byId(smartStore, syncId);
         if (sync == null) {
             throw new SmartSyncException("Cannot run reSync:" + syncId + ": no sync found");
         }
         if (sync.getType() != SyncState.Type.syncDown) {
             throw new SmartSyncException("Cannot run reSync:" + syncId + ": wrong type:" + sync.getType());
-        }
-        if (sync.getStatus() != SyncState.Status.DONE) {
-            throw new SmartSyncException("Cannot run reSync:" + syncId + ": not done:" + sync.getStatus());
         }
         sync.setTotalSize(-1);
         runSync(sync, callback);
@@ -284,6 +291,20 @@ public class SyncManager {
     		sync.setStatus(status);
     		if (progress != UNCHANGED) sync.setProgress(progress);
     		sync.save(smartStore);
+
+            switch (status) {
+
+                case NEW:
+                    break;
+                case RUNNING:
+                    runningSyncIds.add(sync.getId());
+                    break;
+                case DONE:
+                case FAILED:
+                    runningSyncIds.remove(sync.getId());
+                    break;
+            }
+
 	    	callback.onUpdate(sync);
     	}
     	catch (JSONException e) {
