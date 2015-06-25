@@ -190,7 +190,7 @@ echo "Copying windows files for SmartSync from $WINDOWS_SDK_FOLDER/DLLs/Phone to
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/x86/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Phone/x86
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Phone/ARM/Salesforce.SDK.SmartSync.dll src/windows/WinMD/Phone/ARM
 echo "Copying windows source files to src/windows/src"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/* src/windows/src/ -Recurse -Force
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/ src/windows/src/ -Recurse -Force
 
 echo "--- Shared ---"
 echo "Copying split cordova.force.js out of bower_components"
