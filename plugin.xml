@@ -30,7 +30,7 @@
   </engines>
 
   <dependency id="org.apache.cordova.device"/>
-  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin#unstable" />
+  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin" />
 
   <!-- ios -->
   <platform name="ios">
@@ -92,9 +92,7 @@
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
-    <source-file src="src/ios/frameworks/libcrypto.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
-    <source-file src="src/ios/frameworks/libssl.a" framework="true" />
 
     <!-- System frameworks -->
     <framework src="libxml2.dylib" />
@@ -147,5 +145,24 @@
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
+<!-- windows -->
+  <platform name="windows">
+	<js-module src="src/windows/com.salesforce.plugin.oauthProxy.js" name="SalesforceOAuthProxy">
+            <runs/>
+        </js-module>
+	<js-module src="src/windows/com.salesforce.plugin.accountmanagerProxy.js" name="SalesforceAccountManagerProxy">
+            <runs/>
+        </js-module>
+	<js-module src="src/windows/com.salesforce.plugin.smartstoreProxy.js" name="SalesforceSmartStoreProxy">
+            <runs/>
+        </js-module>
+	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
+            <runs/>
+        </js-module>
+        <framework src="src/windows/src/Hybrid/Hybrid.Core.csproj"  custom="true" type="projectReference"/>
+	<framework src="src/windows/src/Hybrid.SmartStore/Hybrid.SmartStore.csproj"  custom="true" type="projectReference"/>
+	<framework src="src/windows/src/Hybrid.SmartSync/Hybrid.SmartSync.csproj"  custom="true" type="projectReference"/>
+	<framework src="src/windows/WinMD/SQLitePCL.Ext.dll" custom="true" />
+  </platform>
 
 </plugin>
