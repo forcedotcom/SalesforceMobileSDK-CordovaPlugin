@@ -159,7 +159,7 @@
 	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
             <runs/>
         </js-module>
-        <framework src="src/windows/src/Hybrid/Hybrid.Core.csproj"  custom="true" type="projectReference"/>
+        <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/src/Hybrid.SmartStore/Hybrid.SmartStore.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/src/Hybrid.SmartSync/Hybrid.SmartSync.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/WinMD/SQLitePCL.Ext.dll" custom="true" />
