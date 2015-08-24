@@ -25,8 +25,8 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova" version=">=3.5.0" />
-    <engine name="cordova" version="<=3.8.0" />
+    <engine name="cordova" version="&gt;=3.5.0" />
+    <engine name="cordova" version="&lt;=3.8.0" />
   </engines>
 
   <dependency id="org.apache.cordova.device"/>
