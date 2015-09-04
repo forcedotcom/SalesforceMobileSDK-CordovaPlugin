@@ -35,6 +35,7 @@
   <!-- ios -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
+      <preference name="BackupWebStorage" value="local"/>
       <access origin="http://localhost"/> <!-- allow local pages -->
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
@@ -43,6 +44,28 @@
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
+    </config-file>
+
+    <config-file target="*-Info.plist" parent="NSAppTransportSecurity">
+      <dict>
+        <key>NSExceptionDomains</key>
+        <dict>
+          <key>salesforce.com</key>
+          <dict>
+            <key>NSIncludesSubdomains</key>
+            <true/>
+            <key>NSExceptionRequiresForwardSecrecy</key>
+            <false/>
+          </dict>
+          <key>force.com</key>
+          <dict>
+            <key>NSIncludesSubdomains</key>
+            <true/>
+            <key>NSExceptionRequiresForwardSecrecy</key>
+            <false/>
+          </dict>
+        </dict>
+      </dict>
     </config-file>
 
     <!-- Header files -->
