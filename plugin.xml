@@ -35,6 +35,7 @@
   <!-- ios -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
+      <preference name="BackupWebStorage" value="local"/>
       <access origin="http://localhost"/> <!-- allow local pages -->
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
