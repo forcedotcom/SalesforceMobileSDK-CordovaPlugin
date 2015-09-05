@@ -109,8 +109,6 @@ IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git"
 IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
 SHARED_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Shared.git"
 SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
-WINDOWS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Windows.git"
-WINDOWS_SDK_FOLDER="SalesforceMobileSDK-Windows"
 
 parse_opts "$@"
 
@@ -119,7 +117,6 @@ cd ${ROOT_FOLDER}
 
 update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
 update_repo "${ANDROID_SDK_FOLDER}" "${ANDROID_SDK_REPO_PATH}"
-update_repo "${WINDOWS_SDK_FOLDER}" "${WINDOWS_SDK_REPO_PATH}"
 update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}"
 
 if [ "$OPT_BUILD" == "yes" ]
@@ -147,7 +144,6 @@ mkdir -p src/ios/headers
 mkdir -p src/ios/frameworks
 mkdir -p src/ios/classes
 mkdir -p src/ios/resources
-mkdir -p src/windows/$WINDOWS_SDK_FOLDER
 
 echo "*** Android ***"
 echo "Copying SalesforceSDK library"
@@ -237,10 +233,6 @@ echo "*** Shared ***"
 echo "Copying split cordova.force.js out of bower_components"
 cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
 
-echo "*** Windows ***"
-echo "Copying windows files from $WINDOWS_SDK_FOLDER to src/windows/$WINDOWS_SDK_FOLDER"
-cp -RL $WINDOWS_SDK_FOLDER src/windows/
-cp src/windows/$WINDOWS_SDK_FOLDER/SalesforceSDK/CordovaPluginJavascript/*.js src/windows/
 echo "*** Cleanup ***"
 rm -rf tmp
 
