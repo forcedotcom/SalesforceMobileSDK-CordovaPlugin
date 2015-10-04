@@ -25,18 +25,24 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova" version="&gt;=3.5.0" />
-    <engine name="cordova" version="&lt;=3.8.0" />
+    <engine name="cordova" version="&gt;=4.0.0" />
   </engines>
 
-  <dependency id="org.apache.cordova.device"/>
+  <dependency id="cordova-plugin-device" />
   <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin" />
 
   <!-- ios -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
-      <preference name="BackupWebStorage" value="local"/>
-      <access origin="http://localhost"/> <!-- allow local pages -->
+      <preference name="BackupWebStorage" value="local" />
+
+      <!-- To allow XHR requests with the new Whitelist plugin -->
+      <allow-navigation href="https://localhost" />
+      <allow-navigation href="https://*.force.com" />
+      <allow-navigation href="https://*.salesforce.com" />
+
+      <!-- For legacy apps that don't use CSP -->
+      <access origin="https://localhost" />
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
@@ -147,7 +153,14 @@
     </config-file>
 
     <config-file target="res/xml/config.xml" parent="/*">
-      <access origin="http://127.0.0.1*"/> <!-- allow local pages -->
+
+      <!-- To allow XHR requests with the new Whitelist plugin -->
+      <allow-navigation href="https://localhost" />
+      <allow-navigation href="https://*.force.com" />
+      <allow-navigation href="https://*.salesforce.com" />
+
+      <!-- For legacy apps that don't use CSP -->
+      <access origin="https://localhost" />
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
       <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SalesforceOAuthPlugin"/></feature>
@@ -168,22 +181,22 @@
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
-<!-- windows -->
+  <!-- windows -->
   <platform name="windows">
 	<js-module src="src/windows/com.salesforce.plugin.oauthProxy.js" name="SalesforceOAuthProxy">
             <runs/>
-        </js-module>
+  </js-module>
 	<js-module src="src/windows/com.salesforce.plugin.accountmanagerProxy.js" name="SalesforceAccountManagerProxy">
             <runs/>
-        </js-module>
+  </js-module>
 	<js-module src="src/windows/com.salesforce.plugin.smartstoreProxy.js" name="SalesforceSmartStoreProxy">
             <runs/>
-        </js-module>
+  </js-module>
 	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
             <runs/>
-        </js-module>
+  </js-module>
 	<framework src="src/windows/src/Core/Core.csproj"  custom="true" type="projectReference"/>
-        <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
+  <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/src/Hybrid.SmartStore/Hybrid.SmartStore.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/src/Hybrid.SmartSync/Hybrid.SmartSync.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/WinMD/SQLitePCL.Ext.dll" custom="true" />
