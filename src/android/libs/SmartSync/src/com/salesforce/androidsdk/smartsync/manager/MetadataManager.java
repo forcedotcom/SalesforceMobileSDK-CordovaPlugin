@@ -202,7 +202,7 @@ public class MetadataManager {
     }
 
     /**
-     * Sets the API version to be used (for example, 'v33.0').
+     * Sets the API version to be used (for example, 'v34.0').
      *
      * @param apiVer API version to be used.
      */
@@ -1092,12 +1092,7 @@ public class MetadataManager {
             }
             String whereClause;
             if (objContainsLastViewedDate) {
-
-            	/*
-            	 * TODO: This should be replaced with 'using SCOPE MRU'
-            	 * in 'v32.0'.
-            	 */
-                queryBuilder.from(String.format("%s using MRU", objectTypeName));
+                queryBuilder.from(String.format("%s using SCOPE MRU", objectTypeName));
                 whereClause = "LastViewedDate != NULL";
                 queryBuilder.orderBy("LastViewedDate DESC");
                 queryBuilder.limit(limit);
