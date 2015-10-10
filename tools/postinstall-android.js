@@ -1,5 +1,4 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
-var useSmartStoreOrSmartSync = true;
 var targetAndroidApi = 21; 
 
 
@@ -26,8 +25,9 @@ var fixFile = function(path, fix) {
 
 // Function to fix AndroidManifest.xml
 var fixAndroidManifest = function(data) {
+
     // Fix application tag
-    var appName = "com.salesforce.androidsdk." + (useSmartStoreOrSmartSync  ? "smartsync.app.HybridAppWithSmartSync"  : "app.HybridApp");
+    var appName = "com.salesforce.androidsdk.smartsync.app.HybridAppWithSmartSync";
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
@@ -43,7 +43,7 @@ var fixAndroidManifest = function(data) {
         data = data.replace(/android\:minSdkVersion\=\"10\"/, 'android:minSdkVersion="17"');
 
         // Change target api
-        data = data.replace(/android\:targetSdkVersion\=\"19\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
+        data = data.replace(/android\:targetSdkVersion\=\"22\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
     }
 
     return data;
@@ -77,7 +77,7 @@ if (androidExePath === null) {
     process.exit(2);
 }
 
-var libProject = useSmartStoreOrSmartSync ? path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync') : path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK');
+var libProject = path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync');
 var cordovaLibProject = path.join('..', '..', '..', '..', '..', '..', 'platforms', 'android', 'CordovaLib');
 
 console.log('Fixing application AndroidManifest.xml');

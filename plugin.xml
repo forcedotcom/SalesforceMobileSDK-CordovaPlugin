@@ -178,7 +178,6 @@
 
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
-    <hook type="before_plugin_install" src="tools/preinstall-android.js" />
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
