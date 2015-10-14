@@ -1,5 +1,4 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
-var useSmartStoreOrSmartSync = true;
 var targetAndroidApi = 21; 
 
 
@@ -24,15 +23,11 @@ var fixFile = function(path, fix) {
     });
 };
 
-// Function to removes current cordova library project reference 
-var fixSDKProjectProperties = function(data) {
-    return data.replace(/android\.library\.reference.*cordova\/framework\n/, '');
-};
-
 // Function to fix AndroidManifest.xml
 var fixAndroidManifest = function(data) {
+
     // Fix application tag
-    var appName = "com.salesforce.androidsdk." + (useSmartStoreOrSmartSync  ? "smartsync.app.HybridAppWithSmartSync"  : "app.HybridApp");
+    var appName = "com.salesforce.androidsdk.smartsync.app.HybridAppWithSmartSync";
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
@@ -48,15 +43,10 @@ var fixAndroidManifest = function(data) {
         data = data.replace(/android\:minSdkVersion\=\"10\"/, 'android:minSdkVersion="17"');
 
         // Change target api
-        data = data.replace(/android\:targetSdkVersion\=\"19\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
+        data = data.replace(/android\:targetSdkVersion\=\"22\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
     }
 
     return data;
-};
-
-// Function to manifest merger
-var fixProjectProperties = function(data) {
-    return data + "manifestmerger.enabled=true\n";
 };
 
 var getAndroidSDKToolPath = function() {
@@ -87,40 +77,10 @@ if (androidExePath === null) {
     process.exit(2);
 }
 
-var libProject = useSmartStoreOrSmartSync ? path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync') : path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK');
+var libProject = path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync');
 var cordovaLibProject = path.join('..', '..', '..', '..', '..', '..', 'platforms', 'android', 'CordovaLib');
 
 console.log('Fixing application AndroidManifest.xml');
 fixFile(path.join('platforms', 'android', 'AndroidManifest.xml'), fixAndroidManifest);
 
-console.log('Fixing application project.properties');
-fixFile(path.join('platforms', 'android', 'project.properties'), fixProjectProperties);
-
-console.log('Removing cordova library project reference from SalesforceSDK\'s project.properties');
-fixFile(path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK', 'project.properties'), fixSDKProjectProperties);
-
-console.log('Building cordova library');
-exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('platforms', 'android', 'CordovaLib'))});
-
-console.log('Updating application to use ' + (useSmartStoreOrSmartSync ? 'SmartSync' : ' SalesforceSDK') + ' library project ');
-exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + libProject, {cwd: path.resolve(process.cwd(), path.join('platforms', 'android'))});
-
-console.log('Updating SalesforceSDK to use CordovaLib');
-exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '" -l ' + cordovaLibProject, {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
-
-console.log('Building SalesforceSDK library');
-exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SalesforceSDK'))});
-
-
-if (useSmartStoreOrSmartSync) {
-    console.log('Updating SmartStore library target android api');
-    exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
-    console.log('Building SmartStore library');
-    exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartStore'))});
-
-    console.log('Updating SmartSync library target android api');
-    exec(androidExePath + ' update project -p . -t "android-' + targetAndroidApi + '"', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
-    console.log('Building SmartSync library');
-    exec('ant debug', {cwd: path.resolve(process.cwd(), path.join('plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync'))});
-}
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
