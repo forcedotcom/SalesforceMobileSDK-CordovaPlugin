@@ -88,4 +88,15 @@ exec('cp -R ' + path.join(libProjectRoot, 'SalesforceSDK') + ' ' + appProjectRoo
 exec('cp -R ' + path.join(libProjectRoot, 'SmartStore') + ' ' + appProjectRoot);
 exec('cp -R ' + path.join(libProjectRoot, 'SmartSync') + ' ' + appProjectRoot);
 
+console.log('Fixing Gradle dependency paths in Salesforce libraries');
+var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
+var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
+var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
+exec("sed -i.bu " + "\"s/" + oldCordovaDep + "/" + "compile project\(\':CordovaLib\'\)" + "/g\" " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
+exec("rm " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle') + ".bu");
+exec("sed -i.bu " + "\"s/" + oldSalesforceSdkDep + "/" + "compile project\(\':SalesforceSDK\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
+exec("rm " + path.join(appProjectRoot, 'SmartStore', 'build.gradle') + ".bu");
+exec("sed -i.bu " + "\"s/" + oldSmartStoreDep + "/" + "compile project\(\':SmartStore\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
+exec("rm " + path.join(appProjectRoot, 'SmartSync', 'build.gradle') + ".bu");
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
