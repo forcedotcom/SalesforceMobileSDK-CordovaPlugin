@@ -99,4 +99,9 @@ exec("rm " + path.join(appProjectRoot, 'SmartStore', 'build.gradle') + ".bu");
 exec("sed -i.bu " + "\"s/" + oldSmartStoreDep + "/" + "compile project\(\':SmartStore\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
 exec("rm " + path.join(appProjectRoot, 'SmartSync', 'build.gradle') + ".bu");
 
+console.log('Fixing root level Gradle file for the generated app');
+exec("echo \'include \":SalesforceSDK\"\' >> " + path.join(appProjectRoot, 'settings.gradle'));
+exec("echo \'include \":SmartStore\"\' >> " + path.join(appProjectRoot, 'settings.gradle'));
+exec("echo \'include \":SmartSync\"\' >> " + path.join(appProjectRoot, 'settings.gradle'));
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
