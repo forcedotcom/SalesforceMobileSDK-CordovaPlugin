@@ -30,7 +30,7 @@
 
   <dependency id="cordova-plugin-whitelist" />
   <dependency id="cordova-plugin-device" />
-  <dependency id="cordova-plugin-push" url="https://github.com/forcedotcom/phonegap-plugin-push" />
+  <dependency id="phonegap-plugin-push" />
 
   <!-- ios -->
   <platform name="ios">

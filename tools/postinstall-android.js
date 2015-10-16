@@ -77,10 +77,26 @@ if (androidExePath === null) {
     process.exit(2);
 }
 
-var libProject = path.join('..', '..', 'plugins', 'com.salesforce', 'src', 'android', 'libs', 'SmartSync');
-var cordovaLibProject = path.join('..', '..', '..', '..', '..', '..', 'platforms', 'android', 'CordovaLib');
+var libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'libs');
+var appProjectRoot = path.join('platforms', 'android');
 
 console.log('Fixing application AndroidManifest.xml');
 fixFile(path.join('platforms', 'android', 'AndroidManifest.xml'), fixAndroidManifest);
+
+console.log('Moving Salesforce libraries to the correct location');
+exec('cp -R ' + path.join(libProjectRoot, 'SalesforceSDK') + ' ' + appProjectRoot);
+exec('cp -R ' + path.join(libProjectRoot, 'SmartStore') + ' ' + appProjectRoot);
+exec('cp -R ' + path.join(libProjectRoot, 'SmartSync') + ' ' + appProjectRoot);
+
+console.log('Fixing Gradle dependency paths in Salesforce libraries');
+var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
+var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
+var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
+exec("sed -i.bu " + "\"s/" + oldCordovaDep + "/" + "compile project\(\':CordovaLib\'\)" + "/g\" " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
+exec("rm " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle') + ".bu");
+exec("sed -i.bu " + "\"s/" + oldSalesforceSdkDep + "/" + "compile project\(\':SalesforceSDK\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
+exec("rm " + path.join(appProjectRoot, 'SmartStore', 'build.gradle') + ".bu");
+exec("sed -i.bu " + "\"s/" + oldSmartStoreDep + "/" + "compile project\(\':SmartStore\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
+exec("rm " + path.join(appProjectRoot, 'SmartSync', 'build.gradle') + ".bu");
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
