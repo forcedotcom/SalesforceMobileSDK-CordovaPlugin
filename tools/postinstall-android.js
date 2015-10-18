@@ -8,7 +8,7 @@ var targetAndroidApi = 21;
 var fs = require('fs');
 var exec = require('child_process').exec;
 var path = require('path');
-//var shelljs = require('shelljs');
+var shelljs = require('shelljs');
 
 var copyFile = function(srcPath, targetPath) {
     fs.createReadStream(srcPath).pipe(fs.createWriteStream(targetPath));
@@ -19,19 +19,6 @@ var fixFile = function(path, fix) {
         fs.writeFile(path, fix(data), function (err) {         
             if (err) { 
                 console.log(err); 
-            } 
-        });
-    });
-};
-
-var searchAndReplaceFile = function(path, fix, origStr, replaceStr) {
-    console.log("Orig: " + origStr + ", Rep: " + replaceStr);
-    console.log("Path: " + path);
-    fs.readFile(path, function (err, data) {
-        console.log("Data: " + data);
-        fs.writeFile(path, fix(data, origStr, replaceStr), function (err) {       
-            if (err) { 
-                console.log(err);
             } 
         });
     });
@@ -60,12 +47,6 @@ var fixAndroidManifest = function(data) {
         data = data.replace(/android\:targetSdkVersion\=\"22\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
     }
 
-    return data;
-};
-
-// Function to search and replace strings
-var searchAndReplace = function(data, origStr, replaceStr) {
-    data = data.replace(origStr, replaceStr);
     return data;
 };
 
@@ -104,26 +85,26 @@ console.log('Fixing application AndroidManifest.xml');
 fixFile(path.join('platforms', 'android', 'AndroidManifest.xml'), fixAndroidManifest);
 
 console.log('Moving Salesforce libraries to the correct location');
-exec('cp -R ' + path.join(libProjectRoot, 'SalesforceSDK') + ' ' + appProjectRoot);
-exec('cp -R ' + path.join(libProjectRoot, 'SmartStore') + ' ' + appProjectRoot);
-exec('cp -R ' + path.join(libProjectRoot, 'SmartSync') + ' ' + appProjectRoot);
-/*shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
+// exec('cp -R ' + path.join(libProjectRoot, 'SalesforceSDK') + ' ' + appProjectRoot);
+// exec('cp -R ' + path.join(libProjectRoot, 'SmartStore') + ' ' + appProjectRoot);
+// exec('cp -R ' + path.join(libProjectRoot, 'SmartSync') + ' ' + appProjectRoot);
+shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
-shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);*/
+shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
 var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
 var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
+shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
+shelljs.sed('-i', oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)', path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
+shelljs.sed('-i', oldSmartStoreDep, 'compile project\(\':SmartStore\'\)', path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
 /*exec("sed -i.bu " + "\"s/" + oldCordovaDep + "/" + "compile project\(\':CordovaLib\'\)" + "/g\" " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
 exec("rm " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle') + ".bu");
 exec("sed -i.bu " + "\"s/" + oldSalesforceSdkDep + "/" + "compile project\(\':SalesforceSDK\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
 exec("rm " + path.join(appProjectRoot, 'SmartStore', 'build.gradle') + ".bu");
 exec("sed -i.bu " + "\"s/" + oldSmartStoreDep + "/" + "compile project\(\':SmartStore\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
 exec("rm " + path.join(appProjectRoot, 'SmartSync', 'build.gradle') + ".bu");*/
-searchAndReplaceFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'), searchAndReplace, oldCordovaDep, "compile project\(\':CordovaLib\'\)");
-searchAndReplaceFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), searchAndReplace, oldSalesforceSdkDep, "compile project\(\':SalesforceSDK\'\)");
-searchAndReplaceFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), searchAndReplace, oldSmartStoreDep, "compile project\(\':SmartStore\'\)");
 
 console.log('Fixing root level Gradle file for the generated app');
 exec("echo \'include \":SalesforceSDK\"\' >> " + path.join(appProjectRoot, 'settings.gradle'));
