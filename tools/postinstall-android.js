@@ -1,7 +1,6 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
 var targetAndroidApi = 21; 
 
-
 //--------------------------------------
 // Useful functions
 //--------------------------------------
@@ -32,7 +31,6 @@ var fixAndroidManifest = function(data) {
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
-
         var applicationTag = '<application android:hardwareAccelerated="true" android:icon="@drawable/sf__icon" android:label="@string/app_name" android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="' + appName + '">'
         data = data.replace(/<application [^>]*>/, applicationTag);
 
@@ -46,7 +44,6 @@ var fixAndroidManifest = function(data) {
         // Change target api
         data = data.replace(/android\:targetSdkVersion\=\"22\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
     }
-
     return data;
 };
 
@@ -56,7 +53,6 @@ var getAndroidSDKToolPath = function() {
         console.log('You must set the ANDROID_HOME environment variable to the path of your installation of the Android SDK.');
         return null;
     }
-
     var androidExePath = path.join(androidHomeDir, 'tools', 'android');
     var isWindows = (/^win/i).test(process.platform);
     if (isWindows) {
@@ -66,7 +62,6 @@ var getAndroidSDKToolPath = function() {
         console.log('The "android" utility does not exist at ' + androidExePath + '.  Make sure you\'ve properly installed the Android SDK.');
         return null;
     }
-
     return androidExePath;
 };
 
@@ -76,11 +71,6 @@ var getAndroidSDKToolPath = function() {
 var androidExePath = getAndroidSDKToolPath();
 if (androidExePath === null) {
     process.exit(1);
-}
-
-if (shelljs === 'undefined') {
-    console.log('The module \'shelljs\' is required for this plugin. Please run \'npm install shelljs\' before running this script.');
-    process.exit(2);
 }
 
 var libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'libs');

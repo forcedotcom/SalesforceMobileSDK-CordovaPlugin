@@ -155,7 +155,9 @@ cp -RL $ANDROID_SDK_FOLDER/libs/SmartSync src/android/libs/
 echo "Copying icu461.zip"
 cp $ANDROID_SDK_FOLDER/external/sqlcipher/assets/icudt46l.zip src/android/assets/
 echo "Copying sqlcipher"
-cp -RL $ANDROID_SDK_FOLDER/external/sqlcipher/libs/* src/android/libs/SmartStore/libs/    
+cp -RL $ANDROID_SDK_FOLDER/external/sqlcipher/libs/* src/android/libs/SmartStore/libs/
+echo "Copying package.json"
+cp _RL $ANDROID_SDK_FOLDER/package.json ./
 
 echo "*** iOS ***"
 echo "Copying SalesforceHybridSDK library"    
