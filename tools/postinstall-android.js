@@ -98,10 +98,13 @@ shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'se
 shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 
-console.log('Moving Gradle wrapper files to app directory');
+console.log('Moving Gradle wrapper files to application directory');
 shelljs.mv(path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradlew.bat'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradle'), appProjectRoot);
+
+console.log('Fixing application build.gradle');
+shelljs.sed('-i', '({(?>[^{}]|(?0))*?})', 'Test', path.join(appProjectRoot, 'build.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
