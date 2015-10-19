@@ -73,6 +73,7 @@ if (androidExePath === null) {
     process.exit(2);
 }
 
+var pluginRoot = path.join('plugins', 'com.salesforce');
 var libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'libs');
 var appProjectRoot = path.join('platforms', 'android');
 
@@ -96,5 +97,11 @@ console.log('Fixing root level Gradle file for the generated app');
 shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+
+console.log('Moving Gradle wrapper files to app directory');
+shelljs.mv(path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
+shelljs.mv(path.join(pluginRoot, 'gradlew.bat'), appProjectRoot);
+shelljs.mv(path.join(pluginRoot, 'gradlew'), appProjectRoot);
+shelljs.mv(path.join(pluginRoot, 'gradle'), appProjectRoot);
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");

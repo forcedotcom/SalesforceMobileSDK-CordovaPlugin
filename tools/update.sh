@@ -156,6 +156,11 @@ echo "Copying icu461.zip"
 cp $ANDROID_SDK_FOLDER/external/sqlcipher/assets/icudt46l.zip src/android/assets/
 echo "Copying sqlcipher"
 cp -RL $ANDROID_SDK_FOLDER/external/sqlcipher/libs/* src/android/libs/SmartStore/libs/
+echo "Copying Gradle wrapper files"
+cp $ANDROID_SDK_FOLDER/gradle.properties ./
+cp $ANDROID_SDK_FOLDER/gradlew.bat ./
+cp $ANDROID_SDK_FOLDER/gradlew ./
+cp -RL $ANDROID_SDK_FOLDER/gradle ./
 
 echo "*** iOS ***"
 echo "Copying SalesforceHybridSDK library"    
