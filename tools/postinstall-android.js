@@ -1,13 +1,13 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
 var targetAndroidApi = 21; 
 
-
 //--------------------------------------
 // Useful functions
 //--------------------------------------
 var fs = require('fs');
 var exec = require('child_process').exec;
 var path = require('path');
+var shelljs = require('shelljs');
 
 var copyFile = function(srcPath, targetPath) {
     fs.createReadStream(srcPath).pipe(fs.createWriteStream(targetPath));
@@ -31,7 +31,6 @@ var fixAndroidManifest = function(data) {
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
-
         var applicationTag = '<application android:hardwareAccelerated="true" android:icon="@drawable/sf__icon" android:label="@string/app_name" android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="' + appName + '">'
         data = data.replace(/<application [^>]*>/, applicationTag);
 
@@ -45,7 +44,6 @@ var fixAndroidManifest = function(data) {
         // Change target api
         data = data.replace(/android\:targetSdkVersion\=\"22\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
     }
-
     return data;
 };
 
@@ -55,7 +53,6 @@ var getAndroidSDKToolPath = function() {
         console.log('You must set the ANDROID_HOME environment variable to the path of your installation of the Android SDK.');
         return null;
     }
-
     var androidExePath = path.join(androidHomeDir, 'tools', 'android');
     var isWindows = (/^win/i).test(process.platform);
     if (isWindows) {
@@ -65,7 +62,6 @@ var getAndroidSDKToolPath = function() {
         console.log('The "android" utility does not exist at ' + androidExePath + '.  Make sure you\'ve properly installed the Android SDK.');
         return null;
     }
-
     return androidExePath;
 };
 
@@ -84,19 +80,21 @@ console.log('Fixing application AndroidManifest.xml');
 fixFile(path.join('platforms', 'android', 'AndroidManifest.xml'), fixAndroidManifest);
 
 console.log('Moving Salesforce libraries to the correct location');
-exec('cp -R ' + path.join(libProjectRoot, 'SalesforceSDK') + ' ' + appProjectRoot);
-exec('cp -R ' + path.join(libProjectRoot, 'SmartStore') + ' ' + appProjectRoot);
-exec('cp -R ' + path.join(libProjectRoot, 'SmartSync') + ' ' + appProjectRoot);
+shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
+shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
+shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
 var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
 var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
-exec("sed -i.bu " + "\"s/" + oldCordovaDep + "/" + "compile project\(\':CordovaLib\'\)" + "/g\" " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
-exec("rm " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle') + ".bu");
-exec("sed -i.bu " + "\"s/" + oldSalesforceSdkDep + "/" + "compile project\(\':SalesforceSDK\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
-exec("rm " + path.join(appProjectRoot, 'SmartStore', 'build.gradle') + ".bu");
-exec("sed -i.bu " + "\"s/" + oldSmartStoreDep + "/" + "compile project\(\':SmartStore\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
-exec("rm " + path.join(appProjectRoot, 'SmartSync', 'build.gradle') + ".bu");
+shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
+shelljs.sed('-i', oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)', path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
+shelljs.sed('-i', oldSmartStoreDep, 'compile project\(\':SmartStore\'\)', path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
+
+console.log('Fixing root level Gradle file for the generated app');
+var oldEntry = "include \":CordovaLib\"";
+var newEntry = "include \":CordovaLib\"\ninclude \":SalesforceSDK\"\ninclude \":SmartStore\"\ninclude \":SmartSync\"";
+shelljs.sed('-i', oldEntry, newEntry, path.join(appProjectRoot, 'settings.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
