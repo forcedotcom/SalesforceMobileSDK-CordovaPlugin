@@ -8,7 +8,7 @@ var targetAndroidApi = 21;
 var fs = require('fs');
 var exec = require('child_process').exec;
 var path = require('path');
-var shelljs = require('shelljs');
+var shelljs = require('shelljs/global');
 
 var copyFile = function(srcPath, targetPath) {
     fs.createReadStream(srcPath).pipe(fs.createWriteStream(targetPath));
@@ -75,6 +75,11 @@ var getAndroidSDKToolPath = function() {
 //--------------------------------------
 var androidExePath = getAndroidSDKToolPath();
 if (androidExePath === null) {
+    process.exit(1);
+}
+
+if (shelljs === 'undefined') {
+    console.log('The module \'shelljs\' is required for this plugin. Please run \'npm install shelljs\' before running this script.');
     process.exit(2);
 }
 
