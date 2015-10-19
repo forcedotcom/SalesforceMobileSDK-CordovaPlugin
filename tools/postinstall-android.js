@@ -7,6 +7,11 @@ var targetAndroidApi = 21;
 var fs = require('fs');
 var exec = require('child_process').exec;
 var path = require('path');
+
+exec("touch package.json");
+exec("echo \'{\' >> package.json");
+exec("echo \'\"dependencies\": { \"shelljs\": \">=0.1.4\" }\' >> package.json");
+exec("echo \'}\' >> package.json");
 var shelljs = require('shelljs');
 
 var copyFile = function(srcPath, targetPath) {
