@@ -7,11 +7,6 @@ var targetAndroidApi = 21;
 var fs = require('fs');
 var exec = require('child_process').exec;
 var path = require('path');
-
-exec("touch package.json");
-exec("echo \'{\' >> package.json");
-exec("echo \'\"dependencies\": { \"shelljs\": \">=0.1.4\" }\' >> package.json");
-exec("echo \'}\' >> package.json");
 var shelljs = require('shelljs');
 
 var copyFile = function(srcPath, targetPath) {
@@ -75,7 +70,7 @@ var getAndroidSDKToolPath = function() {
 //--------------------------------------
 var androidExePath = getAndroidSDKToolPath();
 if (androidExePath === null) {
-    process.exit(1);
+    process.exit(2);
 }
 
 var libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'libs');
@@ -85,9 +80,6 @@ console.log('Fixing application AndroidManifest.xml');
 fixFile(path.join('platforms', 'android', 'AndroidManifest.xml'), fixAndroidManifest);
 
 console.log('Moving Salesforce libraries to the correct location');
-// exec('cp -R ' + path.join(libProjectRoot, 'SalesforceSDK') + ' ' + appProjectRoot);
-// exec('cp -R ' + path.join(libProjectRoot, 'SmartStore') + ' ' + appProjectRoot);
-// exec('cp -R ' + path.join(libProjectRoot, 'SmartSync') + ' ' + appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
@@ -99,12 +91,6 @@ var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
 shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
 shelljs.sed('-i', oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)', path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
 shelljs.sed('-i', oldSmartStoreDep, 'compile project\(\':SmartStore\'\)', path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
-/*exec("sed -i.bu " + "\"s/" + oldCordovaDep + "/" + "compile project\(\':CordovaLib\'\)" + "/g\" " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
-exec("rm " + path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle') + ".bu");
-exec("sed -i.bu " + "\"s/" + oldSalesforceSdkDep + "/" + "compile project\(\':SalesforceSDK\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
-exec("rm " + path.join(appProjectRoot, 'SmartStore', 'build.gradle') + ".bu");
-exec("sed -i.bu " + "\"s/" + oldSmartStoreDep + "/" + "compile project\(\':SmartStore\'\)" + "/g\" " + path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
-exec("rm " + path.join(appProjectRoot, 'SmartSync', 'build.gradle') + ".bu");*/
 
 console.log('Fixing root level Gradle file for the generated app');
 exec("echo \'include \":SalesforceSDK\"\' >> " + path.join(appProjectRoot, 'settings.gradle'));
