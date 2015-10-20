@@ -105,5 +105,8 @@ shelljs.mv(path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradle'), appProjectRoot);
 
 console.log('Fixing application build.gradle');
+var oldAndroidDepTree = "android {";
+var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
+shelljs.sed('-i', oldAndroidDepTree, newAndroidDepTree, path.join(appProjectRoot, 'build.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
