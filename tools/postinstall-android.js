@@ -112,5 +112,8 @@ shelljs.echo("allprojects {\n\trepositories {\n\t\tmavenCentral\(\)\n\t}\n}").to
 var oldBuildScriptDepTree = "buildscript {";
 var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
 shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
+var oldLibDep = "compile \"com.android.support:support-v13:23+\"";
+var newLibDep = "compile project(':SmartSync')";
+shelljs.sed('-i', oldLibDep, newLibDep, path.join(appProjectRoot, 'build.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
