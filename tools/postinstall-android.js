@@ -105,6 +105,8 @@ shelljs.mv(path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradle'), appProjectRoot);
 
 console.log('Fixing application build.gradle');
-shelljs.sed('-i', '({(?>[^{}]|(?0))*?})', 'Test', path.join(appProjectRoot, 'build.gradle'));
+shelljs.rm(path.join(appProjectRoot, 'build.gradle'));
+shelljs.mv(path.join(pluginRoot, 'build.gradle'), appProjectRoot);
+shelljs.sed('-i', 'group = \'com.salesforce.androidsdk\'', '', path.join(appProjectRoot, 'build.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
