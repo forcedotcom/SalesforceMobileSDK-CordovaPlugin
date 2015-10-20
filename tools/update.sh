@@ -160,7 +160,6 @@ echo "Copying Gradle wrapper files"
 cp $ANDROID_SDK_FOLDER/gradle.properties ./
 cp $ANDROID_SDK_FOLDER/gradlew.bat ./
 cp $ANDROID_SDK_FOLDER/gradlew ./
-cp $ANDROID_SDK_FOLDER/build.gradle ./
 cp -RL $ANDROID_SDK_FOLDER/gradle ./
 
 echo "*** iOS ***"
