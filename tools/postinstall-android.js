@@ -7,18 +7,24 @@ var targetAndroidApi = 21;
 var fs = require('fs');
 var exec = require('child_process').exec;
 var path = require('path');
-var shelljs = require('shelljs');
+
+try {
+    var shelljs = require('shelljs');
+} catch(e) {
+    console.log('The node package shelljs is required to use this script. Run \'npm install shelljs\' before running this script.');
+    process.exit(1);
+}
 
 var copyFile = function(srcPath, targetPath) {
     fs.createReadStream(srcPath).pipe(fs.createWriteStream(targetPath));
 };
 
 var fixFile = function(path, fix) {
-    fs.readFile(path, 'utf8', function (err, data) { 
-        fs.writeFile(path, fix(data), function (err) {         
-            if (err) { 
-                console.log(err); 
-            } 
+    fs.readFile(path, 'utf8', function (err, data) {
+        fs.writeFile(path, fix(data), function (err) {
+            if (err) {
+                console.log(err);
+            }
         });
     });
 };
