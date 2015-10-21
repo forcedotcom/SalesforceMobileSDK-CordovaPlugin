@@ -100,6 +100,7 @@ shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settin
 
 console.log('Moving Gradle wrapper files to application directory');
 shelljs.mv(path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
+shelljs.sed('-i', 'cdvCompileSdkVersion=android-21', 'cdvCompileSdkVersion=android-23',path.join(appProjectRoot, 'gradle.properties'));
 shelljs.mv(path.join(pluginRoot, 'gradlew.bat'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradle'), appProjectRoot);
@@ -115,5 +116,8 @@ shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appPro
 var oldLibDep = "compile \"com.android.support:support-v13:23+\"";
 var newLibDep = "compile project(':SmartSync')";
 shelljs.sed('-i', oldLibDep, newLibDep, path.join(appProjectRoot, 'build.gradle'));
+var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
+shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join('CordovaLib', 'build.gradle'));
+shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
