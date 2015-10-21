@@ -117,7 +117,9 @@ var oldLibDep = "compile \"com.android.support:support-v13:23+\"";
 var newLibDep = "compile project(':SmartSync')";
 shelljs.sed('-i', oldLibDep, newLibDep, path.join(appProjectRoot, 'build.gradle'));
 var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
-shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join('CordovaLib', 'build.gradle'));
+shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
 shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
+shelljs.sed('-i', 'debugCompile project(path: \":CordovaLib\", configuration: \"debug\")', '', path.join(appProjectRoot, 'build.gradle'));
+shelljs.sed('-i', 'releaseCompile project(path: \":CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
