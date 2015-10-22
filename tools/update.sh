@@ -152,6 +152,8 @@ echo "Copying SmartStore library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/
 echo "Copying SmartSync library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SmartSync src/android/libs/
+echo "Copying SalesforceHybrid library"
+cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceHybrid src/android/libs/
 echo "Copying icu461.zip"
 cp $ANDROID_SDK_FOLDER/external/sqlcipher/assets/icudt46l.zip src/android/assets/
 echo "Copying sqlcipher"
@@ -180,9 +182,9 @@ unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
 echo "Copying SalesforceSDKCommon library"    
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
 echo "Copying SalesforceCommonUtils library"    
-cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils  tmp
+cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils tmp
 echo "Copying sqlcipher library"    
-cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher  tmp
+cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
 cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
 cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
@@ -240,5 +242,7 @@ cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
 
 echo "*** Cleanup ***"
 rm -rf tmp
-
-
+cd ${ROOT_FOLDER}
+rm -rf $ANDROID_SDK_FOLDER
+rm -rf $IOS_SDK_FOLDER
+rm -rf $SHARED_SDK_FOLDER
