@@ -2,12 +2,8 @@
 apply plugin: 'android-library'
 
 dependencies {
-  // TODO: Replace the following libs with MavenCentral when they're available.
-  compile files('libs/volley_android-4.4.2_r2.jar')
-  compile files('libs/android-junit-report-1.5.8.jar')
-  compile files('libs/guava-18.0.jar')
-  compile files('libs/httpmime-4.3.2.jar')
-  compile files('libs/apache-mime4j-0.7.2.jar')
+  compile project(':libs:SmartSync')
+  compile project(':external:cordova:framework')
 }
 
 android {
@@ -25,15 +21,15 @@ android {
       res.srcDirs = ['res']
       assets.srcDirs = ['assets']
     }
-    androidTest.setRoot('../test/SalesforceSDKTest')
+    androidTest.setRoot('../test/SalesforceHybridTest')
     androidTest {
-      java.srcDirs = ['../test/SalesforceSDKTest/src']
-      resources.srcDirs = ['../test/SalesforceSDKTest/src']
-      res.srcDirs = ['../test/SalesforceSDKTest/res']
+      java.srcDirs = ['../test/SalesforceHybridTest/src']
+      resources.srcDirs = ['../test/SalesforceHybridTest/src']
+      res.srcDirs = ['../test/SalesforceHybridTest/res']
     }
   }
   defaultConfig {
-    testApplicationId "com.salesforce.androidsdk.tests"
+    testApplicationId "com.salesforce.androidsdk.salesforcehybrid.tests"
     testInstrumentationRunner "com.salesforce.androidsdk.util.test.JUnitReportTestRunner"
   }
   packagingOptions {

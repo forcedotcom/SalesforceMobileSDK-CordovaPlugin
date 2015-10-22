@@ -24,34 +24,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.smartsync.app;
+package com.salesforce.androidsdk.phonegap.app;
 
-import android.text.TextUtils;
-
-import com.salesforce.androidsdk.smartstore.app.SmartStoreUpgradeManager;
+import com.salesforce.androidsdk.smartsync.app.SmartSyncUpgradeManager;
 
 /**
  * This class handles upgrades from one version to another.
  *
  * @author bhariharan
  */
-public class SmartSyncUpgradeManager extends SmartStoreUpgradeManager {
+public class SalesforceHybridUpgradeManager extends SmartSyncUpgradeManager {
 
-    /**
-     * Key in shared preference file for smart sync version.
-     */
-    private static final String SMART_SYNC_KEY = "smart_sync_version";
-
-    private static SmartSyncUpgradeManager INSTANCE = null;
+    private static SalesforceHybridUpgradeManager INSTANCE = null;
 
     /**
      * Returns an instance of this class.
      *
      * @return Instance of this class.
      */
-    public static synchronized SmartSyncUpgradeManager getInstance() {
+    public static synchronized SalesforceHybridUpgradeManager getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new SmartSyncUpgradeManager();
+            INSTANCE = new SalesforceHybridUpgradeManager();
         }
         return INSTANCE;
     }
@@ -59,37 +52,6 @@ public class SmartSyncUpgradeManager extends SmartStoreUpgradeManager {
     @Override
     public void upgrade() {
         super.upgrade();
-        upgradeSObject();
-    }
-
-
-    /**
-     * Upgrades smart sync data from existing client version to the current version.
-     */
-    protected synchronized void upgradeSObject() {
-        String installedVersion = getInstalledSobjectVersion();
-        if (installedVersion.equals(SmartSyncSDKManager.SDK_VERSION)) {
-            return;
-        }
-
-        // Update shared preference file to reflect the latest version.
-        writeCurVersion(SMART_SYNC_KEY, SmartSyncSDKManager.SDK_VERSION);
-
-        /*
-         * We need to update this variable, since the app will not
-         * have this value set for a first time install.
-         */
-        if (TextUtils.isEmpty(installedVersion)) {
-            installedVersion = getInstalledSobjectVersion();
-        }
-    }
-
-    /**
-     * Returns the currently installed version of smart sync.
-     *
-     * @return Currently installed version of smart sync.
-     */
-    public String getInstalledSobjectVersion() {
-        return getInstalledVersion(SMART_SYNC_KEY);
     }
 }
+
