@@ -147,7 +147,7 @@
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
       <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
           android:label="@string/app_name"
-          android:name="com.salesforce.androidsdk.ui.sfhybrid.SalesforceDroidGapActivity"
+          android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
           android:theme="@android:style/Theme.Black.NoTitleBar">
         <intent-filter>
           <action android:name="android.intent.action.MAIN" />

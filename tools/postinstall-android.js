@@ -33,7 +33,7 @@ var fixFile = function(path, fix) {
 var fixAndroidManifest = function(data) {
 
     // Fix application tag
-    var appName = "com.salesforce.androidsdk.smartsync.app.HybridAppWithSmartSync";
+    var appName = "com.salesforce.androidsdk.phonegap.app.HybridApp";
 
     // In case the script was run twice
     if (data.indexOf(appName) == -1) {
@@ -90,19 +90,23 @@ console.log('Moving Salesforce libraries to the correct location');
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
+shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceHybrid'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
 var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
 var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
-shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'));
+var oldSmartSyncDep = "compile project\(\':libs:SmartSync\'\)";
 shelljs.sed('-i', oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)', path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
 shelljs.sed('-i', oldSmartStoreDep, 'compile project\(\':SmartStore\'\)', path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
+shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
+shelljs.sed('-i', oldSmartSyncDep, 'compile project\(\':SmartSync\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
 
 console.log('Fixing root level Gradle file for the generated app');
 shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+shelljs.echo("include \":SalesforceHybrid\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 
 console.log('Moving Gradle wrapper files to application directory');
 shelljs.mv(path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
@@ -120,7 +124,7 @@ var oldBuildScriptDepTree = "buildscript {";
 var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
 shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
 var oldLibDep = "compile \"com.android.support:support-v13:23+\"";
-var newLibDep = "compile project(':SmartSync')";
+var newLibDep = "compile \"com.android.support:support-v13:23+\"\ncompile project(':SalesforceHybrid')";
 shelljs.sed('-i', oldLibDep, newLibDep, path.join(appProjectRoot, 'build.gradle'));
 var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
 shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
