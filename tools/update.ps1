@@ -9,8 +9,6 @@ param(
 $global:OPT_BUILD="no" # default 'no' since unlikely building iOS on a Windows machine.
 $global:OPT_BRANCH=""
 
-
-
 function usage 
 {
     echo "usage: $0 -b <branch name> [-n]"
@@ -46,18 +44,6 @@ function parse_opts
 }
 
 # Helper functions
-function copy_and_fix([string] $src, [string] $dest)
-{
-    echo "* Fixing and copying $1 to $2 directory"
-    find tmp -name $src | xargs sed 's/\#import\ \<Salesforce.*\/\(.*\)\>/#import "\1"/' > src/ios/$2/$1
-}
-
-function copy_lib
-{
-    echo "* Copying $1"G
-    find tmp -name $1 -exec cp {} src/ios/frameworks/ \;
-}
-
 function Get-ScriptDirectory
 {
     Split-Path $script:MyInvocation.MyCommand.Path
@@ -106,10 +92,6 @@ function update_repo([string]$repo_dir, [string] $git_repo_url)
 }
 
 $ROOT_FOLDER=$(get_root_folder)
-$ANDROID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Android.git"
-$ANDROID_SDK_FOLDER="SalesforceMobileSDK-Android"
-$SHARED_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Shared.git"
-$SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 $WINDOWS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Windows.git"
 $WINDOWS_SDK_FOLDER="SalesforceMobileSDK-Windows"
 
@@ -118,9 +100,7 @@ parse_opts "$@"
 # Work from the root of the repo.
 cd $ROOT_FOLDER
 
-update_repo $ANDROID_SDK_FOLDER $ANDROID_SDK_REPO_PATH
 update_repo $WINDOWS_SDK_FOLDER $WINDOWS_SDK_REPO_PATH
-update_repo $SHARED_SDK_FOLDER $SHARED_SDK_REPO_PATH
 
 cd $ROOT_FOLDER
 
@@ -128,25 +108,9 @@ echo "*** Creating directories ***"
 echo "Starting clean"
 rm src -r -force
 
-echo "Creating android directories"
-mkdir src/android/libs -Force
-mkdir src/android/assets -Force
-
 echo "Creating Windows directories"
 mkdir src/windows -Force
 mkdir src/windows/WinMD -Force
-
-echo "*** Android ***"
-echo "Copying SalesforceSDK library"
-cp $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/ -Recurse -Force
-echo "Copying SmartStore library"
-cp $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/ -Recurse -Force
-echo "Copying SmartSync library"
-cp $ANDROID_SDK_FOLDER/libs/SmartSync src/android/libs/ -Recurse -Force
-echo "Copying icu461.zip"
-cp $ANDROID_SDK_FOLDER/external/sqlcipher/assets/icudt46l.zip src/android/assets/ -Recurse -Force
-echo "Copying sqlcipher"
-cp $ANDROID_SDK_FOLDER/external/sqlcipher/libs/* src/android/libs/SmartStore/libs/ -Recurse -Force
 
 echo "*** Windows ***"
 echo "Copying windows files from $WINDOWS_SDK_FOLDER/CordovaPluginJavascript/*.js to src/windows/" 
@@ -160,14 +124,8 @@ rm -r src/windows/src/TypeScriptLib
 echo "Copying windows files for Sqlite.Ext from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/SQLitePCL.Ext.dll src/windows/WinMD
 
-echo "--- Shared ---"
-echo "Copying split cordova.force.js out of bower_components"
-cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
-
 echo "--- Clean Up ---"
 echo "Removing SalesforceSDK Library"
 rm -Recurse -Force $WINDOWS_SDK_FOLDER
-rm -Recurse -Force $SHARED_SDK_FOLDER
-rm -Recurse -Force $ANDROID_SDK_FOLDER
 
 
