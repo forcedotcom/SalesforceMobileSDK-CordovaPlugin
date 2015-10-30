@@ -198,6 +198,9 @@
 	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
             <runs/>
   </js-module>
+  <js-module name="SalesforceCore" src="src/windows/salesforce.windows.core.js">	
+	<runs/>
+  </js-module>
 	<framework src="src/windows/src/Core/Core.csproj"  custom="true" type="projectReference"/>
   <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/src/Hybrid.SmartStore/Hybrid.SmartStore.csproj"  custom="true" type="projectReference"/>

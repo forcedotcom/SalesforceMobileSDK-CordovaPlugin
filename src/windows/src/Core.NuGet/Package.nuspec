@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package >
+  <metadata minClientVersion="2.8">
+    <id>Salesforce.SDK.Core</id>
+    <version>3.3.0.unstable</version>
+    <title>Salesforce.SDK.Core</title>
+    <authors>Salesforce.com</authors>
+    <owners></owners>
+    <description>
+      The Salesforce SDK Core package is necessary for writing Salesforce applications on Windows. It contains the base features for OAuth, security, account management, and more. Support for windows and windows phone 8.1 runtime included.
+
+      Source: https://github.com/forcedotcom/SalesforceMobileSDK-Windows/tree/unstable
+
+      Please follow the steps in https://github.com/forcedotcom/SalesforceMobileSDK-Windows/blob/unstable/README.md to install. You will need to use the template included in github in order to make use of this package initially; there are some setup steps that are needed that the template provides.
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+    </summary>
+    <language>en-US</language>
+    <projectUrl>https://nuget.org/packages/Salesforce.SDK.Core.NuGet</projectUrl>
+    <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <copyright>Copyright  2015</copyright>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="6.0.5" />
+    </dependencies>
+    <references></references>
+    <tags></tags>
+  </metadata>
+  <files>
+    <file src="lib\" target="lib" />
+    <file src="tools\" target="tools" />
+    <file src="content\" target="content" />
+    <file src="build\" target="build" />
+  </files>
+</package>
