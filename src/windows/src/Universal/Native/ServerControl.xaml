@@ -1,0 +1,37 @@
+﻿<UserControl
+    x:Class="Salesforce.SDK.Native.ServerControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="30"
+    d:DesignWidth="400">
+
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="9*"/>
+        <ColumnDefinition Width="1*"/>
+    </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0"
+                   x:Name="ServerNameBlock"
+                   Text="{Binding}"
+                   Foreground="{ThemeResource ApplicationForegroundThemeBrush}"
+                   HorizontalAlignment="Stretch"
+                   TextTrimming="CharacterEllipsis"
+                   Tapped="Clicked"
+                   AutomationProperties.AutomationId="TextBlock_ServerFlyout_ServerName"/>
+        <TextBlock Grid.Column="1"
+                   Visibility="{Binding CanDelete}"
+                   x:Name="DeleteButton"
+                   MinHeight="20"
+                   Height="{Binding ElementName=ServerNameBlock, Path=ActualHeight}"
+                   Text="&#xE106;"
+                   FontFamily="Segoe UI Symbol"
+                   Foreground="{ThemeResource ApplicationForegroundThemeBrush}"
+                   TextAlignment="Center"
+                   FontSize="{Binding ElementName=ServerNameBlock, Path=FontSize}"
+                   Tapped="DeleteClicked"
+                   AutomationProperties.AutomationId="TextBlock_ServerFlyout_DeleteButton"/>
+    </Grid>
+</UserControl>
