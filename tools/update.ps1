@@ -111,6 +111,8 @@ rm src -r -force
 echo "Creating Windows directories"
 mkdir src/windows -Force
 mkdir src/windows/WinMD -Force
+mkdir src/windows/WinMD/x86 -Force
+mkdir src/windows/WinMD/x64 -Force
 
 echo "*** Windows ***"
 echo "Copying windows files from $WINDOWS_SDK_FOLDER/CordovaPluginJavascript/*.js to src/windows/" 
@@ -123,6 +125,8 @@ rm -r src/windows/src/TypeScriptLib
 
 echo "Copying windows files for Sqlite.Ext from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/SQLitePCL.Ext.dll src/windows/WinMD
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/sqlite3.dll src/windows/WinMD/x86
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/sqlite3.dll src/windows/WinMD/x64
 
 echo "--- Clean Up ---"
 echo "Removing SalesforceSDK Library"
