@@ -206,6 +206,8 @@
 	<framework src="src/windows/src/Hybrid.SmartStore/Hybrid.SmartStore.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/src/Hybrid.SmartSync/Hybrid.SmartSync.csproj"  custom="true" type="projectReference"/>
 	<framework src="src/windows/WinMD/SQLitePCL.Ext.dll" custom="true" />
+	<framework src="src/windows/WinMD/x64/sqlite3.dll" custom="true" />
+	<framework src="src/windows/WinMD/x86/sqlite3.dll" custom="true" />
   </platform>
 
 </plugin>
