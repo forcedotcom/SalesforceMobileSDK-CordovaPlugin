@@ -120,7 +120,7 @@ cp $WINDOWS_SDK_FOLDER/SalesforceSDK/CordovaPluginJavascript/*.js src/windows/ -
 
 echo "Copying windows source files to src/windows/src"
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/ src/windows/src/ -Recurse -Force
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages src/windows/src/packages -Recurse -Force
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages src/windows/src/ -Recurse -Force
 rm -r src/windows/src/TypeScriptLib
 
 echo "Copying windows files for Sqlite.Ext from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
