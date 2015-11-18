@@ -1,5 +1,5 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
-var targetAndroidApi = 21; 
+var targetAndroidApi = 23; 
 
 //--------------------------------------
 // Useful functions
@@ -110,7 +110,6 @@ shelljs.echo("include \":SalesforceHybrid\"\n").toEnd(path.join(appProjectRoot, 
 
 console.log('Moving Gradle wrapper files to application directory');
 shelljs.mv(path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
-shelljs.sed('-i', 'cdvCompileSdkVersion=android-21', 'cdvCompileSdkVersion=android-23',path.join(appProjectRoot, 'gradle.properties'));
 shelljs.mv(path.join(pluginRoot, 'gradlew.bat'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.mv(path.join(pluginRoot, 'gradle'), appProjectRoot);
@@ -123,13 +122,11 @@ shelljs.echo("allprojects {\n\trepositories {\n\t\tmavenCentral\(\)\n\t}\n}").to
 var oldBuildScriptDepTree = "buildscript {";
 var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
 shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
-var oldLibDep = "compile \"com.android.support:support-v13:23+\"";
-var newLibDep = "compile \"com.android.support:support-v13:23+\"\ncompile project(':SalesforceHybrid')";
-shelljs.sed('-i', oldLibDep, newLibDep, path.join(appProjectRoot, 'build.gradle'));
+var newLibDep = "compile \"com.google.android.gms:play-services:7.5.0\"\ncompile project(':SalesforceHybrid')";
 var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
 shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
 shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
-shelljs.sed('-i', 'debugCompile project(path: \":CordovaLib\", configuration: \"debug\")', '', path.join(appProjectRoot, 'build.gradle'));
-shelljs.sed('-i', 'releaseCompile project(path: \":CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
+shelljs.sed('-i', 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep, path.join(appProjectRoot, 'build.gradle'));
+shelljs.sed('-i', 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
