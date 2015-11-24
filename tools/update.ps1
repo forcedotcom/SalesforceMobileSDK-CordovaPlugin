@@ -127,7 +127,8 @@ echo "Copying windows files for Sqlite.Ext from $WINDOWS_SDK_FOLDER/DLLs to src/
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/SQLitePCL.Ext.dll src/windows/WinMD
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/sqlite3.dll src/windows/WinMD/x86
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/sqlite3.dll src/windows/WinMD/x64
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Salesforce.SDK.Hybrid.winmd src/windows/src/Hybrid/bin/x86/Debug
+echo "Copying Hybrid.winmd from $WINDOWS_SDK_FOLDER/DLLs to src/windows/src/Hybrid/bin/x86/Debug"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Salesforce.SDK.Hybrid.winmd src/windows/src/Hybrid/bin/x86/Debug -Recurse -Force
 
 echo "--- Clean Up ---"
 echo "Removing SalesforceSDK Library"
