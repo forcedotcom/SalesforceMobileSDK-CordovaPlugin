@@ -33,7 +33,7 @@ namespace Salesforce.SDK.Settings
     {
         Task<string> GetApplicationDisplayNameAsync();
 
-        Task<string> GenerateUserAgentHeaderAsync();
+        Task<string> GenerateUserAgentHeaderAsync(bool isHybrid, string qualifier);
 
         Task<string> ReadApplicationFileAsync(string path);
 

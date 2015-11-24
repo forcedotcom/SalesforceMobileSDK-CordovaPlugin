@@ -219,7 +219,7 @@ namespace Salesforce.SDK.Auth
             Account account = AccountManager.GetAccount();
             if (account == null)
             {
-                SDKServiceLocator.Get<IAuthHelper>().StartLoginFlow();
+                await SDKServiceLocator.Get<IAuthHelper>().StartLoginFlowAsync();
             }
             else if (AuthStorageHelper.ValidatePincode(Passcode.Password))
             {

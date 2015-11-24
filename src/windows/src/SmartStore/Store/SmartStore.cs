@@ -406,7 +406,7 @@ namespace Salesforce.SDK.SmartStore.Store
                 }
 
                 using (
-                    SQLiteStatement stmt = db.Query(soupTableName, new[] { IdCol, SoupCol }, String.Empty, String.Empty,
+                    ISQLiteStatement stmt = db.Query(soupTableName, new[] { IdCol, SoupCol }, String.Empty, String.Empty,
                         String.Empty))
                 {
                     if (stmt.DataCount > 0)
@@ -589,7 +589,7 @@ namespace Salesforce.SDK.SmartStore.Store
             {
                 var soupNames = new List<string>();
                 DBHelper db = DBHelper.GetInstance(databasePath);
-                using (SQLiteStatement stmt = db.Query(SoupNamesTable, new[] { SoupNameCol }, String.Empty, String.Empty,
+                using (ISQLiteStatement stmt = db.Query(SoupNamesTable, new[] { SoupNameCol }, String.Empty, String.Empty,
                     String.Empty))
                 {
                     if (stmt.DataCount > 0)
@@ -621,7 +621,7 @@ namespace Salesforce.SDK.SmartStore.Store
                 int numberRows = querySpec.PageSize;
                 string limit = offsetRows + "," + numberRows;
 
-                using (SQLiteStatement statement = DBHelper.GetInstance(DatabasePath)
+                using (ISQLiteStatement statement = DBHelper.GetInstance(DatabasePath)
                     .LimitRawQuery(sql, limit, querySpec.getArgs()))
                 {
                     if (statement.DataCount > 0)
@@ -664,7 +664,7 @@ namespace Salesforce.SDK.SmartStore.Store
         /// <param name="statement"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        private object GetObject(SQLiteStatement statement, int position)
+        private object GetObject(ISQLiteStatement statement, int position)
         {
             try
             {
@@ -692,7 +692,7 @@ namespace Salesforce.SDK.SmartStore.Store
         /// </summary>
         /// <param name="statement"></param>
         /// <returns></returns>
-        private JArray GetDataFromRow(SQLiteStatement statement)
+        private JArray GetDataFromRow(ISQLiteStatement statement)
         {
             var row = new JArray();
             int columnCount = statement.ColumnCount;
@@ -892,7 +892,7 @@ namespace Salesforce.SDK.SmartStore.Store
                     throw new SmartStoreException("Soup: " + soupName + " does not exist");
                 }
                 string columnName = db.GetColumnNameForPath(soupName, fieldPath);
-                using (SQLiteStatement statement = db.Query(soupTableName, new[] { IdCol }, String.Empty, String.Empty,
+                using (ISQLiteStatement statement = db.Query(soupTableName, new[] { IdCol }, String.Empty, String.Empty,
                     columnName + " = ?", fieldValue))
                 {
                     if (statement.DataCount > 1)
@@ -980,7 +980,7 @@ namespace Salesforce.SDK.SmartStore.Store
                 {
                     throw new SmartStoreException("Soup: " + soupName + " does not exist");
                 }
-                using (SQLiteStatement statement = db.Query(soupTableName, new[] { SoupCol }, String.Empty, String.Empty,
+                using (ISQLiteStatement statement = db.Query(soupTableName, new[] { SoupCol }, String.Empty, String.Empty,
                     GetSoupEntryIdsPredicate(soupEntryIds)))
                 {
                     if (statement.DataCount > 0)

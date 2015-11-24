@@ -251,7 +251,7 @@ namespace Salesforce.SDK.Pages
             loginOptions.DisplayType = LoginOptions.DefaultStoreDisplayType;
             var loginUri = new Uri(OAuth2.ComputeAuthorizationUrl(loginOptions));
             var callbackUri = new Uri(loginOptions.CallbackUrl);
-            SDKServiceLocator.Get<IAuthHelper>().ClearCookies(loginOptions);
+            await SDKServiceLocator.Get<IAuthHelper>().ClearCookiesAsync(loginOptions);
             WebAuthenticationResult webAuthenticationResult = null;
             var hasWebAuthErrors = false;
 
@@ -299,7 +299,7 @@ namespace Salesforce.SDK.Pages
                 {
                     AuthResponse authResponse = OAuth2.ParseFragment(responseUri.Fragment.Substring(1));
 
-                    SDKServiceLocator.Get<IAuthHelper>().EndLoginFlow(loginOptions, authResponse);
+                    await SDKServiceLocator.Get<IAuthHelper>().OnLoginCompleteAsync(loginOptions, authResponse);
                 }
             }
             else if (webAuthenticationResult.ResponseStatus == WebAuthenticationStatus.UserCancel)

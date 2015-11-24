@@ -24,6 +24,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 using Salesforce.SDK.App;
@@ -42,7 +44,7 @@ namespace Salesforce.SDK.Native
         {
             await SDKManager.GlobalClientManager.Logout();
 
-            CheckIfLoginNeeded();
+            await CheckIfLoginNeededAsync();
         }
 
         /// <summary>
@@ -50,21 +52,21 @@ namespace Salesforce.SDK.Native
         ///     If we are not already authenticated, this will kick off the login flow
         /// </summary>
         /// <param name="e"></param>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
-            CheckIfLoginNeeded();
+            await CheckIfLoginNeededAsync();
         }
 
-        private void CheckIfLoginNeeded()
+        private async Task CheckIfLoginNeededAsync()
         {
             Account account = AccountManager.GetAccount();
             if (account == null)
             {
-                SDKServiceLocator.Get<ILoggingService>().Log("Account object is null, calling StartLoginFlow",
+                SDKServiceLocator.Get<ILoggingService>().Log("Account object is null, calling StartLoginFlowAsync",
                                                           LoggingLevel.Verbose);
-                SDKServiceLocator.Get<IAuthHelper>().StartLoginFlow();
+                await SDKServiceLocator.Get<IAuthHelper>().StartLoginFlowAsync();
             }
         }
     }

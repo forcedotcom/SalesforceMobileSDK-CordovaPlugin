@@ -30,7 +30,7 @@ var SERVICE = "com.salesforce.oauth";
 var exec = require("com.salesforce.util.exec").exec;
 var core = require("com.salesforce.SalesforceCore").SalesforceJS;
 var oauth2 = new core.OAuth2();
-oauth2.configureOAuth("bootconfig.json", null);
+oauth2.configureOAuth("bootconfig.json", "servers.xml");
 
 var logoutInitiated = false;
 

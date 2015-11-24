@@ -29,11 +29,19 @@ namespace Salesforce.SDK.Rest
 {
     public class ApiVersionStrings
     {
-        public const string VersionNumber = "v34.0";
+        // default to v34
+        private static string _versionNumber = "v34.0";
+        public static string VersionNumber => _versionNumber;
+
         public const string ApiPrefix = "/services/data/";
-        public const string BasePath = ApiPrefix + VersionNumber;
-        public const string BaseChatterPath = BasePath + "/chatter/";
-        public const string BaseConnectPath = BasePath + "/connect/";
-        public const string BaseSobjectPath = BasePath + "/sobjects/";
+        public static readonly string BasePath = ApiPrefix + VersionNumber;
+        public static readonly string BaseChatterPath = BasePath + "/chatter/";
+        public static readonly string BaseConnectPath = BasePath + "/connect/";
+        public static readonly string BaseSobjectPath = BasePath + "/sobjects/";
+
+        public static void OverrideVersionNumber(string versionNumber)
+        {
+            _versionNumber = versionNumber;
+        }
     }
 }

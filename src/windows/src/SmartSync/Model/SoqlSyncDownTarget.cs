@@ -104,7 +104,7 @@ namespace Salesforce.SDK.SmartSync.Model
                 return null;
             }
 
-            var request = new RestRequest(HttpMethod.Get, NextRecordsUrl, null);
+            var request = new RestRequest(HttpMethod.Get, NextRecordsUrl);
             var response = await syncManager.SendRestRequest(request);
             JObject responseJson = response.AsJObject;
             var records = responseJson.ExtractValue<JArray>(Constants.Records);

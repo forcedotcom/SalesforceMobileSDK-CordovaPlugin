@@ -14,7 +14,7 @@ namespace Salesforce.SDK.Hybrid.Auth
 
         /// <summary>
         ///     Constructor for Account
-        ///     NB: the Account is not stored anywhere until we call PersistCredentialsAsync on the IAuthStorageHelper
+        ///     NB: the Account is not stored anywhere until we call PersistCurrentAccountAsync on the IAuthStorageHelper
         /// </summary>
         /// <param name="loginUrl"></param>
         /// <param name="clientId"></param>

@@ -83,7 +83,7 @@ namespace Salesforce.SDK.SmartStore.Store
             Account account = await AccountManager.CreateNewAccount(options, response);
             account.UserId = TestCredentials.UserId;
             account.UserName = TestCredentials.Username;
-            await OAuth2.RefreshAuthToken(account);
+            await OAuth2.RefreshAuthTokenAsync(account);
             _smartStore = SmartStore.GetSmartStore();
             _smartStore.ResetDatabase();
             _syncManager = SyncManager.GetInstance();
@@ -91,9 +91,7 @@ namespace Salesforce.SDK.SmartStore.Store
                 async () =>
                 {
                     account = AccountManager.GetAccount();
-                    AuthResponse authResponse =
-                        await OAuth2.RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
-                    account.AccessToken = authResponse.AccessToken;
+                    account = await OAuth2.RefreshAuthTokenAsync(account);
                     return account.AccessToken;
                 }
                 );
