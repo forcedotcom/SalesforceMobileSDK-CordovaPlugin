@@ -34,8 +34,6 @@ namespace Salesforce.SDK.Auth
 {
     public class SDKManager
     {
-
-
         /// <summary>
         /// The root application page your app should move to after login/pincode. For UI apps only.
         /// </summary>
@@ -45,8 +43,8 @@ namespace Salesforce.SDK.Auth
         /// Set RootAccountPage if you wish to provide your own account settings page.
         /// 
         /// If you do wish to do this, be warned that you should still call,
-        /// 1. PlatformAdapter.Resolve<IAuthHelper>().StartLoginFlow();
-        /// 2. PlatformAdapter.Resolve<IAuthHelper>().EndLoginFlow(loginOptions, authResponse);
+        /// 1. PlatformAdapter.Resolve<IAuthHelper>().StartLoginFlowAsync();
+        /// 2. PlatformAdapter.Resolve<IAuthHelper>().OnLoginCompleteAsync(loginOptions, authResponse);
         /// Both methods will assist in displaying and finishing the login steps, including creation of the account and pincode settings.
         /// 
         /// You can also provide this own functionality yourself. Please look at AuthHelper.cs in the SDK.Phone and SDK.Store application for example code and work from there
@@ -59,8 +57,6 @@ namespace Salesforce.SDK.Auth
         ///     The global client manager is provided for ease of accessing clients such as the RestClient.
         /// </summary>
         public static ClientManager GlobalClientManager { get; private set; }
-
-        
 
         /// <summary>
         ///     The current configuration for the application.

@@ -33,11 +33,14 @@ using Salesforce.SDK.Settings;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.ApplicationModel;
+using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using Windows.System.Profile;
 
 namespace Salesforce.SDK.App
 {
@@ -45,7 +48,8 @@ namespace Salesforce.SDK.App
     {
         private static IEncryptionService EncryptionService => SDKServiceLocator.Get<IEncryptionService>();
         private static ILoggingService LoggingService => SDKServiceLocator.Get<ILoggingService>();
-        private const string UserAgentHeaderFormat = "SalesforceMobileSDK/3.1 ({0}/{1} {2}) {3}";
+        private const string UserAgentHeaderFormat = "SalesforceMobileSDK/{0} {1} ({2}) {3}/{4} {5} uid_{6}";
+        private const string SdkVersion = "4.0.0";
 
         /// <summary>
         ///     Settings key for config.
@@ -66,16 +70,36 @@ namespace Salesforce.SDK.App
             return (file != null);
         }
 
-        public Task<string> GenerateUserAgentHeaderAsync()
+        public Task<string> GenerateUserAgentHeaderAsync(bool isHybrid, string qualifier)
         {
-            var appName = GetApplicationDisplayNameAsync();
+            var appName = GetApplicationDisplayNameAsync().Result;
+            var deviceInfo = AnalyticsInfo.VersionInfo.DeviceFamily + "/" + GetDeviceFamilyVersion(AnalyticsInfo.VersionInfo.DeviceFamilyVersion);
+            var deviceModel = new EasClientDeviceInformation().SystemProductName;
+            var deviceId = new EasClientDeviceInformation().Id;
             PackageVersion packageVersion = Package.Current.Id.Version;
             string packageVersionString = packageVersion.Major + "." + packageVersion.Minor + "." +
                                           packageVersion.Build;
-            var UserAgentHeader = String.Format(UserAgentHeaderFormat, appName,
-            packageVersionString, "native", "");
-            return Task.FromResult<string>(UserAgentHeader);
+            var appType = new StringBuilder(isHybrid ? "Hybrid" : "Native");
+            if (!String.IsNullOrWhiteSpace(qualifier))
+            {
+                appType.Append(qualifier);
+            }
+            var UserAgentHeader = String.Format(UserAgentHeaderFormat, SdkVersion, deviceInfo, deviceModel,
+            appName, packageVersionString, appType, deviceId);
+            return Task.FromResult(UserAgentHeader);
         }
+
+        private string GetDeviceFamilyVersion(string version)
+        {
+            //Voodoo magic to parse OS version and build from DeviceFamilyVersion
+            ulong v = ulong.Parse(version);
+            ulong v1 = (v & 0xFFFF000000000000L) >> 48;
+            ulong v2 = (v & 0x0000FFFF00000000L) >> 32;
+            ulong v3 = (v & 0x00000000FFFF0000L) >> 16;
+            ulong v4 = v & 0x000000000000FFFFL;
+            return $"{v1}.{v2}.{v3}.{v4}";
+        }
+
 
         public Task<string> GetApplicationDisplayNameAsync()
         {

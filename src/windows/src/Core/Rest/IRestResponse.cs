@@ -36,6 +36,11 @@ namespace Salesforce.SDK.Rest
         /// <summary>
         /// True if REST request was successfully executed
         /// </summary>
+        bool HasResponse { get; }
+
+        /// <summary>
+        /// True if REST request was successfully executed
+        /// </summary>
         bool Success { get; }
 
         /// <summary>

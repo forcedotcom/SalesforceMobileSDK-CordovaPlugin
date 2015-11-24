@@ -67,7 +67,7 @@ namespace Salesforce.SDK.Rest
     public class RestClientTest
     {
         private const string ENTITY_NAME_PREFIX = "RestClientTest";
-        private const string BAD_TOKEN = "bad-token";
+        private const string BadToken = "bad-token";
 
         private string _accessToken;
         private IRestClient _restClient;
@@ -81,13 +81,15 @@ namespace Salesforce.SDK.Rest
         }
 
         [TestInitialize]
-        public void SetUp()
+        public async void SetUp()
         {
-            var loginOptions = new LoginOptions(TestCredentials.LOGIN_URL, TestCredentials.CLIENT_ID, null, null);
-            _accessToken =
-                OAuth2.RefreshAuthTokenRequest(loginOptions, TestCredentials.REFRESH_TOKEN).Result.AccessToken;
-            _restClient = new RestClient(TestCredentials.INSTANCE_SERVER, _accessToken, null);
-            _unauthenticatedRestClient = new RestClient(TestCredentials.INSTANCE_SERVER);
+            var account = TestCredentials.TestAccount;
+
+            account = await OAuth2.RefreshAuthTokenAsync(account);
+            _accessToken = account.AccessToken;
+
+            _restClient = new RestClient(TestCredentials.InstanceUrl, _accessToken, null);
+            _unauthenticatedRestClient = new RestClient(TestCredentials.InstanceUrl);
         }
 
         [TestCleanup]
@@ -106,10 +108,10 @@ namespace Salesforce.SDK.Rest
         [TestMethod]
         public async Task TestCallWithBadAuthToken()
         {
-            var unauthenticatedRestClient = new RestClient(TestCredentials.INSTANCE_SERVER, BAD_TOKEN, null);
+            var unauthenticatedRestClient = new RestClient(TestCredentials.InstanceServer, BadToken, null);
             var response =
                 await
-                    unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.API_VERSION));
+                    unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.ApiVersion));
             Assert.IsFalse(response.Success, "Success not expected");
             Assert.IsNotNull(response.Error, "Expected error");
             Assert.AreEqual(HttpStatusCode.Unauthorized.ToString().ToLower(), response.StatusCode.ToString().ToLower(), "Expected 401");
@@ -118,13 +120,13 @@ namespace Salesforce.SDK.Rest
         [TestMethod]
         public async Task TestCallWithBadAuthTokenAndTokenProvider()
         {
-            var unauthenticatedRestClient = new RestClient(TestCredentials.INSTANCE_SERVER, BAD_TOKEN,
+            var unauthenticatedRestClient = new RestClient(TestCredentials.InstanceServer, BadToken,
                 () => Task.Factory.StartNew(() => _accessToken));
-            Assert.AreEqual(BAD_TOKEN, unauthenticatedRestClient.AccessToken,
+            Assert.AreEqual(BadToken, unauthenticatedRestClient.AccessToken,
                 "RestClient should be using the bad token initially");
             var response =
                 await
-                    unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.API_VERSION));
+                    unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.ApiVersion));
             Assert.IsTrue(response.Success, "Success expected");
             Assert.IsNull(response.Error, "Expected error");
             Assert.AreEqual(HttpStatusCode.OK.ToString().ToLower(), response.StatusCode.ToString().ToLower(), "Expected 200");
@@ -144,7 +146,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestGetResources()
         {
             var response =
-                await _restClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.API_VERSION));
+                await _restClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.ApiVersion));
             CheckResponse(response, HttpStatusCode.OK, false);
             CheckKeys(response.AsJObject, "sobjects", "search", "recent");
         }
@@ -153,7 +155,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestGetResourcesWithUnAuthenticatedClient()
         {
             var response =
-                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.API_VERSION));
+                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForResources(TestCredentials.ApiVersion));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
 
@@ -161,7 +163,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestDescribeGlobal()
         {
             var response =
-                await _restClient.SendAsync(RestRequest.GetRequestForDescribeGlobal(TestCredentials.API_VERSION));
+                await _restClient.SendAsync(RestRequest.GetRequestForDescribeGlobal(TestCredentials.ApiVersion));
             CheckResponse(response, HttpStatusCode.OK, false);
             JObject jsonResponse = response.AsJObject;
             CheckKeys(jsonResponse, "encoding", "maxBatchSize", "sobjects");
@@ -172,7 +174,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestDescribeGlobalWithUnAuthenticatedClient()
         {
             var response =
-                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForDescribeGlobal(TestCredentials.API_VERSION));
+                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForDescribeGlobal(TestCredentials.ApiVersion));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
 
@@ -180,7 +182,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestMetadata()
         {
             var response =
-                await _restClient.SendAsync(RestRequest.GetRequestForMetadata(TestCredentials.API_VERSION, "account"));
+                await _restClient.SendAsync(RestRequest.GetRequestForMetadata(TestCredentials.ApiVersion, "account"));
             CheckResponse(response, HttpStatusCode.OK, false);
             JObject jsonResponse = response.AsJObject;
             CheckKeys(jsonResponse, "objectDescribe", "recentItems");
@@ -192,7 +194,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestMetadataWithUnAuthenticatedClient()
         {
             var response =
-                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForMetadata(TestCredentials.API_VERSION, "account"));
+                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForMetadata(TestCredentials.ApiVersion, "account"));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
 
@@ -200,7 +202,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestDescribe()
         {
             var response =
-                await _restClient.SendAsync(RestRequest.GetRequestForDescribe(TestCredentials.API_VERSION, "account"));
+                await _restClient.SendAsync(RestRequest.GetRequestForDescribe(TestCredentials.ApiVersion, "account"));
             CheckResponse(response, HttpStatusCode.OK, false);
             JObject jsonResponse = response.AsJObject;
             CheckKeys(jsonResponse, "name", "fields", "urls", "label");
@@ -211,7 +213,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestDescribeWithUnAuthenticatedClient()
         {
             var response =
-                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForDescribe(TestCredentials.API_VERSION, "account"));
+                await _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForDescribe(TestCredentials.ApiVersion, "account"));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
 
@@ -221,7 +223,7 @@ namespace Salesforce.SDK.Rest
             var fields = new Dictionary<string, object> {{"name", generateAccountName()}};
             var response =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForCreate(TestCredentials.API_VERSION, "account", fields));
+                    _restClient.SendAsync(RestRequest.GetRequestForCreate(TestCredentials.ApiVersion, "account", fields));
             JObject jsonResponse = response.AsJObject;
             CheckKeys(jsonResponse, "id", "errors", "success");
             Assert.IsTrue((bool) jsonResponse["success"], "Create failed");
@@ -233,7 +235,7 @@ namespace Salesforce.SDK.Rest
             var fields = new Dictionary<string, object> { { "name", generateAccountName() } };
             var response =
                 await
-                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForCreate(TestCredentials.API_VERSION, "account", fields));
+                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForCreate(TestCredentials.ApiVersion, "account", fields));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
 
@@ -244,7 +246,7 @@ namespace Salesforce.SDK.Rest
             IdName newAccountIdName = await CreateAccount();
             var response =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.API_VERSION, "account",
+                    _restClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.ApiVersion, "account",
                         newAccountIdName.Id, fields));
             CheckResponse(response, HttpStatusCode.OK, false);
             JObject jsonResponse = response.AsJObject;
@@ -259,7 +261,7 @@ namespace Salesforce.SDK.Rest
             IdName newAccountIdName = await CreateAccount();
             var response =
                 await
-                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.API_VERSION, "account",
+                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.ApiVersion, "account",
                         newAccountIdName.Id, fields));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
@@ -276,14 +278,14 @@ namespace Salesforce.SDK.Rest
 
             var updateResponse =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForUpdate(TestCredentials.API_VERSION, "account",
+                    _restClient.SendAsync(RestRequest.GetRequestForUpdate(TestCredentials.ApiVersion, "account",
                         newAccountIdName.Id, fields));
             Assert.IsTrue(updateResponse.Success, "Update failed");
 
             // Retrieve - expect updated name
             var response =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.API_VERSION, "account",
+                    _restClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.ApiVersion, "account",
                         newAccountIdName.Id, new[] {"name"}));
             Assert.AreEqual(updatedAccountName, response.AsJObject["Name"], "Wrong row returned");
         }
@@ -298,14 +300,14 @@ namespace Salesforce.SDK.Rest
             // Delete
             var deleteResponse =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForDelete(TestCredentials.API_VERSION, "account",
+                    _restClient.SendAsync(RestRequest.GetRequestForDelete(TestCredentials.ApiVersion, "account",
                         newAccountIdName.Id));
             Assert.IsTrue(deleteResponse.Success, "Delete failed");
 
             // Retrieve - expect 404
             var response =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.API_VERSION, "account",
+                    _restClient.SendAsync(RestRequest.GetRequestForRetrieve(TestCredentials.ApiVersion, "account",
                         newAccountIdName.Id, new[] {"name"}));
             Assert.AreEqual(HttpStatusCode.NotFound.ToString().ToLower(), response.StatusCode.ToString().ToLower(), "404 was expected");
         }
@@ -317,7 +319,7 @@ namespace Salesforce.SDK.Rest
             IdName newAccountIdName = await CreateAccount();
             var response =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForQuery(TestCredentials.API_VERSION,
+                    _restClient.SendAsync(RestRequest.GetRequestForQuery(TestCredentials.ApiVersion,
                         "select name from account where id = '" + newAccountIdName.Id + "'"));
             CheckResponse(response, HttpStatusCode.OK, false);
             JObject jsonResponse = response.AsJObject;
@@ -332,7 +334,7 @@ namespace Salesforce.SDK.Rest
             IdName newAccountIdName = await CreateAccount();
             var response =
                 await
-                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForQuery(TestCredentials.API_VERSION,
+                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForQuery(TestCredentials.ApiVersion,
                         "select name from account where id = '" + newAccountIdName.Id + "'"));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
@@ -343,7 +345,7 @@ namespace Salesforce.SDK.Rest
             IdName newAccountIdName = await CreateAccount();
             var response =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForSearch(TestCredentials.API_VERSION,
+                    _restClient.SendAsync(RestRequest.GetRequestForSearch(TestCredentials.ApiVersion,
                         "find {" + newAccountIdName.Name + "}"));
             CheckResponse(response, HttpStatusCode.OK, true);
             JArray matchingRows = response.AsJArray;
@@ -359,7 +361,7 @@ namespace Salesforce.SDK.Rest
             IdName newAccountIdName = await CreateAccount();
             var response =
                 await
-                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForSearch(TestCredentials.API_VERSION,
+                    _unauthenticatedRestClient.SendAsync(RestRequest.GetRequestForSearch(TestCredentials.ApiVersion,
                         "find {" + newAccountIdName.Name + "}"));
             Assert.AreEqual(response.StatusCode.ToString().ToLower(), HttpStatusCode.Unauthorized.ToString().ToLower());
         }
@@ -375,7 +377,7 @@ namespace Salesforce.SDK.Rest
             var fields = new Dictionary<string, object> {{"name", newAccountName}};
             var response =
                 await
-                    _restClient.SendAsync(RestRequest.GetRequestForCreate(TestCredentials.API_VERSION, "account", fields));
+                    _restClient.SendAsync(RestRequest.GetRequestForCreate(TestCredentials.ApiVersion, "account", fields));
             var newAccountId = (string) response.AsJObject["id"];
             return new IdName(newAccountId, newAccountName);
         }
@@ -386,7 +388,7 @@ namespace Salesforce.SDK.Rest
             {
                 var searchResponse =
                     await
-                        _restClient.SendAsync(RestRequest.GetRequestForSearch(TestCredentials.API_VERSION,
+                        _restClient.SendAsync(RestRequest.GetRequestForSearch(TestCredentials.ApiVersion,
                             "find {" + ENTITY_NAME_PREFIX + "}"));
                 JArray matchingRows = searchResponse.AsJArray;
                 for (int i = 0; i < matchingRows.Count; i++)
@@ -396,7 +398,7 @@ namespace Salesforce.SDK.Rest
                     var matchingRowId = (string) matchingRow["Id"];
                     Debug.WriteLine("Trying to delete {0}", matchingRowId);
                     await
-                        _restClient.SendAsync(RestRequest.GetRequestForDelete(TestCredentials.API_VERSION,
+                        _restClient.SendAsync(RestRequest.GetRequestForDelete(TestCredentials.ApiVersion,
                             matchingRowType, matchingRowId));
                     Debug.WriteLine("Successfully deleted {0}", matchingRowId);
                 }

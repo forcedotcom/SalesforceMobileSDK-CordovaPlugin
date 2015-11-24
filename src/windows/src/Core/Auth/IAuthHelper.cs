@@ -31,30 +31,82 @@ using System.Threading.Tasks;
 namespace Salesforce.SDK.Auth
 {
     /// <summary>
-    ///     Interface for auth related operations that are implemented in the platform specific assemblies
+    /// Interface for auth related operations that are implemented in the platform specific assemblies
     /// </summary>
     public interface IAuthHelper
     {
         /// <summary>
-        ///     Kicks off ogin flow
+        /// Shows the login UI
         /// </summary>
-        void StartLoginFlow();
+        Task StartLoginFlowAsync();
 
         /// <summary>
-        ///     Called once the login flow has completed, creates the account
+        /// This should be called when login is complete. A new account is created
+        /// in the AccountManager and the pincode screen is shown if needeed
         /// </summary>
         /// <param name="loginOptions"></param>
         /// <param name="authResponse"></param>
-        void EndLoginFlow(LoginOptions loginOptions, AuthResponse authResponse);
+        Task OnLoginCompleteAsync(LoginOptions loginOptions, AuthResponse authResponse);
 
-        Task PersistCredentialsAsync(Account account);
+        /// <summary>
+        /// Refresh webview cookies
+        /// </summary>
         void RefreshCookies();
-        void ClearCookies(LoginOptions options);
-        void DeletePersistedCredentials(string userName, string userId);
-        Dictionary<string, Account> RetrievePersistedCredentials();
+
+        /// <summary>
+        /// Clears webview cookies
+        /// </summary>
+        /// <param name="options"></param>
+        Task ClearCookiesAsync(LoginOptions options);
+
+        /// <summary>
+        /// Save the current user's credentials to secure storage
+        /// 
+        /// NOTE This should only be called by the AccountManager all login/logout
+        /// functions should be done through the AccountManager
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        Task PersistCurrentAccountAsync(Account account);
+
+        /// <summary>
+        /// Delete the specified user's credentials from secure storage
+        /// 
+        /// NOTE This should only be called by the AccountManager all login/logout
+        /// functions should be done through the AccountManager
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="userId"></param>
+        void DeletePersistedAccount(string userName, string userId);
+
+        /// <summary>
+        /// Delete all persisted accounts
+        /// 
+        /// NOTE This should only be called by the AccountManager all login/logout
+        /// functions should be done through the AccountManager
+        /// </summary>
+        void DeleteAllPersistedAccounts();
+
+        /// <summary>
+        /// Retrieves all accounts stored in secure storage
+        /// </summary>
+        /// <returns></returns>
+        Dictionary<string, Account> RetrieveAllPersistedAccounts();
+
+        /// <summary>
+        /// Retrieves the currently logged in user from secure storage
+        /// </summary>
+        /// <returns></returns>
         Account RetrieveCurrentAccount();
+
+        /// <summary>
+        /// Saves the pin timer
+        /// </summary>
         void SavePinTimer();
-        void DeletePersistedCredentials();
+
+        /// <summary>
+        /// Clear the pincode timer
+        /// </summary>
         void WipePincode();
     }
 }

@@ -29,6 +29,7 @@ using System;
 using System.Threading.Tasks;
 using Salesforce.SDK.Auth;
 using Salesforce.SDK.Core;
+using Salesforce.SDK.Exceptions;
 using Salesforce.SDK.Logging;
 
 namespace Salesforce.SDK.Rest
@@ -40,6 +41,7 @@ namespace Salesforce.SDK.Rest
     /// </summary>
     public class ClientManager
     {
+        private static ILoggingService LoggingService => SDKServiceLocator.Get<ILoggingService>();
         private static IAuthHelper AuthHelper => SDKServiceLocator.Get<IAuthHelper>();
         /// <summary>
         ///     Logs currently authenticated user out by deleting locally persisted credentials and invoking the server to revoke
@@ -53,8 +55,8 @@ namespace Salesforce.SDK.Rest
             {
                 LoginOptions options = account.GetLoginOptions();
                 AccountManager.DeleteAccount();
-                AuthHelper.ClearCookies(options);
-                bool loggedOut = await OAuth2.RevokeAuthToken(options, account.RefreshToken);
+                await AuthHelper.ClearCookiesAsync(options);
+                bool loggedOut = await OAuth2.RevokeAuthTokenAsync(options, account.RefreshToken);
                 if (loggedOut)
                 {
                     GetRestClient();
@@ -78,11 +80,25 @@ namespace Salesforce.SDK.Rest
                     async () =>
                     {
                         account = AccountManager.GetAccount();
-                        AuthResponse authResponse =
-                            await OAuth2.RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
-                        account.AccessToken = authResponse.AccessToken;
 
-                        await AuthHelper.PersistCredentialsAsync(account);
+                        try
+                        {
+                            account = await OAuth2.RefreshAuthTokenAsync(account);
+                        }
+                        catch (DeviceOfflineException)
+                        {
+                            LoggingService.Log("Could not refresh the token because device is offline", LoggingLevel.Warning);
+                            return null;
+                        }
+                        catch (OAuthException ex)
+                        {
+                            LoggingService.Log("Failed to refresh the token, logging the user out", LoggingLevel.Warning);
+                            LoggingService.Log(ex, LoggingLevel.Error);
+
+                            // we failed to refresh the token, we have to log the user out
+                            await Logout();
+                        }
+
                         return account.AccessToken;
                     }
                     );
@@ -101,7 +117,7 @@ namespace Salesforce.SDK.Rest
             {
                 try
                 {
-                    AuthHelper.StartLoginFlow();
+                    AuthHelper.StartLoginFlowAsync();
                 }
                 catch (InvalidOperationException)
                 {

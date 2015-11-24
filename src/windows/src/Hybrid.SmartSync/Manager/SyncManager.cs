@@ -33,8 +33,10 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Salesforce.SDK.Core;
 using Salesforce.SDK.Hybrid.Auth;
 using Salesforce.SDK.Rest;
+using Salesforce.SDK.Settings;
 using Salesforce.SDK.SmartSync.Model;
 using Salesforce.SDK.SmartSync.Util;
 
@@ -43,7 +45,11 @@ namespace Salesforce.SDK.Hybrid.SmartSync
     public sealed class SyncManager
     {
         private SDK.SmartSync.Manager.SyncManager _syncManager = SDK.SmartSync.Manager.SyncManager.GetInstance();
-        
+
+        private static IApplicationInformationService ApplicationInformationService
+            => SDKServiceLocator.Get<IApplicationInformationService>();
+
+        private const string _smartSync = "SmartSync";
         public static SyncManager GetInstance()
         {
             return GetInstance(null, null);
@@ -124,11 +130,13 @@ namespace Salesforce.SDK.Hybrid.SmartSync
 
         public IAsyncOperation<Rest.RestResponse> SendRestRequest(Rest.RestRequest request)
         {
-            var restRequest = JsonConvert.SerializeObject(request);
             return Task.Run(async () =>
             {
-                var response =
-                    await _syncManager.SendRestRequest(JsonConvert.DeserializeObject<RestRequest>(restRequest));
+                var restRequest = JsonConvert.SerializeObject(request);
+                var req = JsonConvert.DeserializeObject<RestRequest>(restRequest);
+                var userAgent = await ApplicationInformationService.GenerateUserAgentHeaderAsync(true, _smartSync);
+                req.AdditionalHeaders?.Add("User-Agent", userAgent);
+                var response = await _syncManager.SendRestRequest(req);
                 var restResponse = JsonConvert.SerializeObject(response);
                 return JsonConvert.DeserializeObject<Rest.RestResponse>(restResponse);
             }).AsAsyncOperation();

@@ -20,6 +20,7 @@ namespace Salesforce.SDK.Hybrid.Auth
         private HybridAccountManager()
         {
             RegisterServices();
+            SDKServiceLocator.Get<IApplicationInformationService>().GenerateUserAgentHeaderAsync(true, String.Empty);
         }
 
         private static void RegisterServices()
