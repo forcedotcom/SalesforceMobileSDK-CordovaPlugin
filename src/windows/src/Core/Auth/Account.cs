@@ -37,8 +37,8 @@ namespace Salesforce.SDK.Auth
         public const string InternalCommunityId = "000000000000000000";
 
         /// <summary>
-        ///     Constructor for Account
-        ///     NB: the Account is not stored anywhere until we call PersistCredentialsAsync on the IAuthStorageHelper
+        ///  Constructor for Account
+        ///  NB: the Account is not stored anywhere until we call PersistCurrentAccountAsync on the IAuthStorageHelper
         /// </summary>
         /// <param name="loginUrl"></param>
         /// <param name="clientId"></param>
@@ -74,10 +74,11 @@ namespace Salesforce.SDK.Auth
         public string CommunityId { get; set; }
         public string CommunityUrl { get; set; }
 
+        public string OrganizationId { get; set; }
+
         [JsonProperty]
         public MobilePolicy Policy { get; internal set; }
-
-
+        
         /// <summary>
         ///     Serialize Account object as a JSON string
         /// </summary>

@@ -37,12 +37,32 @@ using Salesforce.SDK.Rest;
 namespace Salesforce.SDK.Auth
 {
     /// <summary>
-    ///     Class providing (static) methods for creating/deleting or retrieving an Account
+    /// Class providing (static) methods for creating/deleting or retrieving an Account
     /// </summary>
     public class AccountManager
     {
         private static IAuthHelper AuthStorageHelper => SDKServiceLocator.Get<IAuthHelper>();
         private static ILoggingService LoggingService => SDKServiceLocator.Get<ILoggingService>();
+
+        private static Account _loggedInAccount;
+        private static Account LoggedInAccount
+        {
+            set
+            {
+                var oldAccount = _loggedInAccount;
+                _loggedInAccount = value;
+
+                // Raise the event in AccountManager if this is a different account.
+                // This check is necessary as sometimes CurrentAccount.Set is called
+                // even if the same account was already set, so use the unique combo of
+                // InstanceUrl and UserId to tell if the account has actually changed (login/logout).
+                if (oldAccount?.OrganizationId != value?.OrganizationId && oldAccount?.UserId != value?.UserId)
+                {
+                    RaiseAuthenticatedAccountChangedEvent(oldAccount, value);
+                }
+            }
+            get { return _loggedInAccount; }
+        }
 
         /// <summary>
         /// This event notifies consumers that the authenticated account has changed.
@@ -55,71 +75,90 @@ namespace Salesforce.SDK.Auth
         /// an account changes but the event belongs in the AccountManager class, so this method is necessary
         /// to enable AuthStorageHelper to raise that event.
         /// </summary>
-        public static void RaiseAuthenticatedAccountChangedEvent(Account oldAccount, Account newAccount)
+        private static void RaiseAuthenticatedAccountChangedEvent(Account oldAccount, Account newAccount)
         {
             AuthenticatedAccountChanged?.Invoke(new AuthenticatedAccountChangedEventArgs(oldAccount, newAccount));
         }
 
         /// <summary>
-        ///     Delete Account for currently authenticated user
+        /// Delete Account (log out) for currently authenticated user
         /// </summary>
         public static void DeleteAccount()
         {
-            Account account = GetAccount();
-            AuthStorageHelper.DeletePersistedCredentials(account.UserName, account.UserId);
+            var account = GetAccount();
+
+            if (account == null)
+            {
+                return;
+            }
+
+            AuthStorageHelper.DeletePersistedAccount(account.UserName, account.UserId);
+
+            LoggedInAccount = null;
         }
 
         public static Dictionary<string, Account> GetAccounts()
         {
-            return AuthStorageHelper.RetrievePersistedCredentials();
+            return AuthStorageHelper.RetrieveAllPersistedAccounts();
         }
 
         /// <summary>
-        ///     Return Account for currently authenticated user
+        ///  Return Account for currently authenticated user
         /// </summary>
         /// <returns></returns>
         public static Account GetAccount()
         {
-            return AuthStorageHelper.RetrieveCurrentAccount();
+            return LoggedInAccount ?? (LoggedInAccount = AuthStorageHelper.RetrieveCurrentAccount());
         }
 
-        public static async Task<bool> SwitchToAccount(Account account)
+        public static async Task<bool> SwitchToAccount(Account newAccount)
         {
-            if (account != null && account.UserId != null)
+            var oldAccount = LoggedInAccount;
+
+            if (newAccount?.UserId != null)
             {
+                // save current user pin timer
                 AuthStorageHelper.SavePinTimer();
-                await AuthStorageHelper.PersistCredentialsAsync(account);
+
+                await AuthStorageHelper.PersistCurrentAccountAsync(newAccount);
+
                 var client = SDKManager.GlobalClientManager.PeekRestClient();
                 if (client != null)
                 {
-                    AuthStorageHelper.ClearCookies(account.GetLoginOptions());
-                    IdentityResponse identity = await OAuth2.CallIdentityService(account.IdentityUrl, client);
+                    await AuthStorageHelper.ClearCookiesAsync(newAccount.GetLoginOptions());
+                    var identity = await OAuth2.CallIdentityServiceAsync(newAccount.IdentityUrl, client);
                     if (identity != null)
                     {
-                        account.UserId = identity.UserId;
-                        account.UserName = identity.UserName;
-                        account.Policy = identity.MobilePolicy;
-                        await AuthStorageHelper.PersistCredentialsAsync(account);
+                        newAccount.UserId = identity.UserId;
+                        newAccount.UserName = identity.UserName;
+                        newAccount.Policy = identity.MobilePolicy;
+                        await AuthStorageHelper.PersistCurrentAccountAsync(newAccount);
                     }
                     AuthStorageHelper.RefreshCookies();
                     LoggingService.Log("switched accounts, result = true", LoggingLevel.Verbose);
                     return true;
                 }
+
+                // log new user in
+                LoggedInAccount = newAccount;
+
+                RaiseAuthenticatedAccountChangedEvent(oldAccount, newAccount);
             }
+
             LoggingService.Log("switched accounts, result = false", LoggingLevel.Verbose);
             return false;
         }
 
         public static void WipeAccounts()
         {
-            AuthStorageHelper.DeletePersistedCredentials();
+            AuthStorageHelper.DeleteAllPersistedAccounts();
             AuthStorageHelper.WipePincode();
             SwitchAccount();
         }
 
         public static void SwitchAccount()
         {
-            AuthStorageHelper.StartLoginFlow();
+            AuthStorageHelper.StartLoginFlowAsync();
         }
 
         /// <summary>
@@ -130,17 +169,27 @@ namespace Salesforce.SDK.Auth
         public static async Task<Account> CreateNewAccount(LoginOptions loginOptions, AuthResponse authResponse)
         {
             LoggingService.Log("Create account object", LoggingLevel.Verbose);
-            var account = new Account(loginOptions.LoginUrl, loginOptions.ClientId, loginOptions.CallbackUrl,
+
+            var account = new Account(
+                loginOptions.LoginUrl, 
+                loginOptions.ClientId, 
+                loginOptions.CallbackUrl,
                 loginOptions.Scopes,
-                authResponse.InstanceUrl, authResponse.IdentityUrl, authResponse.AccessToken, authResponse.RefreshToken);
-            account.CommunityId = authResponse.CommunityId;
-            account.CommunityUrl = authResponse.CommunityUrl;
+                authResponse.InstanceUrl, 
+                authResponse.IdentityUrl, 
+                authResponse.AccessToken, 
+                authResponse.RefreshToken)
+            {
+                CommunityId = authResponse.CommunityId,
+                CommunityUrl = authResponse.CommunityUrl
+            };
+
             var cm = new ClientManager();
             cm.PeekRestClient();
             IdentityResponse identity = null;
             try
             {
-                identity = await OAuth2.CallIdentityService(authResponse.IdentityUrl, authResponse.AccessToken);
+                identity = await OAuth2.CallIdentityServiceAsync(authResponse.IdentityUrl, authResponse.AccessToken);
             }
             catch (JsonException ex)
             {
@@ -149,12 +198,17 @@ namespace Salesforce.SDK.Auth
                 LoggingService.Log(ex, LoggingLevel.Critical);
                 Debug.WriteLine("Error retrieving account identity");
             }
+
             if (identity != null)
             {
                 account.UserId = identity.UserId;
                 account.UserName = identity.UserName;
                 account.Policy = identity.MobilePolicy;
-                await AuthStorageHelper.PersistCredentialsAsync(account);
+                account.OrganizationId = identity.OrganizationId;
+
+                await AuthStorageHelper.PersistCurrentAccountAsync(account);
+
+                LoggedInAccount = account;
             }
             LoggingService.Log("Finished creating account", LoggingLevel.Verbose);
             return account;

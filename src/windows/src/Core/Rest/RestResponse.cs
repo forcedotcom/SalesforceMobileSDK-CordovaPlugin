@@ -45,6 +45,8 @@ namespace Salesforce.SDK.Rest
             _call = call;
         }
 
+        public bool HasResponse { get { return _call.HasResponse; } }
+
         public bool Success
         {
             get { return _call.Success; }

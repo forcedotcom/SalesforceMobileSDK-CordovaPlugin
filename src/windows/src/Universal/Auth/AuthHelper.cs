@@ -61,7 +61,7 @@ namespace Salesforce.SDK.Auth
         /// <summary>
         ///     Bring up the WebAuthenticationBroker
         /// </summary>
-        public async void StartLoginFlow()
+        public async Task StartLoginFlowAsync()
         {
             var frame = Window.Current.Content as Frame;
             if (frame != null)
@@ -73,14 +73,15 @@ namespace Salesforce.SDK.Auth
         }
 
         /// <summary>
-        ///     Persist oauth credentials via the AccountManager
+        /// This should be called when login is complete. A new account is created
+        /// in the AccountManager and the pincode screen is shown if needeed
         /// </summary>
         /// <param name="loginOptions"></param>
         /// <param name="authResponse"></param>
-        public async void EndLoginFlow(LoginOptions loginOptions, AuthResponse authResponse)
+        public async Task OnLoginCompleteAsync(LoginOptions loginOptions, AuthResponse authResponse)
         {
             var frame = Window.Current.Content as Frame;
-            Account account = await AccountManager.CreateNewAccount(loginOptions, authResponse);
+            var account = await AccountManager.CreateNewAccount(loginOptions, authResponse);
             if (account.Policy != null && (!PincodeManager.IsPincodeSet() || AuthStorageHelper.IsPincodeRequired()))
             {
                 PincodeManager.LaunchPincodeScreen();
@@ -88,13 +89,14 @@ namespace Salesforce.SDK.Auth
             else
             {
                 SDKServiceLocator.Get<ILoggingService>().Log($"Navigating to {SDKManager.RootApplicationPage}", LoggingLevel.Information);
-                frame.Navigate(SDKManager.RootApplicationPage);
+                frame?.Navigate(SDKManager.RootApplicationPage);
             }
         }
 
-        public async Task PersistCredentialsAsync(Account account)
+        public Task PersistCurrentAccountAsync(Account account)
         {
-            AuthStorageHelper.GetAuthStorageHelper().PersistCredentials(account);
+            AuthStorageHelper.GetAuthStorageHelper().PersistCurrentCredentials(account);
+            return Task.FromResult(0);
         }
 
         public void RefreshCookies()
@@ -121,7 +123,7 @@ namespace Salesforce.SDK.Auth
             LoggingService.Log("finished refreshing cookies", LoggingLevel.Verbose);
         }
 
-        public async void ClearCookies(LoginOptions options)
+        public async Task ClearCookiesAsync(LoginOptions options)
         {
             if (Window.Current == null)
                 return;
@@ -153,12 +155,12 @@ namespace Salesforce.SDK.Auth
             }
         }
 
-        public void DeletePersistedCredentials(string userName, string userId)
+        public void DeletePersistedAccount(string userName, string userId)
         {
             AuthStorageHelper.GetAuthStorageHelper().DeletePersistedCredentials(userName, userId);
         }
 
-        public Dictionary<string, Account> RetrievePersistedCredentials()
+        public Dictionary<string, Account> RetrieveAllPersistedAccounts()
         {
             return AuthStorageHelper.GetAuthStorageHelper().RetrievePersistedCredentials();
         }
@@ -173,7 +175,7 @@ namespace Salesforce.SDK.Auth
             AuthStorageHelper.SavePinTimer();
         }
 
-        public void DeletePersistedCredentials()
+        public void DeleteAllPersistedAccounts()
         {
             AuthStorageHelper.GetAuthStorageHelper().DeletePersistedCredentials();
         }

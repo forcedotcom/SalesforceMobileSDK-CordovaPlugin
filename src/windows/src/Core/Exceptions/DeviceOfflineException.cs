@@ -24,27 +24,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+using System;
 
-using System.Threading.Tasks;
-
-namespace Salesforce.SDK.Settings
+namespace Salesforce.SDK.Exceptions
 {
-    public interface IApplicationInformationService
+    public class DeviceOfflineException : Exception
     {
-        Task<string> GetApplicationDisplayNameAsync();
+        public DeviceOfflineException() : base() { }
 
-        Task<string> GenerateUserAgentHeaderAsync(bool isHybrid, string qualifier);
+        public DeviceOfflineException(string msg) : base(msg) { }
 
-        Task<string> ReadApplicationFileAsync(string path);
-
-        Task SaveConfigurationSettingsAsync(string config);
-
-        Task<string> GetConfigurationSettingsAsync();
-
-        Task ClearConfigurationSettingsAsync();
-
-        Task<bool> DoesFileExistAsync(string path);
-
-        string GetApplicationLocalFolderPath();
+        public DeviceOfflineException(string msg, Exception innerException) : base(msg, innerException) { }
     }
 }

@@ -25,18 +25,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using Salesforce.SDK.Auth;
+using Salesforce.SDK.Rest;
+
 namespace Salesforce.SDK
 {
     public class TestCredentials
     {
-        public const string API_VERSION = "v31.0";
-        public const string LOGIN_URL = "https://test.salesforce.com";
-        public const string INSTANCE_SERVER = "https://cs1.salesforce.com";
+        public const String CallbackUrl = "test://sfdc";
+        public static readonly string[] Scopes = { "web" };
+        public const String AccessToken = "test_auth_token";
+        public const String InstanceServer = "https://cs1.salesforce.com";
+        public const String ApiVersion = ApiVersionStrings.VersionNumber;
+        public const String AccountType = "com.salesforce.windowssdk.smartsynctest.login";
+        public const String OrgId = "00DS0000000HDptMAG";
+        public const String Username = "sdktest@cs1.com";
+        public const String AccountName = "sdktest@cs1.com";
+        public const String UserId = "005S0000003yaERIAY";
+        public const String LoginUrl = "https://test.salesforce.com";
+        public const String InstanceUrl = "https://cs1.salesforce.com";
+        public const String CommunityUrl = "https://cs1.salesforce.com/androidcomm";
+        public const String IdentityUrl = "https://test.salesforce.com";
 
-        public const string CLIENT_ID =
+        public const String ClientId =
             "3MVG92.uWdyphVj4bnolD7yuIpCQsNgddWtqRND3faxrv9uKnbj47H4RkwheHA2lKY4cBusvDVp0M6gdGE8hp";
 
-        public const string REFRESH_TOKEN =
+        public const String RefreshToken =
             "5Aep861KIwKdekr90KlxVVUI47zdR6dX_VeBWZBS.SiQYYAy5JPlgkezkgDiE1o9mI4jd6mD4ZFYA==";
+
+        public static Account TestAccount => new Account(LoginUrl, ClientId, CallbackUrl,
+            Scopes, InstanceUrl, IdentityUrl, AccessToken, RefreshToken);
     }
 }

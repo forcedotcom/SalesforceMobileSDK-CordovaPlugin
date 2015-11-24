@@ -65,6 +65,7 @@
     <Compile Include="Auth\IAuthHelper.cs" />
     <Compile Include="Auth\OAuth2.cs" />
     <Compile Include="Auth\SDKManager.cs" />
+    <Compile Include="Exceptions\DeviceOfflineException.cs" />
     <Compile Include="Exceptions\OAuthException.cs" />
     <Compile Include="Logging\ILoggingService.cs" />
     <Compile Include="Logging\LoggingLevel.cs" />
@@ -110,7 +111,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

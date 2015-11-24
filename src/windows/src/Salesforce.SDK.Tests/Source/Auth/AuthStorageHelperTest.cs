@@ -74,9 +74,9 @@ namespace Salesforce.SDK.Auth
             AuthStorageHelper authStorageHelper = AuthStorageHelper.GetAuthStorageHelper();
             CheckAccount(account, false);
             TypeInfo auth = authStorageHelper.GetType().GetTypeInfo();
-            MethodInfo persist = auth.GetDeclaredMethod("PersistCredentialsAsync");
+            MethodInfo persist = auth.GetDeclaredMethod("PersistCurrentAccountAsync");
             MethodInfo delete =
-                auth.GetDeclaredMethods("DeletePersistedCredentials")
+                auth.GetDeclaredMethods("DeleteAllPersistedAccounts")
                     .First(method => method.GetParameters().Count() == 2);
             persist.Invoke(authStorageHelper, new object[] {account});
             CheckAccount(account, true);
@@ -103,7 +103,7 @@ namespace Salesforce.SDK.Auth
         {
             AuthStorageHelper authStorageHelper = AuthStorageHelper.GetAuthStorageHelper();
             TypeInfo auth = authStorageHelper.GetType().GetTypeInfo();
-            MethodInfo retrieve = auth.GetDeclaredMethod("RetrievePersistedCredentials");
+            MethodInfo retrieve = auth.GetDeclaredMethod("RetrieveAllPersistedAccounts");
             var accounts = (Dictionary<string, Account>) retrieve.Invoke(authStorageHelper, null);
             if (!exists)
             {

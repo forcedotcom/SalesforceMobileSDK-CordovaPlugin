@@ -76,33 +76,26 @@ namespace Salesforce.SDK.Auth
             Assert.AreEqual(expectedUrl, actualUrl, "Wrong front door url");
         }
 
-
         [TestMethod]
         public async Task TestRefreshAuthToken()
         {
             // Try describe without being authenticated, expect 401
             Assert.AreEqual(HttpStatusCode.Unauthorized, await DoDescribe(null));
 
-            // Get auth token (through refresh)
-            var loginOptions = new LoginOptions(TestCredentials.LOGIN_URL, TestCredentials.CLIENT_ID, null, null);
-            AuthResponse refreshResponse =
-                OAuth2.RefreshAuthTokenRequest(loginOptions, TestCredentials.REFRESH_TOKEN).Result;
+            var account = await OAuth2.RefreshAuthTokenAsync(TestCredentials.TestAccount);
 
             // Try describe again, expect 200
-            Assert.AreEqual(HttpStatusCode.OK, await DoDescribe(refreshResponse.AccessToken));
+            Assert.AreEqual(HttpStatusCode.OK, await DoDescribe(account.AccessToken));
         }
 
         [TestMethod]
-        public void TestCallIdentityService()
+        public async Task TestCallIdentityService()
         {
             // Get auth token and identity url (through refresh)
-            var loginOptions = new LoginOptions(TestCredentials.LOGIN_URL, TestCredentials.CLIENT_ID, null, null);
-            AuthResponse refreshResponse =
-                OAuth2.RefreshAuthTokenRequest(loginOptions, TestCredentials.REFRESH_TOKEN).Result;
+            var account = await OAuth2.RefreshAuthTokenAsync(TestCredentials.TestAccount);
 
             // Call the identity service
-            IdentityResponse identityResponse =
-                OAuth2.CallIdentityService(refreshResponse.IdentityUrl, refreshResponse.AccessToken).Result;
+            IdentityResponse identityResponse = await OAuth2.CallIdentityServiceAsync(account.IdentityUrl, account.AccessToken);
 
             // Check username
             Assert.AreEqual("sdktest@cs1.com", identityResponse.UserName);
@@ -154,7 +147,7 @@ namespace Salesforce.SDK.Auth
             string describeAccountPath = "/services/data/v33.0/sobjects/Account/describe";
             var headers = new HttpCallHeaders(authToken, new Dictionary<string, string>());
             HttpCall result =
-                await HttpCall.CreateGet(headers, TestCredentials.INSTANCE_SERVER + describeAccountPath).Execute();
+                await HttpCall.CreateGet(headers, TestCredentials.InstanceServer + describeAccountPath).ExecuteAsync();
             return result.StatusCode;
         }
     }

@@ -31,6 +31,7 @@ using Salesforce.SDK.App;
 using Salesforce.SDK.Core;
 using Salesforce.SDK.Logging;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Salesforce.SDK.Net
 {
@@ -69,9 +70,9 @@ namespace Salesforce.SDK.Net
         }
 
         [TestMethod]
-        public void TestPropertiesWhenExecuted()
+        public async Task TestPropertiesWhenExecuted()
         {
-            HttpCall call = HttpCall.CreateGet("http://www.google.com").Execute().Result;
+            HttpCall call = await HttpCall.CreateGet("http://www.google.com").ExecuteAsync();
             Assert.IsTrue(call.Executed);
             Assert.IsTrue(call.HasResponse);
             Assert.IsTrue(call.Success);
@@ -81,9 +82,9 @@ namespace Salesforce.SDK.Net
         }
 
         [TestMethod]
-        public void TestPropertiesWhenInvalidHost()
+        public async Task TestPropertiesWhenInvalidHost()
         {
-            HttpCall call = HttpCall.CreateGet("http://bogus").Execute().Result;
+            HttpCall call = await HttpCall.CreateGet("http://bogus").ExecuteAsync();
             Assert.IsTrue(call.Executed);
             Assert.IsFalse(call.Success);
             Assert.IsNotNull(call.Error);

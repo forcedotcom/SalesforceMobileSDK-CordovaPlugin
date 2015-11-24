@@ -290,63 +290,61 @@ namespace Salesforce.SDK.Auth
         }
 
         /// <summary>
-        ///     Async method to make the request for a new auth token.  Method returns an AuthResponse with the data returned back
-        ///     from
-        ///     Salesforce.
-        /// </summary>
-        /// <param name="loginOptions"></param>
-        /// <param name="refreshToken"></param>
-        /// <returns></returns>
-        public static async Task<AuthResponse> RefreshAuthTokenRequest(LoginOptions loginOptions, string refreshToken)
-        {
-            LoggingService.Log("Atempting to refresh auth token", LoggingLevel.Verbose);
-
-            // Args
-            string argsStr = string.Format(OauthRefreshQueryString, new[] {loginOptions.ClientId, refreshToken});
-
-            // Refresh url
-            string refreshUrl = loginOptions.LoginUrl + OauthRefreshPath;
-
-            // Post
-            HttpCall c = HttpCall.CreatePost(refreshUrl, argsStr);
-
-            // Execute post
-            return await c.ExecuteAndDeserialize<AuthResponse>();
-        }
-
-        /// <summary>
         ///     Async method for refreshing the token, persisting the data in the encrypted settings and returning the updated
         ///     account
         ///     with the new access token.
         /// </summary>
         /// <param name="account"></param>
         /// <returns>Boolean based on if the refresh auth token succeeded or not</returns>
-        public static async Task<Account> RefreshAuthToken(Account account)
+        public static async Task<Account> RefreshAuthTokenAsync(Account account)
         {
-            if (account != null)
+            LoggingService.Log("Atempting to refresh auth token", LoggingLevel.Verbose);
+
+            if (account == null)
             {
-                try
-                {
-                    AuthResponse response =
-                        await RefreshAuthTokenRequest(account.GetLoginOptions(), account.RefreshToken);
-                    account.AccessToken = response.AccessToken;
-                    await SDKServiceLocator.Get<IAuthHelper>().PersistCredentialsAsync(account);
-                }
-                catch (WebException ex)
-                {
-                    LoggingService.Log("Exception occurred when refreshing token:", LoggingLevel.Critical);
-                    LoggingService.Log(ex, LoggingLevel.Critical);
-                    Debug.WriteLine("Error refreshing token");
-                    throw new OAuthException(ex.Message, ex.Status);
-                }
-                catch (Exception ex)
-                {
-                    LoggingService.Log("Exception occurred when refreshing token:", LoggingLevel.Critical);
-                    LoggingService.Log(ex, LoggingLevel.Critical);
-                    Debug.WriteLine("Error refreshing token");
-                    throw new OAuthException(ex.Message, ex.InnerException);
-                }
+                return null;
             }
+
+            try
+            {
+                var loginOptions = account.GetLoginOptions();
+
+                // args
+                var argsStr = string.Format(OauthRefreshQueryString, loginOptions.ClientId, account.RefreshToken);
+
+                // Refresh url
+                var refreshUrl = loginOptions.LoginUrl + OauthRefreshPath;
+
+                // Post
+                var call = HttpCall.CreatePost(refreshUrl, argsStr);
+
+                var response = await call.ExecuteAndDeserializeAsync<AuthResponse>();
+
+                account.AccessToken = response.AccessToken;
+
+                await SDKServiceLocator.Get<IAuthHelper>().PersistCurrentAccountAsync(account);
+            }
+            catch (DeviceOfflineException ex)
+            {
+                LoggingService.Log("Failed to refresh the token because we were offline", LoggingLevel.Warning);
+                LoggingService.Log(ex, LoggingLevel.Warning);
+                throw;
+            }
+            catch (WebException ex)
+            {
+                LoggingService.Log("Exception occurred when refreshing token:", LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical);
+                Debug.WriteLine("Error refreshing token");
+                throw new OAuthException(ex.Message, ex);
+            }
+            catch (Exception ex)
+            {
+                LoggingService.Log("Exception occurred when refreshing token:", LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical);
+                Debug.WriteLine("Error refreshing token");
+                throw new OAuthException(ex.Message, ex);
+            }
+
             return account;
         }
 
@@ -357,7 +355,7 @@ namespace Salesforce.SDK.Auth
         /// <param name="loginOptions"></param>
         /// <param name="refreshToken"></param>
         /// <returns>true if successful</returns>
-        public static async Task<bool> RevokeAuthToken(LoginOptions loginOptions, string refreshToken)
+        public static async Task<bool> RevokeAuthTokenAsync(LoginOptions loginOptions, string refreshToken)
         {
             // Args
             string argsStr = string.Format(OauthRevokeQueryString, new[] {WebUtility.UrlEncode(refreshToken)});
@@ -368,8 +366,8 @@ namespace Salesforce.SDK.Auth
             // Post
             HttpCall c = HttpCall.CreatePost(revokeUrl, argsStr);
 
-            // Execute post
-            HttpCall result = await c.Execute().ConfigureAwait(false);
+            // ExecuteAsync post
+            HttpCall result = await c.ExecuteAsync().ConfigureAwait(false);
 
             LoggingService.Log($"result.StatusCode = {result.StatusCode}", LoggingLevel.Verbose);
 
@@ -383,7 +381,7 @@ namespace Salesforce.SDK.Auth
 
         public static void ClearCookies(LoginOptions loginOptions)
         {
-            AuthHelper.ClearCookies(loginOptions);
+            AuthHelper.ClearCookiesAsync(loginOptions);
         }
 
         /// <summary>
@@ -392,7 +390,7 @@ namespace Salesforce.SDK.Auth
         /// <param name="idUrl"></param>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public static async Task<IdentityResponse> CallIdentityService(string idUrl, string accessToken)
+        public static async Task<IdentityResponse> CallIdentityServiceAsync(string idUrl, string accessToken)
         {
             LoggingService.Log("Calling identity service", LoggingLevel.Verbose);
 
@@ -401,11 +399,11 @@ namespace Salesforce.SDK.Auth
             // Get
             HttpCall c = HttpCall.CreateGet(headers, idUrl);
 
-            // Execute get
-            return await c.ExecuteAndDeserialize<IdentityResponse>();
+            // ExecuteAsync get
+            return await c.ExecuteAndDeserializeAsync<IdentityResponse>();
         }
 
-        public static async Task<IdentityResponse> CallIdentityService(string idUrl, IRestClient client)
+        public static async Task<IdentityResponse> CallIdentityServiceAsync(string idUrl, IRestClient client)
         {
             var request = new RestRequest(HttpMethod.Get, new Uri(idUrl).AbsolutePath);
             var response = await client.SendAsync(request);

@@ -56,7 +56,7 @@ var getUsers = function (successCB, errorCB, args) {
 };
 
 var getCurrentUser = function (successCB, errorCB, args) {
-    var user = oauth2.getCurrentUser();
+    var user = oauth2.getUser(successCB, errorCB);
     if (user)
     {
         successCB(user);

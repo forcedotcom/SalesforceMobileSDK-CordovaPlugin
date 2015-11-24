@@ -59,14 +59,16 @@ var SalesforceJS;
             if ((/^\s*$/).test(bootConfig)) {
                 bootConfig = "bootconfig.json";
             }
-            this.servers = new ServerConfig();
+            if ((/^\s*$/).test(serverConfig)) {
+                serverConfig = "servers.xml";
+            }
             var self = this;
             return new WinJS.Promise(function (resolve, reject, progress) {
                 WinJS.xhr({ url: bootConfig }).then(function (response) {
                     self.loadBootConfig(response.responseText);
                     progress();
                 }).then(function () {
-                    WinJS.xhr({ url: "servers.xml" }).done(function (response) {
+                    WinJS.xhr({ url: serverConfig }).done(function (response) {
                         self.loadServerXml(response);
                         resolve(self);
                     });
@@ -87,6 +89,10 @@ var SalesforceJS;
             this.servers.serverList = serversList;
         };
         OAuth2.prototype.loginDefaultServer = function () {
+            var config;
+            if (this.servers.serverList == null) {
+                config = this.configureOAuth("bootconfig.json", "servers.xml");
+            }
             return this.login(this.servers.serverList[0]);
         };
         OAuth2.prototype.login = function (server) {
@@ -134,6 +140,7 @@ var SalesforceJS;
                     resolve();
                 }
             });
+            
         };
         OAuth2.prototype.getAuthCredentials = function (success, fail) {
             var account = this.auth.HybridAccountManager.getAccount();
@@ -141,7 +148,7 @@ var SalesforceJS;
                 success(this.auth.Account.toJson(account));
             }
             else {
-                fail();
+                this.loginDefaultServer();
             }
         };
         OAuth2.prototype.forcetkRefresh = function (success, fail) {
