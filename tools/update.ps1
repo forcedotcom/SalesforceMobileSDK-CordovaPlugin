@@ -92,7 +92,7 @@ function update_repo([string]$repo_dir, [string] $git_repo_url)
 }
 
 $ROOT_FOLDER=$(get_root_folder)
-$WINDOWS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Windows.git"
+$WINDOWS_SDK_REPO_PATH="C:\repo\sdk-github"
 $WINDOWS_SDK_FOLDER="SalesforceMobileSDK-Windows"
 
 parse_opts "$@"
@@ -123,8 +123,13 @@ cp $WINDOWS_SDK_FOLDER/SalesforceSDK/ src/windows/src/ -Recurse -Force
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages src/windows/src/ -Recurse -Force
 rm -r src/windows/src/TypeScriptLib
 
-echo "Copying windows files for Sqlite.Ext from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
+echo "Copying windows files for all nuget packages from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/SQLitePCL.Ext.dll src/windows/WinMD
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/SQLitePCL.dll src/windows/WinMD
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Newtonsoft.Json.dll src/windows/WinMD
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Microsoft.Practices.ServiceLocation.dll src/windows/WinMD
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/GalaSoft.MvvmLight.Extras.dll src/windows/WinMD
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/GalaSoft.MvvmLight.dll src/windows/WinMD
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/sqlite3.dll src/windows/WinMD/x86
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/sqlite3.dll src/windows/WinMD/x64
 echo "Copying Hybrid.winmd from $WINDOWS_SDK_FOLDER/DLLs to src/windows/src/Hybrid/bin/x86/Debug"
