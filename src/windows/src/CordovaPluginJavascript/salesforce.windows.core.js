@@ -86,14 +86,25 @@ var SalesforceJS;
                 var server = serverItems[i];
                 serversList.push({ name: server.attributes.getNamedItem("name").value, address: server.attributes.getNamedItem("url").value });
             }
-            this.servers.serverList = serversList;
+            this.servers["serverList"] = serversList;
         };
-        OAuth2.prototype.loginDefaultServer = function () {
-            var config;
+        OAuth2.prototype.loginDefaultServer = function (success, fail) {
+            var self = this;
             if (this.servers.serverList == null) {
-                config = this.configureOAuth("bootconfig.json", "servers.xml");
+                this.configureOAuth("bootconfig.json", "servers.xml").then(function(response) {
+                    self.login(response["servers"]["serverList"][0]).done(function(account) {
+                        success(self.auth.Account.toJson(account));
+                    }, function(error) {
+                        fail(error);
+                    });
+                });
+            } else {
+                self.login(this["servers"]["serverList"][0]).done(function (account) {
+                    success(self.auth.Account.toJson(account));
+                }, function (error) {
+                    fail(error);
+                });
             }
-            return this.login(this.servers.serverList[0]);
         };
         OAuth2.prototype.login = function (server) {
             var auth = Salesforce.SDK.Hybrid.Auth;
@@ -140,7 +151,7 @@ var SalesforceJS;
                     resolve();
                 }
             });
-            
+
         };
         OAuth2.prototype.getAuthCredentials = function (success, fail) {
             var account = this.auth.HybridAccountManager.getAccount();
@@ -148,7 +159,7 @@ var SalesforceJS;
                 success(this.auth.Account.toJson(account));
             }
             else {
-                this.loginDefaultServer();
+              this.loginDefaultServer(success, fail);
             }
         };
         OAuth2.prototype.forcetkRefresh = function (success, fail) {
