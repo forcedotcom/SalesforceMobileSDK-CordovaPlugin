@@ -26,6 +26,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -45,76 +46,50 @@ namespace Salesforce.SDK.Rest
             _call = call;
         }
 
-        public bool HasResponse { get { return _call.HasResponse; } }
+        public bool HasResponse => _call.HasResponse;
 
-        public bool Success
-        {
-            get { return _call.Success; }
-        }
+        public bool Success => _call.Success;
 
-        public Exception Error
-        {
-            get { return _call.Error; }
-        }
+        public Exception Error => _call.Error;
 
-        public string AsString
-        {
-            get { return _call.ResponseBody; }
-        }
+        public string AsString => _call.ResponseBody;
 
-        public JArray AsJArray
-        {
-            get
-            {
-                if (_responseArray == null)
-                {
-                    _responseArray = JArray.Parse(AsString);
-                }
-                return _responseArray;
-            }
-        }
+        public string ErrorReasonPhrase => _call.ErrorReasonPhrase;
 
-        public JObject AsJObject
-        {
-            get
-            {
-                if (_responseObject == null)
-                {
-                    _responseObject = JObject.Parse(AsString);
-                }
-                return _responseObject;
-            }
-        }
+        public JArray AsJArray => _responseArray ?? (_responseArray = JArray.Parse(AsString));
 
-        public HttpStatusCode StatusCode
-        {
-            get { return _call.StatusCode; }
-        }
+        public JObject AsJObject => _responseObject ?? (_responseObject = JObject.Parse(AsString));
+
+        public HttpStatusCode StatusCode => _call.StatusCode;
 
         public string PrettyBody
         {
             get
             {
-                if (_prettyBody == null)
+                if (_prettyBody != null)
+                {
+                    return _prettyBody;
+                }
+
+                try
+                {
+                    _prettyBody = JsonConvert.SerializeObject(AsJObject, Formatting.Indented);
+                }
+                catch
                 {
                     try
                     {
-                        _prettyBody = JsonConvert.SerializeObject(AsJObject, Formatting.Indented);
+                        _prettyBody = JsonConvert.SerializeObject(AsJArray, Formatting.Indented);
                     }
                     catch
                     {
-                        try
-                        {
-                            _prettyBody = JsonConvert.SerializeObject(AsJArray, Formatting.Indented);
-                        }
-                        catch
-                        {
-                            _prettyBody = AsString;
-                        }
+                        _prettyBody = AsString;
                     }
                 }
                 return _prettyBody;
             }
         }
+
+        public Dictionary<string, IEnumerable<string>> Headers => _call.ResponseHeaders;
     }
 }

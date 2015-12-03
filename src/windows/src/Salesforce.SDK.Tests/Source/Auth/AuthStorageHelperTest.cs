@@ -33,6 +33,7 @@ using Salesforce.SDK.Security;
 using Salesforce.SDK.Core;
 using Salesforce.SDK.App;
 using Salesforce.SDK.Logging;
+using Salesforce.SDK.Auth;
 
 namespace Salesforce.SDK.Auth
 {
@@ -68,15 +69,17 @@ namespace Salesforce.SDK.Auth
         public void TestPersistRetrieveDeleteCredentials()
         {
             var account = new Account("loginUrl", "clientId", "callbackUrl", new[] {"scopeA", "scopeB"}, "instanceUrl",
-                "identityUrl", "accessToken", "refreshToken");
-            account.UserId = "userId";
-            account.UserName = "userName";
+                "identityUrl", "accessToken", "refreshToken")
+            {
+                UserId = "userId",
+                UserName = "userName"
+            };
             AuthStorageHelper authStorageHelper = AuthStorageHelper.GetAuthStorageHelper();
             CheckAccount(account, false);
             TypeInfo auth = authStorageHelper.GetType().GetTypeInfo();
-            MethodInfo persist = auth.GetDeclaredMethod("PersistCurrentAccountAsync");
+            MethodInfo persist = auth.GetDeclaredMethod("PersistCurrentCredentials");
             MethodInfo delete =
-                auth.GetDeclaredMethods("DeleteAllPersistedAccounts")
+                auth.GetDeclaredMethods("DeletePersistedCredentials")
                     .First(method => method.GetParameters().Count() == 2);
             persist.Invoke(authStorageHelper, new object[] {account});
             CheckAccount(account, true);
@@ -103,7 +106,7 @@ namespace Salesforce.SDK.Auth
         {
             AuthStorageHelper authStorageHelper = AuthStorageHelper.GetAuthStorageHelper();
             TypeInfo auth = authStorageHelper.GetType().GetTypeInfo();
-            MethodInfo retrieve = auth.GetDeclaredMethod("RetrieveAllPersistedAccounts");
+            MethodInfo retrieve = auth.GetDeclaredMethod("RetrievePersistedCredentials");
             var accounts = (Dictionary<string, Account>) retrieve.Invoke(authStorageHelper, null);
             if (!exists)
             {

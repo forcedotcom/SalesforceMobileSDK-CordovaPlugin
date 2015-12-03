@@ -1,44 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Package
-  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
-  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  IgnorableNamespaces="uap mp">
-
-  <Identity Name="4f80cb65-3b76-48ce-a9f4-9c433fac03c5"
-            Publisher="CN=seattle"
-            Version="1.0.0.0" />
-
-  <mp:PhoneIdentity PhoneProductId="4f80cb65-3b76-48ce-a9f4-9c433fac03c5" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
-
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
+  <Identity Name="8a9e3bb8-91b4-452b-ae12-91207224ee23" Publisher="CN=Salesforce" Version="1.0.0.0" />
+  <mp:PhoneIdentity PhoneProductId="8a9e3bb8-91b4-452b-ae12-91207224ee23" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>UnitTestProject1</DisplayName>
-    <PublisherDisplayName>seattle</PublisherDisplayName>
+    <DisplayName>Tests</DisplayName>
+    <PublisherDisplayName>Salesforce</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
-
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.10069.0" MaxVersionTested="10.0.10069.0" />
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.0.0" MaxVersionTested="10.0.0.0" />
   </Dependencies>
-
   <Resources>
     <Resource Language="x-generate" />
   </Resources>
   <Applications>
-    <Application Id="vstest.executionengine.universal.App"
-        Executable="vstest.executionengine.appcontainer.uap.exe"
-        EntryPoint="Microsoft.VisualStudio.TestPlatform.TestExecutor.AppContainer.App">
-      <uap:VisualElements
-        DisplayName="UnitTestProject1"
-        Square150x150Logo="Assets\Logo.png"
-        Square44x44Logo="Assets\SmallLogo.png"
-        Description="UnitTestProject1"
-        BackgroundColor="#464646">
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
-      </uap:VisualElements>
-    </Application>
+  <Application Id="vstest.executionengine.universal.App" Executable="$targetnametoken$.exe" EntryPoint="Tests.App">
+    <uap:VisualElements DisplayName="Tests" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Tests" BackgroundColor="transparent">
+      <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+      </uap:DefaultTile>
+      <uap:SplashScreen Image="Assets\SplashScreen.png" />
+    </uap:VisualElements>
+  </Application>
   </Applications>
   <Capabilities>
-    <Capability Name="internetClientServer" />
+    <Capability Name="internetClient" />
   </Capabilities>
 </Package>

@@ -321,6 +321,7 @@ namespace Salesforce.SDK.Auth
                 var response = await call.ExecuteAndDeserializeAsync<AuthResponse>();
 
                 account.AccessToken = response.AccessToken;
+                account.IdentityUrl = response.IdentityUrl;
 
                 await SDKServiceLocator.Get<IAuthHelper>().PersistCurrentAccountAsync(account);
             }

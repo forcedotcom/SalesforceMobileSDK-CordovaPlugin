@@ -32,7 +32,7 @@ namespace Salesforce.SDK.SmartStore.Store
 {
     internal class TestCredentials
     {
-        public const String ApiVersion = ApiVersionStrings.VersionNumber;
+        public String ApiVersion = ApiVersionStrings.VersionNumber;
         public const String AccountType = "com.salesforce.windowssdk.smartsynctest.login";
         public const String OrgId = "00DS0000000HDptMAG";
         public const String Username = "sdktest@cs1.com";

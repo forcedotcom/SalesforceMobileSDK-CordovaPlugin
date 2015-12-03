@@ -26,6 +26,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using Newtonsoft.Json.Linq;
 
@@ -73,5 +74,9 @@ namespace Salesforce.SDK.Rest
         /// formatted JObject, JArray, or string
         /// </summary>
         string PrettyBody { get; }
+
+        string ErrorReasonPhrase { get; }
+
+        Dictionary<string, IEnumerable<string>> Headers { get; } 
     }
 }

@@ -68,7 +68,7 @@ namespace Salesforce.SDK.Auth
         public string CallbackUrl { get; private set; }
         public string[] Scopes { get; private set; }
         public string InstanceUrl { get; private set; }
-        public string IdentityUrl { get; private set; }
+        public string IdentityUrl { get; set; }
         public string AccessToken { get; set; }
         public string RefreshToken { get; private set; }
         public string CommunityId { get; set; }

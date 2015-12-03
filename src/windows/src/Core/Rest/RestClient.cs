@@ -82,7 +82,9 @@ namespace Salesforce.SDK.Rest
         private async Task<HttpCall> SendAsync(RestRequest request, bool retryInvalidToken)
         {
             var url = _instanceUrl + request.Path;
-            var headers = request.AdditionalHeaders != null ? new HttpCallHeaders(_accessToken, request.AdditionalHeaders) : new HttpCallHeaders(_accessToken, new Dictionary<string, string>());
+            var headers = request.AdditionalHeaders != null
+                ? new HttpCallHeaders(_accessToken, request.AdditionalHeaders)
+                : new HttpCallHeaders(_accessToken, new Dictionary<string, string>());
 
             var call =
                 await

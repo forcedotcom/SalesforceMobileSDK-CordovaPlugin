@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -101,7 +102,9 @@ namespace Salesforce.SDK.Net
         private readonly HttpClient _httpClient;
         private Exception _httpCallErrorException;
         private string _responseBodyText;
+        private Dictionary<string, IEnumerable<string>> _responseHeaders; 
         private HttpStatusCode _statusCodeValue;
+        private string _errorReasonPhrase;
 
         /// <summary>
         ///     Constructor for HttpCall
@@ -189,6 +192,24 @@ namespace Salesforce.SDK.Net
             {
                 CheckExecuted();
                 return _statusCodeValue;
+            }
+        }
+
+        public string ErrorReasonPhrase
+        {
+            get
+            {
+                CheckExecuted();
+                return _errorReasonPhrase;
+            }
+        }
+
+        public Dictionary<string, IEnumerable<string>> ResponseHeaders
+        {
+            get
+            {
+                CheckExecuted();
+                return _responseHeaders;
             }
         }
 
@@ -346,7 +367,29 @@ namespace Salesforce.SDK.Net
                 throw new ArgumentException("Response message cannot be null", nameof(response));
             }
 
-            // End the operation
+            _responseHeaders = new Dictionary<string, IEnumerable<string>>();
+            foreach (var header in response.Headers)
+            {
+                _responseHeaders.Add(header.Key, header.Value);
+            }
+
+            try
+            {
+                _responseBodyText = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _errorReasonPhrase = response.ReasonPhrase;
+                }
+
+                _statusCodeValue = response.StatusCode;
+            }
+            catch (Exception e)
+            {
+                Debugger.Break();
+            }
+
+            // Get the response exception
             try
             {
                 response.EnsureSuccessStatusCode();
@@ -360,16 +403,6 @@ namespace Salesforce.SDK.Net
                     ? new DeviceOfflineException("Could not connect to server because of a bad connection", ex) 
                     : ex;
             }
-
-            if (response.IsSuccessStatusCode)
-            {
-                _responseBodyText = await response.Content.ReadAsStringAsync();
-            }
-            else
-            {
-                _responseBodyText = response.ReasonPhrase;
-            }
-            _statusCodeValue = response.StatusCode;
             response.Dispose();
         }
 
