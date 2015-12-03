@@ -211,8 +211,11 @@ namespace Salesforce.SDK.Auth
             }
 
             var serialized = EncryptionService.Encrypt(JsonConvert.SerializeObject(account));
-            _vault.Add(new PasswordCredential(PasswordVaultAccounts, account.UserName, serialized));
-            _vault.Add(new PasswordCredential(PasswordVaultCurrentAccount, account.UserName, serialized));
+            if (account.UserName != null)
+            {
+                _vault.Add(new PasswordCredential(PasswordVaultAccounts, account.UserName, serialized));
+                _vault.Add(new PasswordCredential(PasswordVaultCurrentAccount, account.UserName, serialized));
+            }
             var options = new LoginOptions(account.LoginUrl, account.ClientId, account.CallbackUrl,
                 LoginOptions.DefaultDisplayType, account.Scopes);
             SalesforceConfig.LoginOptions = options;

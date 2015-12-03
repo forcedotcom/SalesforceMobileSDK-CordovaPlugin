@@ -32,8 +32,11 @@ using Newtonsoft.Json;
 using Salesforce.SDK.Net;
 using System.Net;
 using Salesforce.SDK.App;
+using Salesforce.SDK.Auth;
 using Salesforce.SDK.Core;
 using Salesforce.SDK.Logging;
+using Salesforce.SDK.Rest;
+using Salesforce.SDK.Security;
 
 namespace Salesforce.SDK.Auth
 {
@@ -46,6 +49,13 @@ namespace Salesforce.SDK.Auth
         {
             SFApplicationHelper.RegisterServices();
             SDKServiceLocator.RegisterService<ILoggingService, Hybrid.Logging.Logger>();
+        }
+
+        [TestInitialize]
+        public void Setup()
+        {
+            var settings = new EncryptionSettings(new HmacSHA256KeyGenerator());
+            Encryptor.init(settings);
         }
 
         [TestMethod]
@@ -144,7 +154,7 @@ namespace Salesforce.SDK.Auth
 
         private async Task<HttpStatusCode> DoDescribe(string authToken)
         {
-            string describeAccountPath = "/services/data/v33.0/sobjects/Account/describe";
+            string describeAccountPath = "/services/data/" + ApiVersionStrings.VersionNumber + "/sobjects/Account/describe";
             var headers = new HttpCallHeaders(authToken, new Dictionary<string, string>());
             HttpCall result =
                 await HttpCall.CreateGet(headers, TestCredentials.InstanceServer + describeAccountPath).ExecuteAsync();

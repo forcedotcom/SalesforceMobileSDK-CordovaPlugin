@@ -74,7 +74,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual(ContentTypeValues.None, request.ContentType, "Wrong content type");
             Assert.AreEqual("/services/data/", request.Path, "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]
@@ -85,7 +85,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual(ContentTypeValues.None, request.ContentType, "Wrong content type");
             Assert.AreEqual("/services/data/" + TEST_API_VERSION + "/", request.Path, "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
 
@@ -97,7 +97,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual(ContentTypeValues.None, request.ContentType, "Wrong content type");
             Assert.AreEqual("/services/data/" + TEST_API_VERSION + "/sobjects/", request.Path, "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
 
@@ -110,7 +110,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual("/services/data/" + TEST_API_VERSION + "/sobjects/" + TEST_OBJECT_TYPE + "/", request.Path,
                 "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual("/services/data/" + TEST_API_VERSION + "/sobjects/" + TEST_OBJECT_TYPE + "/describe/",
                 request.Path, "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
 
@@ -135,7 +135,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual("/services/data/" + TEST_API_VERSION + "/sobjects/" + TEST_OBJECT_TYPE, request.Path,
                 "Wrong path");
             Assert.AreEqual(TEST_FIELDS_string, request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]
@@ -149,7 +149,7 @@ namespace Salesforce.SDK.Rest
                 "/services/data/" + TEST_API_VERSION + "/sobjects/" + TEST_OBJECT_TYPE + "/" + TEST_OBJECT_ID +
                 "?fields=" + TEST_FIELDS_LIST_string, request.Path, "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]
@@ -163,7 +163,7 @@ namespace Salesforce.SDK.Rest
                 "/services/data/" + TEST_API_VERSION + "/sobjects/" + TEST_OBJECT_TYPE + "/" + TEST_OBJECT_ID,
                 request.Path, "Wrong path");
             Assert.AreEqual(TEST_FIELDS_string, request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]
@@ -177,7 +177,7 @@ namespace Salesforce.SDK.Rest
                 "/services/data/" + TEST_API_VERSION + "/sobjects/" + TEST_OBJECT_TYPE + "/" + TEST_EXTERNAL_ID_FIELD +
                 "/" + TEST_EXTERNAL_ID, request.Path, "Wrong path");
             Assert.AreEqual(TEST_FIELDS_string, request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]
@@ -190,7 +190,7 @@ namespace Salesforce.SDK.Rest
                 "/services/data/" + TEST_API_VERSION + "/sobjects/" + TEST_OBJECT_TYPE + "/" + TEST_OBJECT_ID,
                 request.Path, "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         public void TestGetRequestForQuery()
@@ -199,7 +199,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual(HttpMethod.Get, request.Method, "Wrong method");
             Assert.AreEqual("/services/data/" + TEST_API_VERSION + "/query?q=" + TEST_QUERY, request.Path, "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]
@@ -211,7 +211,7 @@ namespace Salesforce.SDK.Rest
             Assert.AreEqual("/services/data/" + TEST_API_VERSION + "/search?q=" + TEST_SEARCH, request.Path,
                 "Wrong path");
             Assert.IsNull(request.RequestBody, "Wrong request body");
-            Assert.IsNull(request.AdditionalHeaders, "Wrong additional headers");
+            Assert.AreEqual(request.AdditionalHeaders.Count, 0);
         }
 
         [TestMethod]

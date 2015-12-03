@@ -110,9 +110,6 @@ rm src -r -force
 
 echo "Creating Windows directories"
 mkdir src/windows -Force
-mkdir src/windows/WinMD -Force
-mkdir src/windows/WinMD/x86 -Force
-mkdir src/windows/WinMD/x64 -Force
 
 echo "*** Windows ***"
 echo "Copying windows files from $WINDOWS_SDK_FOLDER/CordovaPluginJavascript/*.js to src/windows/" 
@@ -123,12 +120,14 @@ cp $WINDOWS_SDK_FOLDER/SalesforceSDK/ src/windows/src/ -Recurse -Force
 cp $WINDOWS_SDK_FOLDER/SalesforceSDK/packages src/windows/src/ -Recurse -Force
 rm -r src/windows/src/TypeScriptLib
 
-echo "Copying windows files for Sqlite.Ext from $WINDOWS_SDK_FOLDER/DLLs to src/windows/WinMD"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/SQLitePCL.Ext.dll src/windows/WinMD
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x86/sqlite3.dll src/windows/WinMD/x86
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Store/x64/sqlite3.dll src/windows/WinMD/x64
-echo "Copying Hybrid.winmd from $WINDOWS_SDK_FOLDER/DLLs to src/windows/src/Hybrid/bin/x86/Debug"
-cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Salesforce.SDK.Hybrid.winmd src/windows/src/Hybrid/bin/x86/Debug -Recurse -Force
+echo "Copying Core from $WINDOWS_SDK_FOLDER/DLLs to src/windows/src/Core/bin"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Core src/windows/src/Core/bin -Recurse -Force
+
+echo "Copying Hybrid.winmd from $WINDOWS_SDK_FOLDER/DLLs to src/windows/src/Hybrid/bin"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Hybrid src/windows/src/Hybrid/bin -Recurse -Force
+
+echo "Copying Universal from $WINDOWS_SDK_FOLDER/DLLs to src/windows/src/Core/bin"
+cp $WINDOWS_SDK_FOLDER/SalesforceSDK/DLLs/Universal src/windows/src/Universal/bin -Recurse -Force
 
 echo "--- Clean Up ---"
 echo "Removing SalesforceSDK Library"

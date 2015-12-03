@@ -37,7 +37,7 @@ namespace Salesforce.SDK
         public static readonly string[] Scopes = { "web" };
         public const String AccessToken = "test_auth_token";
         public const String InstanceServer = "https://cs1.salesforce.com";
-        public const String ApiVersion = ApiVersionStrings.VersionNumber;
+        public String ApiVersion = ApiVersionStrings.VersionNumber;
         public const String AccountType = "com.salesforce.windowssdk.smartsynctest.login";
         public const String OrgId = "00DS0000000HDptMAG";
         public const String Username = "sdktest@cs1.com";

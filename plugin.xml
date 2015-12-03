@@ -203,11 +203,11 @@
 	<runs/>
   </js-module>
 	<framework src="src/windows/src/Core/Core.csproj"  custom="true" type="projectReference"/>
-  <framework src="src/windows/src/SmartStore/SmartStore.csproj"  custom="true" type="projectReference"/>
-  <framework src="src/windows/src/SmartSync/SmartSync.csproj"  custom="true" type="projectReference"/>
-  <framework src="src/windows/src/Universal/Universal.csproj"  custom="true" type="projectReference"/>
+    <framework src="src/windows/src/Universal/Universal.csproj"  custom="true" type="projectReference"/>
   <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
-	<framework src="src/windows/WinMD/SQLitePCL.Ext.dll" custom="true" />
-  </platform>
+  <framework src="src/windows/src/packages/Newtonsoft.Json.7.0.1/lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll" custom="true"/>
+  <framework src="src/windows/src/packages/MvvmLightLibs.5.1.1.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.dll" custom="true"/>
+  <framework src="src/windows/src/packages/MvvmLightLibs.5.1.1.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.Extras.dll" custom="true"/>
+</platform>
 
 </plugin>
