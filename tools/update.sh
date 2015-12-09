@@ -50,7 +50,7 @@ parse_opts ()
 copy_and_fix ()
 {
     echo "* Fixing and copying $1 to $2 directory"
-    find tmp -name $1 | xargs sed 's/\#import\ \<Salesforce.*\/\(.*\)\>/#import "\1"/' > src/ios/$2/$1
+    find tmp -name $1 | xargs sed -E 's/#import <(Salesforce|SmartStore).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
 }
 
 copy_lib ()
@@ -165,26 +165,24 @@ cp $ANDROID_SDK_FOLDER/gradlew ./
 cp -RL $ANDROID_SDK_FOLDER/gradle ./
 
 echo "*** iOS ***"
-echo "Copying SalesforceHybridSDK library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
-echo "Copying SalesforceOAuth library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceOAuth-Debug.zip -d tmp
-echo "Copying SalesforceSDKCore library"    
+echo "Copying SalesforceSDKCore library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCore-Debug.zip -d tmp
-echo "Copying SalesforceSecurity library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSecurity-Debug.zip -d tmp
-echo "Copying SalesforceNetwork library"    
+echo "Copying SalesforceNetwork library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceNetwork-Debug.zip -d tmp
-echo "Copying SalesforceRestAPI library"    
+echo "Copying SalesforceRestAPI library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceRestAPI-Debug.zip -d tmp
-echo "Copying SmartSync library"    
+echo "Copying SmartStore library"
+unzip $IOS_SDK_FOLDER/build/artifacts/SmartStore-Debug.zip -d tmp
+echo "Copying SmartSync library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
-echo "Copying SalesforceSDKCommon library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
-echo "Copying SalesforceCommonUtils library"    
-cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils tmp
+echo "Copying SalesforceHybridSDK library"
+unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
+echo "Copying FMDB library"
+unzip $IOS_SDK_FOLDER/build/artifacts/libFMDB-Debug.zip -d tmp
+echo "Copying CocoaLumberjack library"
+unzip $IOS_SDK_FOLDER/build/artifacts/CocoaLumberjack-Debug.zip -d tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
 cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
 cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
@@ -219,16 +217,15 @@ copy_and_fix UIApplication+SalesforceHybridSDK.m classes
 copy_and_fix InitialViewController.m classes
 copy_and_fix SalesforceSDKCoreDefines.h headers
 echo "Copying needed libraries to src/ios/frameworks"
-copy_lib libSalesforceCommonUtils.a
-copy_lib libSalesforceHybridSDK.a
-copy_lib libSalesforceOAuth.a
 copy_lib libSalesforceSDKCore.a
-copy_lib libSalesforceSecurity.a
 copy_lib libSalesforceNetwork.a
 copy_lib libSalesforceRestAPI.a
+copy_lib libSmartStore.a
 copy_lib libSmartSync.a
-copy_lib libSalesforceSDKCommon.a
+copy_lib libSalesforceHybridSDK.a
 copy_lib libsqlcipher.a
+copy_lib libFMDB.a
+copy_lib libCocoaLumberjack.a
 echo "Copying Images.xcassets"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
 echo "Copying Settings.bundle"
