@@ -51,6 +51,7 @@ copy_and_fix ()
 {
     echo "* Fixing and copying $1 to $2 directory"
     find tmp -name $1 | xargs sed 's/\#import\ \<Salesforce.*\/\(.*\)\>/#import "\1"/' > src/ios/$2/$1
+    find tmp -name $1 | xargs sed 's/\#import\ \<Smart.*\/\(.*\)\>/#import "\1"/' > src/ios/$2/$1
 }
 
 copy_lib ()
