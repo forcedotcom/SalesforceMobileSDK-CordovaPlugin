@@ -114,20 +114,19 @@
     <resource-file src="src/ios/resources/Images.xcassets" />
 
     <!-- Libraries -->
-    <source-file src="src/ios/frameworks/libSalesforceCommonUtils.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceOAuth.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSecurity.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceNetwork.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
+    <source-file src="src/ios/frameworks/libFMDB.a" framework="true" />
+    <source-file src="src/ios/frameworks/libCocoaLumberjack.a" framework="true" />
 
     <!-- System frameworks -->
-    <framework src="libxml2.dylib" />
-    <framework src="libz.dylib" />
+    <framework src="libxml2.tbd" />
+    <framework src="libz.tbd" />
     <framework src="AddressBook.framework" weak="true" />
     <framework src="AddressBookUI.framework" weak="true" />
     <framework src="CoreGraphics.framework" weak="true" />
