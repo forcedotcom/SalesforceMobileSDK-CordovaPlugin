@@ -180,9 +180,9 @@ unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
 echo "Copying FMDB library"
-unzip $IOS_SDK_FOLDER/build/artifacts/libFMDB-Debug.zip -d tmp
+unzip $IOS_SDK_FOLDER/build/artifacts/fmdb-Debug.zip -d tmp
 echo "Copying CocoaLumberjack library"
-unzip $IOS_SDK_FOLDER/build/artifacts/CocoaLumberjack-Debug.zip -d tmp
+unzip $IOS_SDK_FOLDER/build/artifacts/Lumberjack-Debug.zip -d tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
 cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
 cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
@@ -201,6 +201,7 @@ copy_and_fix SFIdentityCoordinator.h headers
 copy_and_fix SFIdentityData.h headers
 copy_and_fix SFLocalhostSubstitutionCache.h headers
 copy_and_fix SFLogger.h headers
+copy_and_fix NSNotificationCenter+SFAdditions.h headers
 copy_and_fix SFOAuthCoordinator.h headers
 copy_and_fix SFOAuthCredentials.h headers
 copy_and_fix SFOAuthInfo.h headers
@@ -210,6 +211,7 @@ copy_and_fix SFUserAccountConstants.h headers
 copy_and_fix SFUserAccountManager.h headers
 copy_and_fix SFUserAccountIdentity.h headers
 copy_and_fix SalesforceSDKManager.h headers
+copy_and_fix SalesforceSDKManagerWithSmartStore.h headers
 copy_and_fix SFAuthErrorHandler.h headers
 copy_and_fix SFAuthErrorHandlerList.h headers
 copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
