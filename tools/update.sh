@@ -180,9 +180,9 @@ unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
 echo "Copying FMDB library"
-unzip $IOS_SDK_FOLDER/build/artifacts/libFMDB-Debug.zip -d tmp
+unzip $IOS_SDK_FOLDER/build/artifacts/fmdb-Debug.zip -d tmp
 echo "Copying CocoaLumberjack library"
-unzip $IOS_SDK_FOLDER/build/artifacts/CocoaLumberjack-Debug.zip -d tmp
+unzip $IOS_SDK_FOLDER/build/artifacts/Lumberjack-Debug.zip -d tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
 cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
 cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
