@@ -201,6 +201,7 @@ copy_and_fix SFIdentityCoordinator.h headers
 copy_and_fix SFIdentityData.h headers
 copy_and_fix SFLocalhostSubstitutionCache.h headers
 copy_and_fix SFLogger.h headers
+copy_and_fix NSNotificationCenter+SFAdditions.h headers
 copy_and_fix SFOAuthCoordinator.h headers
 copy_and_fix SFOAuthCredentials.h headers
 copy_and_fix SFOAuthInfo.h headers
@@ -210,6 +211,7 @@ copy_and_fix SFUserAccountConstants.h headers
 copy_and_fix SFUserAccountManager.h headers
 copy_and_fix SFUserAccountIdentity.h headers
 copy_and_fix SalesforceSDKManager.h headers
+copy_and_fix SalesforceSDKManagerWithSmartStore.h headers
 copy_and_fix SFAuthErrorHandler.h headers
 copy_and_fix SFAuthErrorHandlerList.h headers
 copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
