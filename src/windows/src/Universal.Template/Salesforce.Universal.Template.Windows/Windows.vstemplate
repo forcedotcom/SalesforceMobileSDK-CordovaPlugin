@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+	<TemplateData>
+		<Name>SharedSalesforceApplication.Windows</Name>
+		<DefaultName>$safeprojectname$</DefaultName>
+		<TemplateID>Salesforce.Universal.Template.Shared.Windows</TemplateID>
+		<TemplateGroupID>WinRT-Managed</TemplateGroupID>
+		<ProjectType>CSharp</ProjectType>
+		<TargetPlatformName>Windows</TargetPlatformName>
+		<RequiredPlatformVersion>6.3.0</RequiredPlatformVersion>
+		<CreateInPlace>true</CreateInPlace>
+		<CreateNewFolder>true</CreateNewFolder>
+		<LocationField>Enabled</LocationField>
+		<Hidden>true</Hidden>
+	</TemplateData>
+	<TemplateContent>
+		<Project File="Salesforce.Universal.Template.Windows.csproj" ReplaceParameters="true">
+			<Folder Name="Assets">
+				<ProjectItem ReplaceParameters="false" TargetFileName="Logo.scale-100.png">Logo.scale-100.png</ProjectItem>
+				<ProjectItem ReplaceParameters="false" TargetFileName="SmallLogo.scale-100.png">SmallLogo.scale-100.png</ProjectItem>
+				<ProjectItem ReplaceParameters="false" TargetFileName="SplashScreen.scale-100.png">SplashScreen.scale-100.png</ProjectItem>
+				<ProjectItem ReplaceParameters="false" TargetFileName="StoreLogo.scale-100.png">StoreLogo.scale-100.png</ProjectItem>
+			</Folder>
+			<Folder Name="Properties">
+				<ProjectItem ReplaceParameters="true" TargetFileName="AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+			</Folder>
+			<ProjectItem ReplaceParameters="true" TargetFileName="Package.appxmanifest">Package.appxmanifest</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="packages.config">packages.config</ProjectItem>
+			<ProjectItem ReplaceParameters="false" TargetFileName="$ext_projectname$.Windows_TemporaryKey.pfx" BlendDoNotCreate="true">Salesforce.Universal.Template.Windows_TemporaryKey.pfx</ProjectItem>
+		</Project>
+	</TemplateContent>
+  <WizardExtension>
+    <Assembly>Microsoft.VisualStudio.WinRT.TemplateWizards, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+    <FullClassName>Microsoft.VisualStudio.WinRT.TemplateWizards.CreateProjectCertificate.Wizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

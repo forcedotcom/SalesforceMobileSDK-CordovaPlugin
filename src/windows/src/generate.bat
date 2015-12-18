@@ -1,0 +1,1 @@
+call powershell -executionpolicy bypass -file %~1\packageTemplate.ps1 %~1

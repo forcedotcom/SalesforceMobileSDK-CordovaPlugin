@@ -1,0 +1,32 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>Salesforce.Universal.Template.Shared</Name>
+    <Description>Salesforce Universal App</Description>
+    <ProjectType>CSharp</ProjectType>
+    <TargetPlatformName>Windows</TargetPlatformName>
+    <RequiredPlatformVersion>6.3.0</RequiredPlatformVersion>
+    <CreateInPlace>true</CreateInPlace>
+    <CreateNewFolder>true</CreateNewFolder>
+    <LocationField>Enabled</LocationField>
+    <Hidden>true</Hidden>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="Salesforce.Universal.Template.Shared.shproj" ReplaceParameters="true">
+      <Folder Name="Pages" TargetFolderName="Pages">
+        <ProjectItem ReplaceParameters="true" TargetFileName="MainPage.xaml">MainPage.xaml</ProjectItem>
+        <ProjectItem ReplaceParameters="true" TargetFileName="MainPage.xaml.cs">MainPage.xaml.cs</ProjectItem>
+      </Folder>
+      <Folder Name="settings" TargetFolderName="settings">
+        <ProjectItem ReplaceParameters="true" TargetFileName="Config.cs">Config.cs</ProjectItem>
+      </Folder>
+      <ProjectItem ReplaceParameters="true" TargetFileName="App.xaml">App.xaml</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="App.xaml.cs">App.xaml.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="$ext_projectname$.Shared.projitems">Salesforce.Universal.Template.Shared.projitems</ProjectItem>
+    </Project>
+  </TemplateContent>
+  <WizardExtension>
+    <!--<Assembly>TemplateWizard, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=69245b93ade9431a</Assembly>-->
+    <Assembly>TemplateWizard, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=69245b93ade9431a</Assembly>
+    <FullClassName>TemplateWizard.ChildWizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

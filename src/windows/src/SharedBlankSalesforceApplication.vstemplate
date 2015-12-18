@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="ProjectGroup">
+	<TemplateData>
+    <Name>Salesforce Application (Universal Apps for Windows 8.1)</Name>
+    <Description>Salesforce Universal App</Description>
+    <Icon>BlankApp.png</Icon>
+		<DefaultName>App</DefaultName>
+		<TemplateID>Salesforce.SharedBlankApplication</TemplateID>
+		<TemplateGroupID>WinRT-Managed</TemplateGroupID>
+		<ProjectType>CSharp</ProjectType>
+		<TargetPlatformName>Windows</TargetPlatformName>
+		<RequiredPlatformVersion>6.3.0</RequiredPlatformVersion>
+		<CreateInPlace>true</CreateInPlace>		
+		<CreateNewFolder>false</CreateNewFolder>		
+		<LocationField>Enabled</LocationField>	
+		<PreviewImage>BlankApp.png</PreviewImage>
+		<ProvideDefaultName>true</ProvideDefaultName>
+		<SortOrder>10</SortOrder>
+		<EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+		<NumberOfParentCategoriesToRollUp>2</NumberOfParentCategoriesToRollUp>
+		<PromptForSaveOnCreation>true</PromptForSaveOnCreation>		
+	</TemplateData>
+ 	<TemplateContent>
+ 		<ProjectCollection>
+      <SolutionFolder Name="$projectname$">
+        <ProjectTemplateLink ProjectName="$projectname$.Shared" CopyParameters="true">
+          Salesforce.Universal.Template\Salesforce.Universal.Template.Shared\Shared.vstemplate
+        </ProjectTemplateLink>
+        <ProjectTemplateLink ProjectName="$projectname$.Windows" CopyParameters="true">
+          Salesforce.Universal.Template\Salesforce.Universal.Template.Windows\Windows.vstemplate
+        </ProjectTemplateLink>
+        <ProjectTemplateLink ProjectName="$projectname$.WindowsPhone" CopyParameters="true">
+          Salesforce.Universal.Template\Salesforce.Universal.Template.WindowsPhone\WindowsPhone.vstemplate
+        </ProjectTemplateLink>
+      </SolutionFolder>
+ 		</ProjectCollection>
+    <CustomParameters>
+      <CustomParameter Name="$ClientID$" Value="clientID"/>
+      <CustomParameter Name="$CallbackURL$" Value="callbackUrl"/>
+      <CustomParameter Name="$EncryptionPassword$" Value="password"/>
+      <CustomParameter Name="$EncryptionSalt$" Value="salt"/>
+      <CustomParameter Name="$scopes$" Value="api"/>
+    </CustomParameters>
+	</TemplateContent>
+  <WizardExtension>
+    <!--<Assembly>TemplateWizard, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=69245b93ade9431a</Assembly>-->
+    <Assembly>TemplateWizard, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=69245b93ade9431a</Assembly>
+    <FullClassName>TemplateWizard.SalesforceTemplateWizard</FullClassName>
+  </WizardExtension>
+</VSTemplate>

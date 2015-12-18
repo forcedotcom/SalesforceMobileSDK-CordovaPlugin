@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="3.3.2">
+        version="4.0.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -25,18 +25,26 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova" version=">=3.5.0" />
-    <engine name="cordova" version="<=3.8.0" />
+    <engine name="cordova-android" version="5.0.0" />
+    <engine name="cordova-ios" version="3.9.2" />
   </engines>
 
-  <dependency id="org.apache.cordova.device"/>
-  <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/forcedotcom/PushPlugin" />
+  <dependency id="cordova-plugin-whitelist" />
+  <dependency id="cordova-plugin-device" />
+  <dependency id="phonegap-plugin-push" />
 
   <!-- ios -->
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
-      <preference name="BackupWebStorage" value="local"/>
-      <access origin="http://localhost"/> <!-- allow local pages -->
+      <preference name="BackupWebStorage" value="local" />
+
+      <!-- To allow XHR requests with the new Whitelist plugin -->
+      <allow-navigation href="https://localhost" />
+      <allow-navigation href="https://*.force.com" />
+      <allow-navigation href="https://*.salesforce.com" />
+
+      <!-- For legacy apps that don't use CSP -->
+      <access origin="https://localhost" />
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
@@ -80,6 +88,7 @@
     <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthInfo.h" target-dir="salesforce" />
@@ -89,6 +98,7 @@
     <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountIdentity.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SalesforceSDKManagerWithSmartStore.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
@@ -106,20 +116,19 @@
     <resource-file src="src/ios/resources/Images.xcassets" />
 
     <!-- Libraries -->
-    <source-file src="src/ios/frameworks/libSalesforceCommonUtils.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceOAuth.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSecurity.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceNetwork.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
+    <source-file src="src/ios/frameworks/libFMDB.a" framework="true" />
+    <source-file src="src/ios/frameworks/libCocoaLumberjack.a" framework="true" />
 
     <!-- System frameworks -->
-    <framework src="libxml2.dylib" />
-    <framework src="libz.dylib" />
+    <framework src="libxml2.tbd" />
+    <framework src="libz.tbd" />
     <framework src="AddressBook.framework" weak="true" />
     <framework src="AddressBookUI.framework" weak="true" />
     <framework src="CoreGraphics.framework" weak="true" />
@@ -138,7 +147,10 @@
   <!-- android -->
   <platform name="android">
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
-      <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" android:label="@string/app_name" android:name="com.salesforce.androidsdk.ui.sfhybrid.SalesforceDroidGapActivity" android:theme="@android:style/Theme.Black.NoTitleBar">
+      <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+          android:label="@string/app_name"
+          android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
+          android:theme="@android:style/Theme.Black.NoTitleBar">
         <intent-filter>
           <action android:name="android.intent.action.MAIN" />
           <category android:name="android.intent.category.LAUNCHER" />
@@ -147,14 +159,21 @@
     </config-file>
 
     <config-file target="res/xml/config.xml" parent="/*">
-      <access origin="http://127.0.0.1*"/> <!-- allow local pages -->
+
+      <!-- To allow XHR requests with the new Whitelist plugin -->
+      <allow-navigation href="https://localhost" />
+      <allow-navigation href="https://*.force.com" />
+      <allow-navigation href="https://*.salesforce.com" />
+
+      <!-- For legacy apps that don't use CSP -->
+      <access origin="https://localhost" />
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
-      <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SalesforceOAuthPlugin"/></feature>
-      <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SFAccountManagerPlugin"/></feature>
-      <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.SDKInfoPlugin"/></feature>
-      <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.smartstore.phonegap.SmartStorePlugin"/></feature>
-      <feature name="com.salesforce.smartsync"><param name="android-package" value="com.salesforce.androidsdk.smartsync.phonegap.SmartSyncPlugin"/></feature>
+      <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceOAuthPlugin"/></feature>
+      <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SFAccountManagerPlugin"/></feature>
+      <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SDKInfoPlugin"/></feature>
+      <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
+      <feature name="com.salesforce.smartsync"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartSyncPlugin"/></feature>
     </config-file>
 
     <config-file target="res/values/strings.xml" parent="/resources">
@@ -164,28 +183,32 @@
 
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
-    <hook type="before_plugin_install" src="tools/preinstall-android.js" />
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 
-<!-- windows -->
+  <!-- windows -->
   <platform name="windows">
 	<js-module src="src/windows/com.salesforce.plugin.oauthProxy.js" name="SalesforceOAuthProxy">
-            <runs/>
-        </js-module>
+    <runs/>
+  </js-module>
 	<js-module src="src/windows/com.salesforce.plugin.accountmanagerProxy.js" name="SalesforceAccountManagerProxy">
-            <runs/>
-        </js-module>
+    <runs/>
+  </js-module>
 	<js-module src="src/windows/com.salesforce.plugin.smartstoreProxy.js" name="SalesforceSmartStoreProxy">
-            <runs/>
-        </js-module>
+    <runs/>
+  </js-module>
 	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
-            <runs/>
-        </js-module>
-        <framework src="src/windows/src/Hybrid/Hybrid.Core.csproj"  custom="true" type="projectReference"/>
-	<framework src="src/windows/src/Hybrid.SmartStore/Hybrid.SmartStore.csproj"  custom="true" type="projectReference"/>
-	<framework src="src/windows/src/Hybrid.SmartSync/Hybrid.SmartSync.csproj"  custom="true" type="projectReference"/>
-	<framework src="src/windows/WinMD/SQLitePCL.Ext.dll" custom="true" />
-  </platform>
+    <runs/>
+  </js-module>
+  <js-module name="SalesforceCore" src="src/windows/salesforce.windows.core.js">
+	<runs/>
+  </js-module>
+	<framework src="src/windows/src/Core/Core.csproj"  custom="true" type="projectReference"/>
+    <framework src="src/windows/src/Universal/Universal.csproj"  custom="true" type="projectReference"/>
+  <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
+  <framework src="src/windows/src/packages/Newtonsoft.Json.7.0.1/lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll" custom="true"/>
+  <framework src="src/windows/src/packages/MvvmLightLibs.5.1.1.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.dll" custom="true"/>
+  <framework src="src/windows/src/packages/MvvmLightLibs.5.1.1.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.Extras.dll" custom="true"/>
+</platform>
 
 </plugin>
