@@ -1,5 +1,5 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
-var targetAndroidApi = 23; 
+var targetAndroidApi = 23;
 
 //--------------------------------------
 // Useful functions
@@ -109,10 +109,10 @@ shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settin
 shelljs.echo("include \":SalesforceHybrid\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 
 console.log('Moving Gradle wrapper files to application directory');
-shelljs.cp(path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
-shelljs.cp(path.join(pluginRoot, 'gradlew.bat'), appProjectRoot);
-shelljs.cp(path.join(pluginRoot, 'gradlew'), appProjectRoot);
-shelljs.cp(path.join(pluginRoot, 'gradle'), appProjectRoot);
+shelljs.cp('-R', path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
+shelljs.cp('-R', path.join(pluginRoot, 'gradlew.bat'), appProjectRoot);
+shelljs.cp('-R', path.join(pluginRoot, 'gradlew'), appProjectRoot);
+shelljs.cp('-R', path.join(pluginRoot, 'gradle'), appProjectRoot);
 
 console.log('Fixing application build.gradle');
 var oldAndroidDepTree = "android {";
