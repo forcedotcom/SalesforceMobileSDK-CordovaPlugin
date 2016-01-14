@@ -39,14 +39,28 @@
       <preference name="BackupWebStorage" value="local" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
+      <!--
+      FIXME:
+      Commenting whitelist entries until Mobile SDK plugin supports a version of Cordova with a functioning whitelist plugin.
+
       <allow-navigation href="https://localhost" />
       <allow-navigation href="https://*.force.com" />
       <allow-navigation href="https://*.salesforce.com" />
 
+      FIXME:
+      -->
+
       <!-- For legacy apps that don't use CSP -->
+      <!--
+      FIXME:
+      Commenting whitelist entries until Mobile SDK plugin supports a version of Cordova with a functioning whitelist plugin.
+
       <access origin="https://localhost" />
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
+
+      FIXME:
+      -->
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
