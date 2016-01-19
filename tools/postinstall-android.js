@@ -135,4 +135,4 @@ fs.readFile(path.join(appProjectRoot, 'build.gradle'), 'utf8', function (err, da
         shelljs.sed('-i', 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
     }
     console.log("Done running SalesforceMobileSDK plugin android post-install script");
-};
+});
