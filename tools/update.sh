@@ -179,8 +179,6 @@ echo "Copying SalesforceHybridSDK library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
-echo "Copying FMDB library"
-unzip $IOS_SDK_FOLDER/build/artifacts/fmdb-Debug.zip -d tmp
 echo "Copying CocoaLumberjack library"
 unzip $IOS_SDK_FOLDER/build/artifacts/Lumberjack-Debug.zip -d tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
@@ -226,7 +224,6 @@ copy_lib libSmartStore.a
 copy_lib libSmartSync.a
 copy_lib libSalesforceHybridSDK.a
 copy_lib libsqlcipher.a
-copy_lib libFMDB.a
 copy_lib libCocoaLumberjack.a
 echo "Copying Images.xcassets"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets

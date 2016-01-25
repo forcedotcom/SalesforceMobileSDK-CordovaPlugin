@@ -137,7 +137,6 @@
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
-    <source-file src="src/ios/frameworks/libFMDB.a" framework="true" />
     <source-file src="src/ios/frameworks/libCocoaLumberjack.a" framework="true" />
 
     <!-- System frameworks -->
