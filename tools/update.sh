@@ -133,7 +133,7 @@ cd ${ROOT_FOLDER}
 
 echo "*** Creating directories ***"
 echo "Starting clean"
-rm -rf tmp src
+rm -rf tmp src/ios src/anrdroid
 echo "Creating tmp directory"
 mkdir -p tmp
 echo "Creating android directories"
