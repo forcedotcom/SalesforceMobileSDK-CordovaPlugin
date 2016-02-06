@@ -127,7 +127,7 @@ fs.readFile(path.join(appProjectRoot, 'build.gradle'), 'utf8', function (err, da
         var oldBuildScriptDepTree = "buildscript {";
         var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
         shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
-        var newLibDep = "compile \"com.google.android.gms:play-services:7.5.0\"\ncompile project(':SalesforceHybrid')";
+        var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
         var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
         shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
         shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
