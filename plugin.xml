@@ -163,6 +163,7 @@
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
       <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
           android:label="@string/app_name"
+          android:launchMode="singleTop"
           android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
           android:theme="@android:style/Theme.Black.NoTitleBar">
         <intent-filter>
@@ -198,6 +199,8 @@
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
+    <hook type="after_platform_add" src="tools/after-platform-add-android.js" />
+    <hook type="after_plugin_add" src="tools/after-platform-add-android.js" />
   </platform>
 
   <!-- windows -->
