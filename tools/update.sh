@@ -1,6 +1,8 @@
 #!/bin/bash
 
-#set -x
+#set -x  # turn trace on 
+set -e   # stop at first error
+
 
 OPT_BUILD="yes"
 OPT_BRANCH=""
