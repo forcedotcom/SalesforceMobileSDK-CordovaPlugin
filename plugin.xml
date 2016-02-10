@@ -125,9 +125,9 @@
     <source-file src="src/ios/classes/InitialViewController.m" />
 
     <!-- Resource bundles -->
-    <resource-file src="src/ios/resources/Settings.bundle" />
     <resource-file src="src/ios/resources/SalesforceSDKResources.bundle" />
     <resource-file src="src/ios/resources/Images.xcassets" />
+    <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Libraries -->
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />

@@ -229,8 +229,8 @@ copy_lib libsqlcipher.a
 copy_lib libCocoaLumberjack.a
 echo "Copying Images.xcassets"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
-echo "Copying Settings.bundle"
-cp -RL $IOS_SDK_FOLDER/shared/resources/Settings.bundle src/ios/resources/
+echo "Copying SalesforceSDKAssets.xcassets"
+cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKAssets.xcassets src/ios/resources/SalesforceSDKAssets.xcassets
 echo "Copying SalesforceSDKResources.bundle"
 cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKResources.bundle src/ios/resources/
 
