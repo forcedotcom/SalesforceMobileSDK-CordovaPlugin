@@ -197,6 +197,8 @@
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
+    <hook type="after_platform_add" src="tools/after-platform-add-android.js" />
+    <hook type="after_plugin_add" src="tools/after-platform-add-android.js" />
   </platform>
 
   <!-- windows -->
