@@ -1,6 +1,8 @@
 #!/bin/bash
 
-#set -x
+#set -x  # turn trace on 
+set -e   # stop at first error
+
 
 OPT_BUILD="yes"
 OPT_BRANCH=""
@@ -133,7 +135,7 @@ cd ${ROOT_FOLDER}
 
 echo "*** Creating directories ***"
 echo "Starting clean"
-rm -rf tmp src
+rm -rf tmp src/ios src/android
 echo "Creating tmp directory"
 mkdir -p tmp
 echo "Creating android directories"
@@ -179,8 +181,6 @@ echo "Copying SalesforceHybridSDK library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
-echo "Copying FMDB library"
-unzip $IOS_SDK_FOLDER/build/artifacts/fmdb-Debug.zip -d tmp
 echo "Copying CocoaLumberjack library"
 unzip $IOS_SDK_FOLDER/build/artifacts/Lumberjack-Debug.zip -d tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
@@ -226,12 +226,11 @@ copy_lib libSmartStore.a
 copy_lib libSmartSync.a
 copy_lib libSalesforceHybridSDK.a
 copy_lib libsqlcipher.a
-copy_lib libFMDB.a
 copy_lib libCocoaLumberjack.a
 echo "Copying Images.xcassets"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
-echo "Copying Settings.bundle"
-cp -RL $IOS_SDK_FOLDER/shared/resources/Settings.bundle src/ios/resources/
+echo "Copying SalesforceSDKAssets.xcassets"
+cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKAssets.xcassets src/ios/resources/SalesforceSDKAssets.xcassets
 echo "Copying SalesforceSDKResources.bundle"
 cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKResources.bundle src/ios/resources/
 

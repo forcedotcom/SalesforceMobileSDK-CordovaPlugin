@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="4.0.2">
+        version="4.1.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -125,9 +125,9 @@
     <source-file src="src/ios/classes/InitialViewController.m" />
 
     <!-- Resource bundles -->
-    <resource-file src="src/ios/resources/Settings.bundle" />
     <resource-file src="src/ios/resources/SalesforceSDKResources.bundle" />
     <resource-file src="src/ios/resources/Images.xcassets" />
+    <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Libraries -->
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
@@ -137,7 +137,6 @@
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
-    <source-file src="src/ios/frameworks/libFMDB.a" framework="true" />
     <source-file src="src/ios/frameworks/libCocoaLumberjack.a" framework="true" />
 
     <!-- System frameworks -->
@@ -198,6 +197,8 @@
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
+    <hook type="after_platform_add" src="tools/after-platform-add-android.js" />
+    <hook type="after_plugin_add" src="tools/after-platform-add-android.js" />
   </platform>
 
   <!-- windows -->
