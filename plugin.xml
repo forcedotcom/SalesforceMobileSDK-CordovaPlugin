@@ -102,6 +102,7 @@
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
+    <header-file src="src/ios/headers/SFApplicationHelper.h"  />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
