@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="4.0.0">
+        version="4.2.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -29,9 +29,10 @@
     <engine name="cordova-ios" version="3.9.2" />
   </engines>
 
-  <dependency id="cordova-plugin-whitelist" />
-  <dependency id="cordova-plugin-device" />
-  <dependency id="phonegap-plugin-push" />
+  <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
+  <dependency id="cordova-plugin-whitelist" url="https://github.com/apache/cordova-plugin-whitelist" commit="1.2.0" />
+  <dependency id="cordova-plugin-device" url="https://github.com/apache/cordova-plugin-device" commit="r1.0.1" />
+  <dependency id="phonegap-plugin-push" url="https://github.com/phonegap/phonegap-plugin-push" commit="1.5.0" />
 
   <!-- ios -->
   <platform name="ios">
@@ -39,14 +40,28 @@
       <preference name="BackupWebStorage" value="local" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
+      <!--
+      FIXME:
+      Commenting whitelist entries until Mobile SDK plugin supports a version of Cordova with a functioning whitelist plugin.
+
       <allow-navigation href="https://localhost" />
       <allow-navigation href="https://*.force.com" />
       <allow-navigation href="https://*.salesforce.com" />
 
+      FIXME:
+      -->
+
       <!-- For legacy apps that don't use CSP -->
+      <!--
+      FIXME:
+      Commenting whitelist entries until Mobile SDK plugin supports a version of Cordova with a functioning whitelist plugin.
+
       <access origin="https://localhost" />
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
+
+      FIXME:
+      -->
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
@@ -88,6 +103,7 @@
     <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthInfo.h" target-dir="salesforce" />
@@ -97,6 +113,7 @@
     <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountIdentity.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SalesforceSDKManagerWithSmartStore.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
@@ -110,25 +127,23 @@
     <source-file src="src/ios/classes/InitialViewController.m" />
 
     <!-- Resource bundles -->
-    <resource-file src="src/ios/resources/Settings.bundle" />
     <resource-file src="src/ios/resources/SalesforceSDKResources.bundle" />
     <resource-file src="src/ios/resources/Images.xcassets" />
+    <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Libraries -->
-    <source-file src="src/ios/frameworks/libSalesforceCommonUtils.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceOAuth.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSecurity.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceNetwork.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
+    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
+    <source-file src="src/ios/frameworks/libCocoaLumberjack.a" framework="true" />
 
     <!-- System frameworks -->
-    <framework src="libxml2.dylib" />
-    <framework src="libz.dylib" />
+    <framework src="libxml2.tbd" />
+    <framework src="libz.tbd" />
     <framework src="AddressBook.framework" weak="true" />
     <framework src="AddressBookUI.framework" weak="true" />
     <framework src="CoreGraphics.framework" weak="true" />
@@ -184,6 +199,8 @@
     <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
+    <hook type="after_platform_add" src="tools/after-platform-add-android.js" />
+    <hook type="after_plugin_add" src="tools/after-platform-add-android.js" />
   </platform>
 
   <!-- windows -->
