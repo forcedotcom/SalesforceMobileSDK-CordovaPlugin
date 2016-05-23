@@ -1,6 +1,8 @@
 #!/bin/bash
 
-#set -x
+#set -x  # turn trace on 
+set -e   # stop at first error
+
 
 OPT_BUILD="yes"
 OPT_BRANCH=""
@@ -50,7 +52,7 @@ parse_opts ()
 copy_and_fix ()
 {
     echo "* Fixing and copying $1 to $2 directory"
-    find tmp -name $1 | xargs sed 's/\#import\ \<Salesforce.*\/\(.*\)\>/#import "\1"/' > src/ios/$2/$1
+    find tmp -name $1 | xargs sed -E 's/#import <(Salesforce|SmartStore).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
 }
 
 copy_lib ()
@@ -133,7 +135,7 @@ cd ${ROOT_FOLDER}
 
 echo "*** Creating directories ***"
 echo "Starting clean"
-rm -rf tmp src
+rm -rf tmp src/ios src/android
 echo "Creating tmp directory"
 mkdir -p tmp
 echo "Creating android directories"
@@ -154,10 +156,6 @@ echo "Copying SmartSync library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SmartSync src/android/libs/
 echo "Copying SalesforceHybrid library"
 cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceHybrid src/android/libs/
-echo "Copying icu461.zip"
-cp $ANDROID_SDK_FOLDER/external/sqlcipher/assets/icudt46l.zip src/android/assets/
-echo "Copying sqlcipher"
-cp -RL $ANDROID_SDK_FOLDER/external/sqlcipher/libs/* src/android/libs/SmartStore/libs/
 echo "Copying Gradle wrapper files"
 cp $ANDROID_SDK_FOLDER/gradle.properties ./
 cp $ANDROID_SDK_FOLDER/gradlew.bat ./
@@ -165,26 +163,22 @@ cp $ANDROID_SDK_FOLDER/gradlew ./
 cp -RL $ANDROID_SDK_FOLDER/gradle ./
 
 echo "*** iOS ***"
-echo "Copying SalesforceHybridSDK library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
-echo "Copying SalesforceOAuth library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceOAuth-Debug.zip -d tmp
-echo "Copying SalesforceSDKCore library"    
+echo "Copying SalesforceSDKCore library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCore-Debug.zip -d tmp
-echo "Copying SalesforceSecurity library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSecurity-Debug.zip -d tmp
-echo "Copying SalesforceNetwork library"    
+echo "Copying SalesforceNetwork library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceNetwork-Debug.zip -d tmp
-echo "Copying SalesforceRestAPI library"    
+echo "Copying SalesforceRestAPI library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceRestAPI-Debug.zip -d tmp
-echo "Copying SmartSync library"    
+echo "Copying SmartStore library"
+unzip $IOS_SDK_FOLDER/build/artifacts/SmartStore-Debug.zip -d tmp
+echo "Copying SmartSync library"
 unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
-echo "Copying SalesforceSDKCommon library"    
-unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
-echo "Copying SalesforceCommonUtils library"    
-cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/SalesforceCommonUtils tmp
+echo "Copying SalesforceHybridSDK library"
+unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
 echo "Copying sqlcipher library"    
 cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
+echo "Copying CocoaLumberjack library"
+unzip $IOS_SDK_FOLDER/build/artifacts/Lumberjack-Debug.zip -d tmp
 echo "Copying AppDelegate+SalesforceHybridSDK"    
 cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
 cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
@@ -203,6 +197,7 @@ copy_and_fix SFIdentityCoordinator.h headers
 copy_and_fix SFIdentityData.h headers
 copy_and_fix SFLocalhostSubstitutionCache.h headers
 copy_and_fix SFLogger.h headers
+copy_and_fix NSNotificationCenter+SFAdditions.h headers
 copy_and_fix SFOAuthCoordinator.h headers
 copy_and_fix SFOAuthCredentials.h headers
 copy_and_fix SFOAuthInfo.h headers
@@ -212,6 +207,7 @@ copy_and_fix SFUserAccountConstants.h headers
 copy_and_fix SFUserAccountManager.h headers
 copy_and_fix SFUserAccountIdentity.h headers
 copy_and_fix SalesforceSDKManager.h headers
+copy_and_fix SalesforceSDKManagerWithSmartStore.h headers
 copy_and_fix SFAuthErrorHandler.h headers
 copy_and_fix SFAuthErrorHandlerList.h headers
 copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
@@ -220,20 +216,18 @@ copy_and_fix InitialViewController.m classes
 copy_and_fix SalesforceSDKCoreDefines.h headers
 copy_and_fix SFApplicationHelper.h headers
 echo "Copying needed libraries to src/ios/frameworks"
-copy_lib libSalesforceCommonUtils.a
-copy_lib libSalesforceHybridSDK.a
-copy_lib libSalesforceOAuth.a
 copy_lib libSalesforceSDKCore.a
-copy_lib libSalesforceSecurity.a
 copy_lib libSalesforceNetwork.a
 copy_lib libSalesforceRestAPI.a
+copy_lib libSmartStore.a
 copy_lib libSmartSync.a
-copy_lib libSalesforceSDKCommon.a
+copy_lib libSalesforceHybridSDK.a
 copy_lib libsqlcipher.a
+copy_lib libCocoaLumberjack.a
 echo "Copying Images.xcassets"
 cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
-echo "Copying Settings.bundle"
-cp -RL $IOS_SDK_FOLDER/shared/resources/Settings.bundle src/ios/resources/
+echo "Copying SalesforceSDKAssets.xcassets"
+cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKAssets.xcassets src/ios/resources/SalesforceSDKAssets.xcassets
 echo "Copying SalesforceSDKResources.bundle"
 cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKResources.bundle src/ios/resources/
 
