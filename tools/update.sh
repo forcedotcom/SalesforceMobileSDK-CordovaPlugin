@@ -214,7 +214,6 @@ copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
 copy_and_fix UIApplication+SalesforceHybridSDK.m classes
 copy_and_fix InitialViewController.m classes
 copy_and_fix SalesforceSDKCoreDefines.h headers
-copy_and_fix SFApplicationHelper.h headers
 echo "Copying needed libraries to src/ios/frameworks"
 copy_lib libSalesforceSDKCore.a
 copy_lib libSalesforceNetwork.a
