@@ -13,13 +13,13 @@ var shelljs;
 try {
     shelljs = require('shelljs');
     var version = require('shelljs/package.json').version
-    if (version !== '0.5.3') {
-        console.log('The version 0.5.3 of the node package shelljs is required to use this script. Run \'npm install shelljs@0.5.3\' before running this script.');
+    if (version !== '0.7.0') {
+        console.log('The version 0.7.0 of the node package shelljs is required to use this script. Run \'npm install shelljs@0.7.0\' before running this script.');
         process.exit(1);
     }
 
 } catch(e) {
-    console.log('The node package shelljs is required to use this script. Run \'npm install shelljs@0.5.3\' before running this script.');
+    console.log('The node package shelljs is required to use this script. Run \'npm install shelljs@0.7.0\' before running this script.');
     process.exit(1);
 }
 
