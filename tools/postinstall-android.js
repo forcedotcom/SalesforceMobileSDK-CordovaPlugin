@@ -68,10 +68,14 @@ var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
 var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
 var oldSmartSyncDep = "compile project\(\':libs:SmartSync\'\)";
-shelljs.sed('-i', oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)', path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
-shelljs.sed('-i', oldSmartStoreDep, 'compile project\(\':SmartStore\'\)', path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
-shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
-shelljs.sed('-i', oldSmartSyncDep, 'compile project\(\':SmartSync\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
+//shelljs.sed('-i', oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)', path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
+replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)');
+//shelljs.sed('-i', oldSmartStoreDep, 'compile project\(\':SmartStore\'\)', path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
+replaceTextInFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), oldSmartStoreDep, 'compile project\(\':SmartStore\'\)');
+//shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldCordovaDep, 'compile project\(\':CordovaLib\'\)');
+//shelljs.sed('-i', oldSmartSyncDep, 'compile project\(\':SmartSync\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldSmartSyncDep, 'compile project\(\':SmartSync\'\)');
 
 console.log('Fixing root level Gradle file for the generated app');
 shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
@@ -100,9 +104,23 @@ if(data.indexOf("org.apache.http.legacy") < 0 && data.indexOf("allprojects") < 0
     shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
     var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
     var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
-    shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
-    shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
-    shelljs.sed('-i', 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep, path.join(appProjectRoot, 'build.gradle'));
-    shelljs.sed('-i', 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
+    //shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
+    replaceTextInFile(path.join(appProjectRoot, 'CordovaLib', 'build.gradle'), oldAndroidDepTree, useLegacyStr);
+    //shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, useLegacyStr);
+    //shelljs.sed('-i', 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep, path.join(appProjectRoot, 'build.gradle'));
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")');
+    //shelljs.sed('-i', 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '');
 }
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
+
+function replaceTextInFile(fileName, textInFile, replacementText) {
+    var contents = fs.readFileSync(fileName, 'utf8');
+    var lines = contents.split(/\r*\n/);
+    var result = lines.map(function (line) {
+      return line.replace(textInFile, replacementText);
+    }).join('\n');
+
+    fs.writeFileSync(fileName, result, 'utf8'); 
+}
