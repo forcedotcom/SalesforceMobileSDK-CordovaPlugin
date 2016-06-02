@@ -101,7 +101,8 @@ if(data.indexOf("org.apache.http.legacy") < 0 && data.indexOf("allprojects") < 0
     shelljs.echo("allprojects {\n\trepositories {\n\t\tmavenCentral\(\)\n\t}\n}").toEnd(path.join(appProjectRoot, 'build.gradle'));
     var oldBuildScriptDepTree = "buildscript {";
     var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
-    shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
+    //shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldBuildScriptDepTree, newBuildScriptDepTree);
     var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
     var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
     //shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
@@ -109,7 +110,7 @@ if(data.indexOf("org.apache.http.legacy") < 0 && data.indexOf("allprojects") < 0
     //shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, useLegacyStr);
     //shelljs.sed('-i', 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep, path.join(appProjectRoot, 'build.gradle'));
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")');
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep);
     //shelljs.sed('-i', 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '');
 }
