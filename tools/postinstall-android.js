@@ -68,13 +68,9 @@ var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
 var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
 var oldSmartSyncDep = "compile project\(\':libs:SmartSync\'\)";
-//shelljs.sed('-i', oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)', path.join(appProjectRoot, 'SmartStore', 'build.gradle'));
 replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)');
-//shelljs.sed('-i', oldSmartStoreDep, 'compile project\(\':SmartStore\'\)', path.join(appProjectRoot, 'SmartSync', 'build.gradle'));
 replaceTextInFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), oldSmartStoreDep, 'compile project\(\':SmartStore\'\)');
-//shelljs.sed('-i', oldCordovaDep, 'compile project\(\':CordovaLib\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldCordovaDep, 'compile project\(\':CordovaLib\'\)');
-//shelljs.sed('-i', oldSmartSyncDep, 'compile project\(\':SmartSync\'\)', path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'));
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldSmartSyncDep, 'compile project\(\':SmartSync\'\)');
 
 console.log('Fixing root level Gradle file for the generated app');
@@ -97,21 +93,17 @@ if(data.indexOf("org.apache.http.legacy") < 0 && data.indexOf("allprojects") < 0
 {
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
-    shelljs.sed('-i', oldAndroidDepTree, newAndroidDepTree, path.join(appProjectRoot, 'build.gradle'));
+    //shelljs.sed('-i', oldAndroidDepTree, newAndroidDepTree, path.join(appProjectRoot, 'build.gradle'));
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
     shelljs.echo("allprojects {\n\trepositories {\n\t\tmavenCentral\(\)\n\t}\n}").toEnd(path.join(appProjectRoot, 'build.gradle'));
     var oldBuildScriptDepTree = "buildscript {";
     var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
-    //shelljs.sed('-i', oldBuildScriptDepTree, newBuildScriptDepTree, path.join(appProjectRoot, 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldBuildScriptDepTree, newBuildScriptDepTree);
     var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
     var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
-    //shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'CordovaLib', 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'CordovaLib', 'build.gradle'), oldAndroidDepTree, useLegacyStr);
-    //shelljs.sed('-i', oldAndroidDepTree, useLegacyStr, path.join(appProjectRoot, 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, useLegacyStr);
-    //shelljs.sed('-i', 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep, path.join(appProjectRoot, 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep);
-    //shelljs.sed('-i', 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '', path.join(appProjectRoot, 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '');
 }
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
