@@ -93,7 +93,6 @@ if(data.indexOf("org.apache.http.legacy") < 0 && data.indexOf("allprojects") < 0
 {
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
-    //shelljs.sed('-i', oldAndroidDepTree, newAndroidDepTree, path.join(appProjectRoot, 'build.gradle'));
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
     shelljs.echo("allprojects {\n\trepositories {\n\t\tmavenCentral\(\)\n\t}\n}").toEnd(path.join(appProjectRoot, 'build.gradle'));
     var oldBuildScriptDepTree = "buildscript {";
