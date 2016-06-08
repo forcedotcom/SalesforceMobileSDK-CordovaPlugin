@@ -43,9 +43,7 @@ parse_opts ()
 
     if [ "${OPT_OS}" == "" ]
     then
-        echo "You must specify a value for os."
-        usage
-        exit 1
+        OPT_OS="all"
     fi
 
     valid_branch_regex='^[a-zA-Z0-9_][a-zA-Z0-9_]*(/[a-zA-Z0-9_][a-zA-Z0-9_]*)?$'
