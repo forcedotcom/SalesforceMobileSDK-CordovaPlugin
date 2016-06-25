@@ -26,11 +26,18 @@
  */
 package com.salesforce.androidsdk.smartstore.store;
 
+import android.text.TextUtils;
+
 import com.salesforce.androidsdk.smartstore.store.SmartStore.SmartStoreException;
 import com.salesforce.androidsdk.util.JSONObjectHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Simple class to represent a query spec
@@ -58,6 +65,7 @@ public class QuerySpec {
     public static final String ORDER = "order";
     public static final String PAGE_SIZE = "pageSize";
     public static final String QUERY_TYPE = "queryType";
+    public static final String SELECT_PATHS = "selectPaths";
 
     // Key members
 	public final QueryType queryType;
@@ -68,6 +76,7 @@ public class QuerySpec {
 
     // Exact/Range/Like/Match
 	public final String soupName;
+    public final String[] selectPaths;
     public final String path;
     public final String orderPath;
     public final Order order;
@@ -81,8 +90,9 @@ public class QuerySpec {
     public final String likeKey;
 
     // Private constructor for soup query spec
-    private QuerySpec(String soupName, String path, QueryType queryType, String matchKey, String beginKey, String endKey, String likeKey, String orderPath, Order order, int pageSize) {
+    private QuerySpec(String soupName, String[] selectPaths, QueryType queryType, String matchKey, String beginKey, String endKey, String likeKey, String orderPath, Order order, int pageSize, String path) {
     	this.soupName = soupName;
+        this.selectPaths = selectPaths;
         this.path = path;
         this.queryType = queryType;
         this.matchKey = matchKey;
@@ -107,6 +117,7 @@ public class QuerySpec {
     	
     	// Not applicable
         this.soupName = null;
+        this.selectPaths = null;
         this.path = null;
         this.matchKey = null;
         this.beginKey = null;
@@ -117,7 +128,7 @@ public class QuerySpec {
     }
 
     /**
-     * Return q auery spec for an all query
+     * Return query spec for an all query
      * @param soupName
      * @param orderPath
      * @param order
@@ -125,9 +136,22 @@ public class QuerySpec {
      * @return
      */
     public static QuerySpec buildAllQuerySpec(String soupName, String orderPath, Order order, int pageSize) {
-        return new QuerySpec(soupName, null, QueryType.range, null, null, null, null, orderPath, order, pageSize);
+        return buildAllQuerySpec(soupName, null, orderPath, order, pageSize);
     }
-    
+
+    /**
+     * Return query spec for an all query
+     * @param soupName
+     * @param selectPaths
+     * @param orderPath
+     * @param order
+     * @param pageSize
+     * @return
+     */
+    public static QuerySpec buildAllQuerySpec(String soupName, String[] selectPaths, String orderPath, Order order, int pageSize) {
+        return new QuerySpec(soupName, selectPaths, QueryType.range, null, null, null, null, orderPath, order, pageSize, null);
+    }
+
     /**
      * Return a query spec for an exact match query
      * @param soupName
@@ -139,7 +163,22 @@ public class QuerySpec {
      * @return
      */
     public static QuerySpec buildExactQuerySpec(String soupName, String path, String exactMatchKey, String orderPath, Order order, int pageSize) {
-        return new QuerySpec(soupName, path, QueryType.exact, exactMatchKey, null, null, null, orderPath, order, pageSize);
+        return buildExactQuerySpec(soupName, null, path, exactMatchKey, orderPath, order, pageSize);
+    }
+
+    /**
+     * Return a query spec for an exact match query
+     * @param soupName
+     * @param selectPaths
+     * @param path
+     * @param exactMatchKey
+     * @param orderPath
+     * @param order
+     * @param pageSize
+     * @return
+     */
+    public static QuerySpec buildExactQuerySpec(String soupName, String[] selectPaths, String path, String exactMatchKey, String orderPath, Order order, int pageSize) {
+        return new QuerySpec(soupName, selectPaths, QueryType.exact, exactMatchKey, null, null, null, orderPath, order, pageSize, path);
     }
 
     /**
@@ -154,7 +193,23 @@ public class QuerySpec {
      * @return
      */
     public static QuerySpec buildRangeQuerySpec(String soupName, String path, String beginKey, String endKey, String orderPath, Order order, int pageSize) {
-        return new QuerySpec(soupName, path, QueryType.range, null, beginKey, endKey, null, orderPath, order, pageSize);
+        return buildRangeQuerySpec(soupName, null, path, beginKey, endKey, orderPath, order, pageSize);
+    }
+
+    /**
+     * Return a query spec for a range query
+     * @param soupName
+     * @param selectPaths
+     * @param path
+     * @param beginKey
+     * @param endKey
+     * @param orderPath
+     * @param order
+     * @param pageSize
+     * @return
+     */
+    public static QuerySpec buildRangeQuerySpec(String soupName, String[] selectPaths, String path, String beginKey, String endKey, String orderPath, Order order, int pageSize) {
+        return new QuerySpec(soupName, selectPaths, QueryType.range, null, beginKey, endKey, null, orderPath, order, pageSize, path);
     }
 
     /**
@@ -168,7 +223,22 @@ public class QuerySpec {
      * @return
      * */
     public static QuerySpec buildLikeQuerySpec(String soupName, String path, String likeKey, String orderPath, Order order, int pageSize) {
-        return new QuerySpec(soupName, path, QueryType.like, null, null, null, likeKey, orderPath, order, pageSize);
+        return buildLikeQuerySpec(soupName, null, path, likeKey, orderPath, order, pageSize);
+    }
+
+    /**
+     * Return a query spec for a like query
+     * @param soupName
+     * @param selectPaths
+     * @param path
+     * @param likeKey
+     * @param orderPath
+     * @param order
+     * @param pageSize
+     * @return
+     * */
+    public static QuerySpec buildLikeQuerySpec(String soupName, String[] selectPaths, String path, String likeKey, String orderPath, Order order, int pageSize) {
+        return new QuerySpec(soupName, selectPaths, QueryType.like, null, null, null, likeKey, orderPath, order, pageSize, path);
     }
 
     /**
@@ -182,7 +252,22 @@ public class QuerySpec {
      * @return
      */
     public static QuerySpec buildMatchQuerySpec(String soupName, String path, String matchKey, String orderPath, Order order, int pageSize) {
-        return new QuerySpec(soupName, path, QueryType.match, matchKey, null, null, null, orderPath, order, pageSize);
+        return buildMatchQuerySpec(soupName, null, path, matchKey, orderPath, order, pageSize);
+    }
+
+    /**
+     * Return a query spec for a match query (full-text search)
+     * @param soupName
+     * @param selectPaths
+     * @param path
+     * @param matchKey
+     * @param orderPath
+     * @param order
+     * @param pageSize
+     * @return
+     */
+    public static QuerySpec buildMatchQuerySpec(String soupName, String[] selectPaths, String path, String matchKey, String orderPath, Order order, int pageSize) {
+        return new QuerySpec(soupName, selectPaths, QueryType.match, matchKey, null, null, null, orderPath, order, pageSize, path);
     }
 
     /**
@@ -243,20 +328,18 @@ public class QuerySpec {
      * @return select clause for exact/like/range/match queries
      */
     private String computeSelectClause() {
-        return SELECT + computeFieldReference(SmartSqlHelper.SOUP) + " ";
+        List<String> fieldReferences = new ArrayList<>();
+        for (String selectPath : (selectPaths != null ? selectPaths : new String[] {SmartSqlHelper.SOUP})) {
+            fieldReferences.add(computeFieldReference(selectPath));
+        }
+        return SELECT + TextUtils.join(", ", fieldReferences) + " ";
     }
 
     /**
      * @return from clause for exact/like/range/match queries
      */
     private String computeFromClause() {
-        if (queryType == QueryType.match) {
-            return FROM + computeSoupReference() + ", " + computeSoupFtsReference() + " ";
-        }
-        else {
-            return FROM + computeSoupReference() + " ";
-        }
-        
+        return FROM + computeSoupReference() + " ";
     }
     
     /**
@@ -265,12 +348,9 @@ public class QuerySpec {
     private String computeWhereClause() {
         if (path == null && queryType != QueryType.match /* null path allowed for fts match query */) return "";
 
-        String field;
+        String field = null;
 
-        if (queryType == QueryType.match) {
-            field = computeSoupFtsReference() + (path == null ? "" : "." + computeFieldReference(path));
-        }
-        else {
+        if (path != null) {
             field = computeFieldReference(path);
         }
 
@@ -299,9 +379,11 @@ public class QuerySpec {
                     break;
                 }
             case match:
-                String joinClause = computeSoupFtsReference() + "." + SmartStore.DOCID_COL + " = " + computeFieldReference(SmartStore.SOUP_ENTRY_ID);
-                String matchCause = field + " MATCH '" + matchKey + "' "; // statement arg binding doesn't seem to work so inlining matchKey
-                pred = joinClause + " AND " + matchCause;
+                pred = computeFieldReference(SmartStore.SOUP_ENTRY_ID) + " IN ("
+                        + SELECT + SmartStore.ROWID_COL + " " + FROM + computeSoupFtsReference() + " " + WHERE
+                        + computeSoupFtsReference() + " MATCH '" + qualifyMatchKey(field, matchKey) + "'"
+                        // statement arg binding doesn't seem to work so inlining matchKey
+                        + ") ";
                 break;
             default:
                 throw new SmartStoreException("Fell through switch: " + queryType);
@@ -310,12 +392,47 @@ public class QuerySpec {
     }
 
     /**
+     * fts5 doesn't allow WHERE column MATCH 'value' - only allows WHERE table MATCH 'column:value'
+     * This method changes the matchKey to add field: in the right places
+     * @param field
+     * @param matchKey
+     * @return
+     */
+    public static String qualifyMatchKey(String field, String matchKey) {
+        if (field == null) {
+            return matchKey;
+        }
+
+        StringBuffer qualifiedMatchKey = new StringBuffer();
+        Pattern pattern = Pattern.compile("[^\\(\\) ]+");
+        Matcher matcher = pattern.matcher(matchKey);
+        while (matcher.find()) {
+            String fullMatch = matcher.group();
+            String fullMatchLowerCase = fullMatch.toLowerCase();
+
+            if (fullMatchLowerCase.equals("and") || fullMatchLowerCase.equals("or") || fullMatchLowerCase.equals("not") // operator
+                    || fullMatch.startsWith("{")) // already qualified
+            {
+                // Leaving unchanged
+                matcher.appendReplacement(qualifiedMatchKey, fullMatch);
+            }
+            else {
+                // Qualifying with {soup:path}: -- which turn into column: in sql
+                matcher.appendReplacement(qualifiedMatchKey, field + ":" + fullMatch);
+            }
+        }
+        matcher.appendTail(qualifiedMatchKey);
+
+        return qualifiedMatchKey.toString();
+    }
+
+    /**
      * @return order clause for exact/like/range/match queries
      */
     private String computeOrderClause() {
     	if (orderPath == null || order == null) return "";
 
-    	return ORDER_BY + computeSoupReference() + "." + computeFieldReference(orderPath) + " " + order.sql + " ";
+    	return ORDER_BY + computeFieldReference(orderPath) + " " + order.sql + " ";
     }
     
 	/**
@@ -376,6 +493,7 @@ public class QuerySpec {
 	public static QuerySpec fromJSON(String soupName, JSONObject querySpecJson)
 			throws JSONException {
 		QueryType queryType = QueryType.valueOf(querySpecJson.getString(QUERY_TYPE));
+        String[] selectPaths = JSONObjectHelper.optStringArray(querySpecJson, SELECT_PATHS);
 		String path = JSONObjectHelper.optString(querySpecJson, INDEX_PATH);
 		String matchKey = JSONObjectHelper.optString(querySpecJson, MATCH_KEY);
 		String beginKey = JSONObjectHelper.optString(querySpecJson, BEGIN_KEY);
@@ -389,10 +507,10 @@ public class QuerySpec {
 		// Building query spec
 		QuerySpec querySpec = null;
 		switch (queryType) {
-	    case exact:   querySpec = buildExactQuerySpec(soupName, path, matchKey, orderPath, order, pageSize); break;
-	    case range:   querySpec = buildRangeQuerySpec(soupName, path, beginKey, endKey, orderPath, order, pageSize); break;
-	    case like:    querySpec = buildLikeQuerySpec(soupName, path, likeKey, orderPath, order, pageSize); break;
-        case match:   querySpec = buildMatchQuerySpec(soupName, path, matchKey, orderPath, order, pageSize); break;
+	    case exact:   querySpec = buildExactQuerySpec(soupName, selectPaths, path, matchKey, orderPath, order, pageSize); break;
+	    case range:   querySpec = buildRangeQuerySpec(soupName, selectPaths, path, beginKey, endKey, orderPath, order, pageSize); break;
+	    case like:    querySpec = buildLikeQuerySpec(soupName, selectPaths, path, likeKey, orderPath, order, pageSize); break;
+        case match:   querySpec = buildMatchQuerySpec(soupName, selectPaths, path, matchKey, orderPath, order, pageSize); break;
 	    case smart:   querySpec = buildSmartQuerySpec(smartSql, pageSize); break;
 	    default: throw new RuntimeException("Fell through switch: " + queryType);
 		}
