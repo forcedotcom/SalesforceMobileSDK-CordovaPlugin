@@ -26,6 +26,7 @@
  */
 package com.salesforce.androidsdk.smartsync.manager;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.salesforce.androidsdk.accounts.UserAccount;
@@ -334,14 +335,13 @@ public class SyncManager {
         }
 
         // Deletes extra IDs from SmartStore.
-        if (localIds.size() > 0) {
-            final Long[] soupEntryIds = new Long[localIds.size()];
-            int index = 0;
-            for (final String localId : localIds) {
-                soupEntryIds[index] = smartStore.lookupSoupEntryId(soupName, idFieldName, localId);
-                index++;
-            }
-            smartStore.delete(soupName, soupEntryIds, true);
+        int localIdSize = localIds.size();
+        if (localIdSize > 0) {
+            String smartSql = String.format("SELECT {%s:%s} FROM {%s} WHERE {%s:%s} IN (%s)",
+                    soupName, SmartStore.SOUP_ENTRY_ID, soupName, soupName, idFieldName,
+                    "'" + TextUtils.join("', '", localIds) + "'");
+            querySpec = QuerySpec.buildSmartQuerySpec(smartSql, localIdSize);
+            smartStore.deleteByQuery(soupName, querySpec);
         }
     }
 
@@ -425,7 +425,7 @@ public class SyncManager {
 
             return (serverLastModifiedDate <= lastModifiedDate);
         } catch (Exception e) {
-            Log.e("SmartSyncManager:isNewerThanServer", "Couldn't figure out last modified date", e);
+            Log.e("SmartSyncMgr:isNewerThanServer", "Couldn't figure out last modified date", e);
             throw new SmartSyncException(e);
         }
     }
@@ -434,12 +434,16 @@ public class SyncManager {
                                     JSONObject record, MergeMode mergeMode) throws JSONException, IOException {
 
         // Do we need to do a create, update or delete
+        boolean locallyDeleted = record.getBoolean(LOCALLY_DELETED);
+        boolean locallyCreated = record.getBoolean(LOCALLY_CREATED);
+        boolean locallyUpdated = record.getBoolean(LOCALLY_UPDATED);
+
         Action action = null;
-        if (record.getBoolean(LOCALLY_DELETED))
+        if (locallyDeleted)
             action = Action.delete;
-        else if (record.getBoolean(LOCALLY_CREATED))
+        else if (locallyCreated)
             action = Action.create;
-        else if (record.getBoolean(LOCALLY_UPDATED))
+        else if (locallyUpdated)
             action = Action.update;
 
         if (action == null) {
@@ -460,7 +464,7 @@ public class SyncManager {
          * circumstances, we will do nothing and return here.
          */
         if (mergeMode == MergeMode.LEAVE_IF_CHANGED &&
-        		(action == Action.update || action == Action.delete) &&
+        		!locallyCreated &&
         		!isNewerThanServer(target, objectType, objectId, lastModStr)) {
 
         	// Nothing to do for this record
@@ -491,7 +495,9 @@ public class SyncManager {
                 }
                 break;
             case delete:
-                statusCode = target.deleteOnServer(this, objectType, objectId);
+                statusCode = (locallyCreated
+                        ? HttpURLConnection.HTTP_NOT_FOUND // if locally created it can't exist on the server - we don't need to actually do the deleteOnServer call
+                        : target.deleteOnServer(this, objectType, objectId));
                 if (RestResponse.isSuccess(statusCode) || statusCode == HttpURLConnection.HTTP_NOT_FOUND) {
                     smartStore.delete(soupName, record.getLong(SmartStore.SOUP_ENTRY_ID));
                 }

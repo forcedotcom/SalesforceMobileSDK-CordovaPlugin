@@ -152,6 +152,18 @@ typedef void (^SFOAuthFlowFailureCallbackBlock)(SFOAuthInfo *, NSError *);
  */
 - (void)authManagerDidEnterBackground:(SFAuthenticationManager *)manager;
 
+/**
+ Called when a browser flow authentication is proceeded.
+ @param manager The instance of SFAuthenticationManager making the call.
+ */
+- (void)authManagerDidProceedWithBrowserFlow:(SFAuthenticationManager *)manager;
+
+/**
+ Called when a browser flow authentication is cancelled.
+ @param manager The instance of SFAuthenticationManager making the call.
+ */
+- (void)authManagerDidCancelBrowserFlow:(SFAuthenticationManager *)manager;
+
 @end
 
 /**
@@ -266,6 +278,11 @@ extern NSString * const kSFAuthenticationManagerFinishedNotification;
  service to retrieve org authentication configuration.
  */
 @property (nonatomic, assign) SFOAuthAdvancedAuthConfiguration advancedAuthConfiguration;
+
+/**
+ An array of additional keys (NSString) to parse during OAuth
+ */
+@property (nonatomic, strong) NSArray * additionalOAuthParameterKeys;
 
 /**
  Adds a delegate to the list of authentication manager delegates.
