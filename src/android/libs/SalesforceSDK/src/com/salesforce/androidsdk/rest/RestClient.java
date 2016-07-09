@@ -269,24 +269,24 @@ public class RestClient {
 	 * Note: Intended to be used by code on the UI thread.
 	 * @param restRequest
 	 * @param callback
-	 * @return okHttp Request object
-	 */
-	public Request sendAsync(final RestRequest restRequest, final AsyncRequestCallback callback) {
-        Request request = buildRequest(restRequest);
-        okHttpClient.newCall(request)
-                .enqueue(new Callback() {
-                             @Override
-                             public void onFailure(Call call, IOException e) {
-                                 callback.onError(e);
-                             }
+	 * @return okHttp Call object (through which you can cancel the request or get the request back)
+		 */
+		public Call sendAsync(final RestRequest restRequest, final AsyncRequestCallback callback) {
+			Request request = buildRequest(restRequest);
+			Call call = okHttpClient.newCall(request);
+			call.enqueue(new Callback() {
+								 @Override
+								 public void onFailure(Call call, IOException e) {
+									 callback.onError(e);
+								 }
 
-                             @Override
-                             public void onResponse(Call call, Response response) throws IOException {
-                                 callback.onSuccess(restRequest, new RestResponse(response));
-                             }
-                         }
-                );
-        return request;
+								 @Override
+								 public void onResponse(Call call, Response response) throws IOException {
+									 callback.onSuccess(restRequest, new RestResponse(response));
+								 }
+							 }
+					);
+			return call;
 	}
 
 	/**
@@ -301,6 +301,26 @@ public class RestClient {
         Response response = okHttpClient.newCall(request).execute();
         return new RestResponse(response);
 	}
+
+
+    /**
+     * Send the given restRequest synchronously and return a RestResponse
+     * Note: Cannot be used by code on the UI thread (use sendAsync instead).
+     * @param restRequest
+     * @param interceptors Interceptor(s) to add to the network client before making the request
+     * @return
+     * @throws IOException
+     */
+    public RestResponse sendSync(RestRequest restRequest, Interceptor... interceptors) throws IOException {
+        Request request = buildRequest(restRequest);
+        // builder that shares the same connection pool, dispatcher, and configuration with the original client
+        OkHttpClient.Builder clientBuilder = getOkHttpClient().newBuilder();
+        for (Interceptor interceptor : interceptors) {
+            clientBuilder.addNetworkInterceptor(interceptor);
+        }
+        Response response = clientBuilder.build().newCall(request).execute();
+        return new RestResponse(response);
+    }
 
 	/**
 	 * All immutable information for an authenticated client (e.g. username, org ID, etc.).
