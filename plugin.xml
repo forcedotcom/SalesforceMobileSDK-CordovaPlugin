@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="4.1.2">
+        version="4.2.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -103,6 +103,7 @@
     <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFLoggerMacros.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
@@ -194,8 +195,6 @@
       <string name="account_type">$PACKAGE_NAME.login</string>
       <string name="app_package">$PACKAGE_NAME</string>
     </config-file>
-
-    <source-file src="src/android/assets/icudt46l.zip" target-dir="assets/" />
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
     <hook type="after_platform_add" src="tools/after-platform-add-android.js" />
