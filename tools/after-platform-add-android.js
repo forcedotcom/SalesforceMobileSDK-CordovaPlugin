@@ -1,31 +1,23 @@
-//--------------------------------------
-// Useful functions
-//--------------------------------------
 var fs = require('fs');
 var path = require('path');
-var targetAndroidApi = 23;
 
-// Function to fix AndroidManifest.xml
+// Function to fix AndroidManifest.xml.
 var fixAndroidManifest = function(data) {
     
-    // Fix application tag
+    // Fix application tag.
     var appName = "com.salesforce.androidsdk.phonegap.app.HybridApp";
     
-    // In case the script was run twice
+    // In case the script was run twice.
     if (data.indexOf(appName) == -1) {    
         var applicationTag = '<application android:hardwareAccelerated="true" android:icon="@drawable/sf__icon" android:label="@string/app_name" android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="' + appName + '">'
         data = data.replace(/<application [^>]*>/, applicationTag);
         
-        // Comment out first activity
+        // Comment out first activity.
         data = data.replace(/<activity/, "<!--<activity");
         data = data.replace(/<\/activity>/, "</activity>-->");
         
-        // Change min sdk version
-        data = data.replace(/android\:minSdkVersion\=\"10\"/, 'android:minSdkVersion="19"');
-        
-        // Change target api
-        data = data.replace(/android\:targetSdkVersion\=\"22\"/, 'android:targetSdkVersion="' + targetAndroidApi + '"');
-        
+        // Change min SDK version.
+        data = data.replace(/android\:minSdkVersion\=\"14\"/, 'android:minSdkVersion="19"');
         console.log('Fixed AndroidManifest.xml');
     } else {
         console.log('Already fixed. Skipping.');
@@ -45,16 +37,14 @@ module.exports = function(ctx) {
 /**
  * Run the hook logic.
  *
- * @param {Object} ctx - cordova context object
+ * @param {Object} ctx - Cordova context object.
  */
 function run(ctx) {
-    // make sure android platform is part of build 
     console.log('Fixing AndroidManifest.xml file for Salesforce SDK Plugin.');
     if (ctx.opts.cordova.platforms.indexOf('android') < 0) {
-        console.warn('Not android.\n');
+        console.warn('Not Android.\n');
         return;
     }
-    
     try {
         fixFile(path.join('platforms', 'android', 'AndroidManifest.xml'), fixAndroidManifest);
     } catch(e) {
