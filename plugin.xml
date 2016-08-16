@@ -40,42 +40,20 @@
       <preference name="BackupWebStorage" value="local" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
-      <allow-navigation href="https://localhost" />
-      <allow-navigation href="https://*.force.com" />
-      <allow-navigation href="https://*.salesforce.com" />
+      <allow-navigation href="https://localhost" subdomains="true" requires-forward-secrecy="false" />
+      <allow-navigation href="https://*.force.com" subdomains="true" requires-forward-secrecy="false" />
+      <allow-navigation href="https://*.salesforce.com" subdomains="true" requires-forward-secrecy="false" />
 
       <!-- For legacy apps that don't use CSP -->
-      <access origin="https://localhost" />
-      <access origin="https://*.force.com" />
-      <access origin="https://*.salesforce.com" />
+      <access origin="https://localhost" subdomains="true" requires-forward-secrecy="false" />
+      <access origin="https://*.force.com" subdomains="true" requires-forward-secrecy="false" />
+      <access origin="https://*.salesforce.com" subdomains="true" requires-forward-secrecy="false" />
 
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
-    </config-file>
-
-    <config-file target="*-Info.plist" parent="NSAppTransportSecurity">
-      <dict>
-        <key>NSExceptionDomains</key>
-        <dict>
-          <key>salesforce.com</key>
-          <dict>
-            <key>NSIncludesSubdomains</key>
-            <true/>
-            <key>NSExceptionRequiresForwardSecrecy</key>
-            <false/>
-          </dict>
-          <key>force.com</key>
-          <dict>
-            <key>NSIncludesSubdomains</key>
-            <true/>
-            <key>NSExceptionRequiresForwardSecrecy</key>
-            <false/>
-          </dict>
-        </dict>
-      </dict>
     </config-file>
 
     <!-- Header files -->
