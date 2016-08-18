@@ -30,8 +30,8 @@
 #import "SFLocalhostSubstitutionCache.h"
 #import "SFHybridViewConfig.h"
 #import "SalesforceSDKManager.h"
-#import "SFSDKAppConfig.h"
 #import "SFPushNotificationManager.h"
+#import "SFSDKAppConfig.h"
 #import "SFDefaultUserManagementViewController.h"
 #import "SFLogger.h"
 #import "SalesforceSDKManagerWithSmartStore.h"
@@ -50,9 +50,9 @@
 - (AppDelegate *)sfsdk_swizzled_init
 {
 #if defined(DEBUG)
-    [SFLogger setLogLevel:SFLogLevelDebug];
+    [SFLogger sharedLogger].logLevel = SFLogLevelDebug;
 #else
-    [SFLogger setLogLevel:SFLogLevelInfo];
+    [SFLogger sharedLogger].logLevel  = SFLogLevelInfo;
 #endif
     
     SFHybridViewConfig *appConfig = [SFHybridViewConfig fromDefaultConfigFile];
@@ -181,4 +181,3 @@
 }
 
 @end
-
