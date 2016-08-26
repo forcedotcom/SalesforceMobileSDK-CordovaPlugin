@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, salesforce.com, inc.
+ * Copyright (c) 2016, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,47 +24,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+package com.salesforce.androidsdk.analytics;
 
-package com.salesforce.androidsdk.util.test;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import android.test.AndroidTestRunner;
-import android.util.Log;
+import org.json.JSONArray;
 
 /**
- * A TestRunner that limits the lifetime of the test run.
+ * Represents a typical analytics network publisher.
+ *
+ * @author bhariharan
  */
-public class TimeLimitedTestRunner extends AndroidTestRunner {
-    public TimeLimitedTestRunner(int maxRuntime, TimeUnit maxUnits) {
-        this.maxRuntime = maxRuntime;
-        this.maxRuntimeUnit = maxUnits;
-    }
+public interface AnalyticsPublisher {
 
-    private final long maxRuntime;
-    private final TimeUnit maxRuntimeUnit;
-
-    @Override
-    public void runTest() {
-        ExecutorService exec = Executors.newSingleThreadExecutor();
-        Future<Boolean> f = exec.submit(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                TimeLimitedTestRunner.super.runTest();
-                return true;
-            }
-        });
-        try {
-            f.get(maxRuntime, maxRuntimeUnit);
-        } catch (TimeoutException ex) {
-           Log.e("TimeLimitedTestRunner.runTest", String.format("TestRunner has timed out after: %d %s.", maxRuntime, maxRuntimeUnit.name()), ex);
-        } catch (Exception ex){
-            Log.e("TimeLimitedTestRunner.runTest", "TestRunner did not complete successfully, check the exception logged above.", ex);
-        }
-    }
+    /**
+     * Publishes events to a network endpoint.
+     *
+     * @param events Events to be published.
+     * @return True - if successful, False - otherwise.
+     */
+    public boolean publish(JSONArray events);
 }
