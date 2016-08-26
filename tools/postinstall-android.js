@@ -58,6 +58,7 @@ var libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'l
 var appProjectRoot = path.join('platforms', 'android');
 
 console.log('Moving Salesforce libraries to the correct location');
+shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceAnalytics'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
@@ -65,15 +66,18 @@ shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceHybrid'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
 var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
+var oldSalesforceAnalyticsDep = "compile project\(\':libs:SalesforceAnalytics\'\)";
 var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
 var oldSmartSyncDep = "compile project\(\':libs:SmartSync\'\)";
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'), oldSalesforceAnalyticsDep, 'compile project\(\':SalesforceAnalytics\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), oldSmartStoreDep, 'compile project\(\':SmartStore\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldCordovaDep, 'compile project\(\':CordovaLib\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldSmartSyncDep, 'compile project\(\':SmartSync\'\)');
 
 console.log('Fixing root level Gradle file for the generated app');
+shelljs.echo("include \":SalesforceAnalytics\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
