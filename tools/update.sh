@@ -251,6 +251,8 @@ copy_android_sdk()
 {
     echo "*** Android ***"
     echo "Copying SalesforceSDK library"
+    cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceAnalytics src/android/libs/
+    echo "Copying SalesforceSDK library"
     cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/
     echo "Copying SmartStore library"
     cp -RL $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/
