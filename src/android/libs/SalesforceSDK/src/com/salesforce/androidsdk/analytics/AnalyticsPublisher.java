@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, salesforce.com, inc.
+ * Copyright (c) 2016, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,29 +24,22 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.phonegap.app;
+package com.salesforce.androidsdk.analytics;
 
-import android.app.Application;
-
-import com.salesforce.androidsdk.app.SalesforceSDKManager.KeyInterface;
-import com.salesforce.androidsdk.analytics.security.Encryptor;
+import org.json.JSONArray;
 
 /**
- * Application class used by hybrid applications
+ * Represents a typical analytics network publisher.
+ *
+ * @author bhariharan
  */
-public class HybridApp extends Application {
+public interface AnalyticsPublisher {
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		SalesforceHybridSDKManager.initHybrid(getApplicationContext(), new HybridKeyImpl());
-	}
-}
-
-class HybridKeyImpl implements KeyInterface {
-
-	@Override
-	public String getKey(String name) {
-		return Encryptor.hash(name + "12s9adpahk;n12-97sdainkasd=012", name + "12kl0dsakj4-cxh1qewkjasdol8");
-	}
+    /**
+     * Publishes events to a network endpoint.
+     *
+     * @param events Events to be published.
+     * @return True - if successful, False - otherwise.
+     */
+    public boolean publish(JSONArray events);
 }

@@ -97,6 +97,7 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Libraries -->
+    <source-file src="src/ios/frameworks/libSalesforceAnalytics.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceNetwork.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />

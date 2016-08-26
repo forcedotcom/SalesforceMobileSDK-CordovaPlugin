@@ -2,17 +2,16 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-  compile project(':libs:SmartStore')
 }
 
 android {
   compileSdkVersion 23
   buildToolsVersion '23.0.1'
-  
+
   buildTypes {
-      debug {
-         testCoverageEnabled = true
-      }
+    debug {
+      testCoverageEnabled = true
+    }
   }
 
   sourceSets {
@@ -25,16 +24,15 @@ android {
       res.srcDirs = ['res']
       assets.srcDirs = ['assets']
     }
-
-    androidTest.setRoot('../test/SmartSyncTest')
+    androidTest.setRoot('../test/SalesforceAnalyticsTest')
     androidTest {
-      java.srcDirs = ['../test/SmartSyncTest/src']
-      resources.srcDirs = ['../test/SmartSyncTest/src']
-      res.srcDirs = ['../test/SmartSyncTest/res']
+      java.srcDirs = ['../test/SalesforceAnalyticsTest/src']
+      resources.srcDirs = ['../test/SalesforceAnalyticsTest/src']
+      res.srcDirs = ['../test/SalesforceAnalyticsTest/res']
     }
   }
   defaultConfig {
-    testApplicationId "com.salesforce.androidsdk.smartsync.tests"
+    testApplicationId "com.salesforce.androidsdk.analytics.tests"
     testInstrumentationRunner "com.salesforce.androidsdk.analytics.util.test.JUnitReportTestRunner"
   }
   packagingOptions {
