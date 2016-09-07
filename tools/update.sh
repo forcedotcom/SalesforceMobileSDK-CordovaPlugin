@@ -179,10 +179,6 @@ copy_ios_sdk()
     unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceAnalytics-Debug.zip -d tmp
     echo "Copying SalesforceSDKCore library"
     unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCore-Debug.zip -d tmp
-    echo "Copying SalesforceNetwork library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceNetwork-Debug.zip -d tmp
-    echo "Copying SalesforceRestAPI library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceRestAPI-Debug.zip -d tmp
     echo "Copying SmartStore library"
     unzip $IOS_SDK_FOLDER/build/artifacts/SmartStore-Debug.zip -d tmp
     echo "Copying SmartSync library"
@@ -232,8 +228,6 @@ copy_ios_sdk()
     echo "Copying needed libraries to src/ios/frameworks"
     copy_lib libSalesforceAnalytics.a
     copy_lib libSalesforceSDKCore.a
-    copy_lib libSalesforceNetwork.a
-    copy_lib libSalesforceRestAPI.a
     copy_lib libSmartStore.a
     copy_lib libSmartSync.a
     copy_lib libSalesforceHybridSDK.a
@@ -250,7 +244,7 @@ copy_ios_sdk()
 copy_android_sdk()
 {
     echo "*** Android ***"
-    echo "Copying SalesforceSDK library"
+    echo "Copying SalesforceAnalytics library"
     cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceAnalytics src/android/libs/
     echo "Copying SalesforceSDK library"
     cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/
