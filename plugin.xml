@@ -12,6 +12,7 @@
   <repo>https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin</repo>
 
   <js-module src="www/com.salesforce.plugin.oauth.js" name="plugin.oauth"></js-module>
+  <js-module src="www/com.salesforce.plugin.network.js" name="plugin.network"></js-module>
   <js-module src="www/com.salesforce.plugin.sdkinfo.js" name="plugin.sdkinfo"></js-module>
   <js-module src="www/com.salesforce.plugin.smartstore.js" name="plugin.smartstore">
     <clobbers target="navigator.smartstore" />
@@ -50,6 +51,7 @@
       <access origin="https://*.salesforce.com" subdomains="true" requires-forward-secrecy="false" />
 
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
+      <feature name="com.salesforce.network"><param name="ios-package" value="SFNetworkPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
@@ -149,6 +151,7 @@
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
       <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceOAuthPlugin"/></feature>
+      <feature name="com.salesforce.network"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceNetworkPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SDKInfoPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
