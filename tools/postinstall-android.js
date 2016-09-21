@@ -1,5 +1,4 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
-var targetAndroidApi = 23;
 
 //--------------------------------------
 // Useful functions
