@@ -26,6 +26,7 @@
  */
 
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Salesforce.SDK.Rest
@@ -34,8 +35,8 @@ namespace Salesforce.SDK.Rest
     {
         string InstanceUrl { get; }
         string AccessToken { get; }
-        Task<IRestResponse> SendAsync(HttpMethod method, string url);
-        void SendAsync(RestRequest request, AsyncRequestCallback callback);
-        Task<IRestResponse> SendAsync(RestRequest request);
+        Task<IRestResponse> SendAsync(HttpMethod method, string url, CancellationToken cancellationToken = default(CancellationToken));
+        void SendAsync(RestRequest request, AsyncRequestCallback callback, CancellationToken cancellationToken = default(CancellationToken));
+        Task<IRestResponse> SendAsync(RestRequest request, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

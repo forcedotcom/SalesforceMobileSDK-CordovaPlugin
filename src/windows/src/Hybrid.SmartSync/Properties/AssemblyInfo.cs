@@ -29,6 +29,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitleAttribute("Salesforce.SDK.Hybrid.SmartSync")]
 [assembly: AssemblyCompanyAttribute("Salesforce")]
 [assembly: AssemblyProductAttribute("Salesforce.SDK.Hybrid.SmartSync")]
-[assembly: AssemblyVersionAttribute("4.0.0.0")]
-[assembly: AssemblyFileVersionAttribute("4.0.0.0")]
+[assembly: AssemblyVersionAttribute("4.2.0.0")]
+[assembly: AssemblyFileVersionAttribute("4.2.0.0")]
 

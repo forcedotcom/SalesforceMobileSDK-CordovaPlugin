@@ -2,29 +2,29 @@
 <package >
   <metadata minClientVersion="2.8">
     <id>Salesforce.SDK.Core</id>
-    <version>3.3.0.unstable</version>
+    <version>4.2.0</version>
     <title>Salesforce.SDK.Core</title>
     <authors>Salesforce.com</authors>
     <owners></owners>
     <description>
-      The Salesforce SDK Core package is necessary for writing Salesforce applications on Windows. It contains the base features for OAuth, security, account management, and more. Support for windows and windows phone 8.1 runtime included.
+      The Salesforce SDK package is necessary for writing Salesforce applications on Windows. It contains the base features for OAuth, security, account management, and more. Support for windows 10 runtime included.
 
-      Source: https://github.com/forcedotcom/SalesforceMobileSDK-Windows/tree/unstable
+      Source: https://github.com/forcedotcom/SalesforceMobileSDK-Windows
 
-      Please follow the steps in https://github.com/forcedotcom/SalesforceMobileSDK-Windows/blob/unstable/README.md to install. You will need to use the template included in github in order to make use of this package initially; there are some setup steps that are needed that the template provides.
+      Please follow the steps in https://github.com/forcedotcom/SalesforceMobileSDK-Windows/blob/master/README.md to install. You will need to use the template included in github in order to make use of this package initially; there are some setup steps that are needed that the template provides.
     </description>
     <releaseNotes>
     </releaseNotes>
     <summary>
     </summary>
     <language>en-US</language>
-    <projectUrl>https://nuget.org/packages/Salesforce.SDK.Core.NuGet</projectUrl>
+    <projectUrl>https://nuget.org/packages/Salesforce.SDK.NuGet</projectUrl>
     <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
     <copyright>Copyright  2015</copyright>
     <dependencies>
-      <dependency id="Newtonsoft.Json" version="6.0.5" />
+      <dependency id="Newtonsoft.Json" version="7.0.1" />
     </dependencies>
     <references></references>
     <tags></tags>

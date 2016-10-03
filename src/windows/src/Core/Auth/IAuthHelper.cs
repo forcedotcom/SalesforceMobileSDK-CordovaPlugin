@@ -42,7 +42,7 @@ namespace Salesforce.SDK.Auth
 
         /// <summary>
         /// This should be called when login is complete. A new account is created
-        /// in the AccountManager and the pincode screen is shown if needeed
+        /// in the AccountManager and the pincode screen is shown if needed
         /// </summary>
         /// <param name="loginOptions"></param>
         /// <param name="authResponse"></param>

@@ -237,7 +237,7 @@ namespace Salesforce.SDK.Auth
             {
                 if (RetryCounter <= 1)
                 {
-                    await SDKManager.GlobalClientManager.Logout();
+                    await SDKManager.GlobalClientManager.LogoutAsync();
                 }
                 RetryCounter--;
                 ContentFooter.Text = String.Format(LocalizedStrings.GetString("passcode_incorrect"), RetryCounter);

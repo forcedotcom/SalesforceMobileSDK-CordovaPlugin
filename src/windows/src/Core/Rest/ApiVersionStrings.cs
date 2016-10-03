@@ -30,7 +30,7 @@ namespace Salesforce.SDK.Rest
     public class ApiVersionStrings
     {
         // default to v34
-        private static string _versionNumber = "v34.0";
+        private static string _versionNumber = "v36.0";
         public static string VersionNumber => _versionNumber;
 
         public const string ApiPrefix = "/services/data/";

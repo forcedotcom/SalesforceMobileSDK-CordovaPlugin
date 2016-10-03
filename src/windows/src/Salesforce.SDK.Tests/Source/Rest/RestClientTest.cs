@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
+using Windows.Security.Cryptography.Core;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json.Linq;
 using Salesforce.SDK.Auth;
@@ -84,7 +85,7 @@ namespace Salesforce.SDK.Rest
         [TestInitialize]
         public async Task SetUp()
         {
-            var settings = new EncryptionSettings(new HmacSHA256KeyGenerator());
+            var settings = new EncryptionSettings(new HmacSHA256KeyGenerator(HashAlgorithmNames.Sha256));
             Encryptor.init(settings);
             var account = TestCredentials.TestAccount;
 
@@ -124,7 +125,7 @@ namespace Salesforce.SDK.Rest
         public async Task TestCallWithBadAuthTokenAndTokenProvider()
         {
             var unauthenticatedRestClient = new RestClient(TestCredentials.InstanceServer, BadToken,
-                () => Task.Factory.StartNew(() => _accessToken));
+                (cancellationToken) => Task.Factory.StartNew(() => _accessToken));
             Assert.AreEqual(BadToken, unauthenticatedRestClient.AccessToken,
                 "RestClient should be using the bad token initially");
             var response =

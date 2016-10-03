@@ -315,5 +315,7 @@ namespace Salesforce.SDK.Hybrid.SmartStore
             var data = cursor.GetCursorData(this);
             return data;
         }
+
+        public long CurrentTimeMillis => SDK.SmartStore.Store.SmartStore.CurrentTimeMillis;
     }
 }

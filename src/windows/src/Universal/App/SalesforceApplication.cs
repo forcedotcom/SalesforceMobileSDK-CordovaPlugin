@@ -26,6 +26,7 @@
  */
 
 using System;
+using System.Threading;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
@@ -38,6 +39,10 @@ using Salesforce.SDK.Exceptions;
 using Salesforce.SDK.Logging;
 using Salesforce.SDK.Core;
 using System.Threading.Tasks;
+using Salesforce.SDK.Hybrid.Logging;
+using Salesforce.SDK.Security;
+using Salesforce.SDK.Settings;
+using Salesforce.SDK.Upgrade;
 
 namespace Salesforce.SDK.App
 {
@@ -62,7 +67,13 @@ namespace Salesforce.SDK.App
         protected SalesforceApplication()
         {
             SFApplicationHelper.RegisterServices();
+            SDKServiceLocator.RegisterService<ILoggingService, Logger>();
             Suspending += OnSuspending;
+
+            //do upgrade on stored config, account and pincode
+            UpgradeConfigAsync().Wait();
+            SDKUpgradeManager.GetInstance().UpgradeAsync().Wait();
+
             InitializeConfig();
             SDKManager.CreateClientManager(false);
             SDKManager.RootApplicationPage = SetRootApplicationPage();
@@ -89,6 +100,23 @@ namespace Salesforce.SDK.App
         ///     }
         /// </summary>
         protected abstract Task InitializeConfig();
+
+        /// <summary>
+        ///     Use this to upgrade your custom SalesforceConfig source.
+        ///     An example of code that may go into this method would be as follows:
+        //protected override Task UpgradeConfigAsync()
+        //{
+        //    if (!ApplicationData.Current.Version.Equals(0)) return Task.CompletedTask;
+        //    var config = SalesforceConfig.RetrieveConfig<Config>().Result;
+        //    if (config == null) return Task.CompletedTask;
+        //    Encryptor.init(new EncryptionSettings(new HmacSHA256KeyGenerator(HashAlgorithmNames.Md5)));
+        //    config = SDKManager.InitializeConfigAsync<Config>().Result;
+        //    Encryptor.ChangeSettings(
+        //        new EncryptionSettings(new HmacSHA256KeyGenerator(HashAlgorithmNames.Sha256)));
+        //    return config.SaveConfigAsync();
+        //}
+        /// </summary>
+        protected abstract Task UpgradeConfigAsync();
 
         /// <summary>
         ///     Implement to return the type of the root page to switch to once oauth completes.
@@ -136,7 +164,7 @@ namespace Salesforce.SDK.App
         {
             if (SDKManager.GlobalClientManager != null)
             {
-                await SDKManager.GlobalClientManager.Logout();
+                await SDKManager.GlobalClientManager.LogoutAsync();
             }
         }
 
@@ -151,8 +179,7 @@ namespace Salesforce.SDK.App
             }
             catch (OAuthException ex)
             {
-                LoggingService.Log("Error occured when refreshing token", LoggingLevel.Critical);
-                LoggingService.Log(ex, LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical, "Error occurred when refreshing token");
             }
         }
 

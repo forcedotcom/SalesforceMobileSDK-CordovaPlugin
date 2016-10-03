@@ -200,7 +200,7 @@ namespace Salesforce.SDK.SmartStore.Store
                     Store.ConvertSmartSql(smartSql);
                     Assert.Fail("Should have thrown exception for " + smartSql);
                 }
-                catch (SmartStoreException e)
+                catch (SmartStoreException)
                 {
                     // Expected
                 }

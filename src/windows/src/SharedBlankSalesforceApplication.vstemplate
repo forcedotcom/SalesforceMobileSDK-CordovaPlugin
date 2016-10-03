@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="ProjectGroup">
 	<TemplateData>
-    <Name>Salesforce Application (Universal Apps for Windows 8.1)</Name>
+    <Name>Salesforce Application (Universal Windows)</Name>
     <Description>Salesforce Universal App</Description>
     <Icon>BlankApp.png</Icon>
 		<DefaultName>App</DefaultName>
-		<TemplateID>Salesforce.SharedBlankApplication</TemplateID>
+		<TemplateID>Salesforce.BlankApplication</TemplateID>
 		<TemplateGroupID>WinRT-Managed</TemplateGroupID>
 		<ProjectType>CSharp</ProjectType>
 		<TargetPlatformName>Windows</TargetPlatformName>
@@ -23,14 +23,8 @@
  	<TemplateContent>
  		<ProjectCollection>
       <SolutionFolder Name="$projectname$">
-        <ProjectTemplateLink ProjectName="$projectname$.Shared" CopyParameters="true">
-          Salesforce.Universal.Template\Salesforce.Universal.Template.Shared\Shared.vstemplate
-        </ProjectTemplateLink>
-        <ProjectTemplateLink ProjectName="$projectname$.Windows" CopyParameters="true">
-          Salesforce.Universal.Template\Salesforce.Universal.Template.Windows\Windows.vstemplate
-        </ProjectTemplateLink>
-        <ProjectTemplateLink ProjectName="$projectname$.WindowsPhone" CopyParameters="true">
-          Salesforce.Universal.Template\Salesforce.Universal.Template.WindowsPhone\WindowsPhone.vstemplate
+        <ProjectTemplateLink ProjectName="$projectname$" CopyParameters="true">
+          Universal.Template\Salesforce.Universal.Template\MyTemplate.vstemplate
         </ProjectTemplateLink>
       </SolutionFolder>
  		</ProjectCollection>

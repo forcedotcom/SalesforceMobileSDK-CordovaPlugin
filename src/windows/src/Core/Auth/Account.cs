@@ -25,6 +25,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace Salesforce.SDK.Auth
@@ -35,6 +37,7 @@ namespace Salesforce.SDK.Auth
     public class Account
     {
         public const string InternalCommunityId = "000000000000000000";
+        public const string InternalCommunityPath = "internal";
 
         /// <summary>
         ///  Constructor for Account
@@ -107,6 +110,32 @@ namespace Salesforce.SDK.Auth
         public LoginOptions GetLoginOptions()
         {
             return new LoginOptions(LoginUrl, ClientId, CallbackUrl, LoginOptions.DefaultDisplayType, Scopes);
+        }
+
+        public string GetCommunityLevelFileNameSuffix()
+        {
+            var leafDir = InternalCommunityPath;
+            if (!string.IsNullOrWhiteSpace(CommunityId) && !CommunityId.Equals(InternalCommunityId))
+            {
+                leafDir = CommunityId;
+            }
+            return GetCommunityLevelFileNameSuffix(leafDir);
+        }
+
+        public string GetCommunityLevelFileNameSuffix(string communityId)
+        {
+            var sb = new StringBuilder("_");
+            sb.Append(OrganizationId);
+            sb.Append("_");
+            sb.Append(UserId);
+            sb.Append("_");
+            var leafDir = InternalCommunityPath;
+            if (!string.IsNullOrWhiteSpace(communityId) && !communityId.Equals(InternalCommunityId))
+            {
+                leafDir = communityId;
+            }
+            sb.Append(leafDir);
+            return sb.ToString();
         }
     }
 }
