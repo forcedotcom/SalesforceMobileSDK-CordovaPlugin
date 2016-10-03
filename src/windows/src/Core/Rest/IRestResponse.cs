@@ -65,7 +65,7 @@ namespace Salesforce.SDK.Rest
         JObject AsJObject { get; }
 
         /// <summary>
-        /// HTTP status code fo the response returned by the server
+        /// HTTP status code for the response returned by the server
         /// </summary>
         HttpStatusCode StatusCode { get; }
 

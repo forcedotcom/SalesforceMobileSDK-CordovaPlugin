@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Salesforce.SDK.Logging;
 using Newtonsoft.Json;
@@ -111,7 +112,8 @@ namespace Salesforce.SDK.Auth
             return LoggedInAccount ?? (LoggedInAccount = AuthStorageHelper.RetrieveCurrentAccount());
         }
 
-        public static async Task<bool> SwitchToAccount(Account newAccount)
+        public static async Task<bool> SwitchToAccountAsync(Account newAccount,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             var oldAccount = LoggedInAccount;
 
@@ -126,7 +128,8 @@ namespace Salesforce.SDK.Auth
                 if (client != null)
                 {
                     await AuthStorageHelper.ClearCookiesAsync(newAccount.GetLoginOptions());
-                    var identity = await OAuth2.CallIdentityServiceAsync(newAccount.IdentityUrl, client);
+                    var identity =
+                        await OAuth2.CallIdentityServiceAsync(newAccount.IdentityUrl, client, cancellationToken);
                     if (identity != null)
                     {
                         newAccount.UserId = identity.UserId;
@@ -166,18 +169,20 @@ namespace Salesforce.SDK.Auth
         /// </summary>
         /// <param name="loginOptions"></param>
         /// <param name="authResponse"></param>
-        public static async Task<Account> CreateNewAccount(LoginOptions loginOptions, AuthResponse authResponse)
+        /// <param name="cancellationToken"></param>
+        public static async Task<Account> CreateNewAccount(LoginOptions loginOptions, AuthResponse authResponse,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             LoggingService.Log("Create account object", LoggingLevel.Verbose);
 
             var account = new Account(
-                loginOptions.LoginUrl, 
-                loginOptions.ClientId, 
+                loginOptions.LoginUrl,
+                loginOptions.ClientId,
                 loginOptions.CallbackUrl,
                 loginOptions.Scopes,
-                authResponse.InstanceUrl, 
-                authResponse.IdentityUrl, 
-                authResponse.AccessToken, 
+                authResponse.InstanceUrl,
+                authResponse.IdentityUrl,
+                authResponse.AccessToken,
                 authResponse.RefreshToken)
             {
                 CommunityId = authResponse.CommunityId,
@@ -189,13 +194,14 @@ namespace Salesforce.SDK.Auth
             IdentityResponse identity = null;
             try
             {
-                identity = await OAuth2.CallIdentityServiceAsync(authResponse.IdentityUrl, authResponse.AccessToken);
+                identity =
+                    await
+                        OAuth2.CallIdentityServiceAsync(authResponse.IdentityUrl, authResponse.AccessToken,
+                            cancellationToken);
             }
             catch (JsonException ex)
             {
-                LoggingService.Log("Exception occurred when retrieving account identity:",
-                    LoggingLevel.Critical);
-                LoggingService.Log(ex, LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical, "Exception occurred when retrieving account identity");
                 Debug.WriteLine("Error retrieving account identity");
             }
 

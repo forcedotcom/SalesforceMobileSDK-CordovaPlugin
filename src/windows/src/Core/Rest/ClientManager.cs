@@ -26,6 +26,7 @@
  */
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Salesforce.SDK.Auth;
 using Salesforce.SDK.Core;
@@ -48,7 +49,7 @@ namespace Salesforce.SDK.Rest
         ///     the user auth tokens
         /// </summary>
         /// <returns>true if server logout was successful</returns>
-        public async Task<bool> Logout()
+        public async Task<bool> LogoutAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             Account account = AccountManager.GetAccount();
             if (account != null)
@@ -56,7 +57,7 @@ namespace Salesforce.SDK.Rest
                 LoginOptions options = account.GetLoginOptions();
                 AccountManager.DeleteAccount();
                 await AuthHelper.ClearCookiesAsync(options);
-                bool loggedOut = await OAuth2.RevokeAuthTokenAsync(options, account.RefreshToken);
+                bool loggedOut = await OAuth2.RevokeAuthTokenAsync(options, account.RefreshToken, cancellationToken);
                 if (loggedOut)
                 {
                     GetRestClient();
@@ -64,7 +65,7 @@ namespace Salesforce.SDK.Rest
                 return loggedOut;
             }
             GetRestClient();
-            return await Task.Factory.StartNew(() => true);
+            return true;
         }
 
         /// <summary>
@@ -77,26 +78,27 @@ namespace Salesforce.SDK.Rest
             if (account != null)
             {
                 return new RestClient(account.InstanceUrl, account.AccessToken,
-                    async () =>
+                    async cancellationToken =>
                     {
                         account = AccountManager.GetAccount();
 
                         try
                         {
-                            account = await OAuth2.RefreshAuthTokenAsync(account);
+                            account = await OAuth2.RefreshAuthTokenAsync(account, cancellationToken);
                         }
                         catch (DeviceOfflineException)
                         {
-                            LoggingService.Log("Could not refresh the token because device is offline", LoggingLevel.Warning);
+                            LoggingService.Log("Could not refresh the token because device is offline",
+                                LoggingLevel.Warning);
                             return null;
                         }
                         catch (OAuthException ex)
                         {
-                            LoggingService.Log("Failed to refresh the token, logging the user out", LoggingLevel.Warning);
-                            LoggingService.Log(ex, LoggingLevel.Error);
+                            LoggingService.Log(ex, LoggingLevel.Error,
+                                "Failed to refresh the token, logging the user out");
 
                             // we failed to refresh the token, we have to log the user out
-                            await Logout();
+                            await LogoutAsync(cancellationToken);
                         }
 
                         return account.AccessToken;

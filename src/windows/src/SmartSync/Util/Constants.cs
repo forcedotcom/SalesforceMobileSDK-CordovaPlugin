@@ -132,7 +132,7 @@ namespace Salesforce.SDK.SmartSync.Util
         public const string SyncMaxTimeStamp = "maxTimeStamp";
         public const string SyncAsString = "syncAsString";
         public const string MergeMode = "mergeMode";
-        public const string FieldList = "fieldlist";
+        public const string FieldList = "fieldList";
         public const string QueryType = "type";
         public const string Query = "query";
         public const string Fieldlist = "fieldlist";

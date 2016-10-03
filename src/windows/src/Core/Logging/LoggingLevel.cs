@@ -28,10 +28,10 @@ namespace Salesforce.SDK.Logging
 {
     public enum LoggingLevel
     {
-        Verbose,
-        Critical,
-        Warning,
-        Information,
-        Error
+        Verbose = 0,
+        Information = 1,
+        Warning = 2,
+        Error = 3,
+        Critical = 4
     }
 }

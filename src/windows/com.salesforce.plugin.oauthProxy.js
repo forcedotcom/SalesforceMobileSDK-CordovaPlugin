@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-var SALESFORCE_MOBILE_SDK_VERSION = "4.0.0";
+var SALESFORCE_MOBILE_SDK_VERSION = "4.2.0";
 var SERVICE = "com.salesforce.oauth";
 
 var exec = require("com.salesforce.util.exec").exec;

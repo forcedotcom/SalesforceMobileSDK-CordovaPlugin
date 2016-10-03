@@ -48,6 +48,11 @@ namespace Salesforce.SDK.Security
             Settings = settings;
         }
 
+        public static void ChangeSettings(EncryptionSettings settings)
+        {
+            Settings = settings;
+        }
+
         public string Encrypt(string text)
         {
             return Encrypt(text, null);

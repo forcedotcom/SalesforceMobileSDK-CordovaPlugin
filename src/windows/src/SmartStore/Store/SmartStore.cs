@@ -218,6 +218,17 @@ namespace Salesforce.SDK.SmartStore.Store
             }
         }
 
+        public async Task LogoutAsync()
+        {
+            DropAllSoups(DatabasePath);
+            ResetDatabase();
+            if (SDKManager.GlobalClientManager != null)
+            {
+                await SDKManager.GlobalClientManager.LogoutAsync();
+            }
+            AccountManager.SwitchAccount();
+        }
+
         public static void DeleteAllDatabases(bool includeGlobal)
         {
             var accounts = AccountManager.GetAccounts();

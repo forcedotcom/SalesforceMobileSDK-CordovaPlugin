@@ -1,6 +1,8 @@
 ﻿{
   "dependencies": {
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0"
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
+    "PCLStorage": "1.0.2",
+    "SQLitePCL": "3.8.7.2"
   },
   "frameworks": {
     "uap10.0": {}

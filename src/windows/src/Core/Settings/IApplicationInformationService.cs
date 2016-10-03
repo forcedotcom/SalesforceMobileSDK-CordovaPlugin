@@ -46,5 +46,9 @@ namespace Salesforce.SDK.Settings
         Task<bool> DoesFileExistAsync(string path);
 
         string GetApplicationLocalFolderPath();
+
+        string GetConnectionType();
+
+        string GetAppType();
     }
 }
