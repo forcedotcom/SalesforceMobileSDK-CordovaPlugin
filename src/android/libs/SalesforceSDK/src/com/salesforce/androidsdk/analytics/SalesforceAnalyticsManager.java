@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, salesforce.com, inc.
+ * Copyright (c) 2016-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -27,6 +27,7 @@
 package com.salesforce.androidsdk.analytics;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -42,6 +43,7 @@ import com.salesforce.androidsdk.analytics.store.EventStoreManager;
 import com.salesforce.androidsdk.analytics.transform.AILTNTransform;
 import com.salesforce.androidsdk.analytics.transform.Transform;
 import com.salesforce.androidsdk.app.SalesforceSDKManager;
+import com.salesforce.androidsdk.config.AdminSettingsManager;
 import com.salesforce.androidsdk.config.BootConfig;
 
 import org.json.JSONArray;
@@ -52,6 +54,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains APIs that can be used to interact with
@@ -61,12 +67,20 @@ import java.util.Set;
  */
 public class SalesforceAnalyticsManager {
 
+    private static final String ANALYTICS_ON_OFF_KEY = "ailtn_enabled";
+    private static final String AILTN_POLICY_PREF = "ailtn_policy";
+    private static final int DEFAULT_PUBLISH_FREQUENCY_IN_HOURS = 8;
     private static final String TAG = "AnalyticsManager";
 
     private static Map<String, SalesforceAnalyticsManager> INSTANCES;
+    private static boolean sPublishHandlerActive;
+    private static ScheduledFuture sScheduler;
+    private static int sPublishFrequencyInHours = DEFAULT_PUBLISH_FREQUENCY_IN_HOURS;
 
     private AnalyticsManager analyticsManager;
     private EventStoreManager eventStoreManager;
+    private UserAccount account;
+    private boolean enabled;
     private Map<Class<? extends Transform>, Class<? extends AnalyticsPublisher>> remotes;
 
     /**
@@ -112,6 +126,12 @@ public class SalesforceAnalyticsManager {
             instance = new SalesforceAnalyticsManager(account, communityId);
             INSTANCES.put(uniqueId, instance);
         }
+
+        // Adds a handler for publishing if not already active.
+        if (!sPublishHandlerActive) {
+            sScheduler = createPublishHandler();
+            sPublishHandlerActive = true;
+        }
         return instance;
     }
 
@@ -146,6 +166,7 @@ public class SalesforceAnalyticsManager {
                 final SalesforceAnalyticsManager manager = INSTANCES.get(uniqueId);
                 if (manager != null) {
                     manager.analyticsManager.reset();
+                    manager.resetAnalyticsPolicy();
                 }
                 INSTANCES.remove(uniqueId);
             }
@@ -178,6 +199,28 @@ public class SalesforceAnalyticsManager {
     }
 
     /**
+     * Sets the publish frequency, in hours.
+     *
+     * @param publishFrequencyInHours Publish frequency, in hours.
+     */
+    public static synchronized void setPublishFrequencyInHours(int publishFrequencyInHours) {
+        sPublishFrequencyInHours = publishFrequencyInHours;
+        if (sScheduler != null) {
+            sScheduler.cancel(false);
+            sScheduler = createPublishHandler();
+        }
+    }
+
+    /**
+     * Returns the publish frequency currently set, in hours.
+     *
+     * @return Publish frequency, in hours.
+     */
+    public static int getPublishFrequencyInHours() {
+        return sPublishFrequencyInHours;
+    }
+
+    /**
      * Returns an instance of event store manager.
      *
      * @return Event store manager.
@@ -202,7 +245,23 @@ public class SalesforceAnalyticsManager {
      * @param enabled True - if logging should be enabled, False - otherwise.
      */
     public void disableOrEnableLogging(boolean enabled) {
+        storeAnalyticsPolicy(enabled);
         eventStoreManager.disableOrEnableLogging(enabled);
+    }
+
+    /**
+     * Updates the preferences of this library.
+     */
+    public void updateLoggingPrefs() {
+        final AdminSettingsManager settingsManager = new AdminSettingsManager();
+        final String enabled = settingsManager.getPref(SalesforceAnalyticsManager.ANALYTICS_ON_OFF_KEY, account);
+        if (!TextUtils.isEmpty(enabled)) {
+            if (!Boolean.parseBoolean(enabled)) {
+                disableOrEnableLogging(false);
+            } else {
+                disableOrEnableLogging(true);
+            }
+        }
     }
 
     /**
@@ -211,7 +270,7 @@ public class SalesforceAnalyticsManager {
      * @return True - if logging is enabled, False - otherwise.
      */
     public boolean isLoggingEnabled() {
-        return eventStoreManager.isLoggingEnabled();
+        return enabled;
     }
 
     /**
@@ -318,6 +377,7 @@ public class SalesforceAnalyticsManager {
     }
 
     private SalesforceAnalyticsManager(UserAccount account, String communityId) {
+        this.account = account;
         final DeviceAppAttributes deviceAppAttributes = buildDeviceAppAttributes();
         final SalesforceSDKManager sdkManager = SalesforceSDKManager.getInstance();
         analyticsManager = new AnalyticsManager(account.getCommunityLevelFilenameSuffix(),
@@ -327,6 +387,10 @@ public class SalesforceAnalyticsManager {
         eventStoreManager = analyticsManager.getEventStoreManager();
         remotes = new HashMap<Class<? extends Transform>, Class<? extends AnalyticsPublisher>>();
         remotes.put(AILTNTransform.class, AILTNPublisher.class);
+
+        // Reads the existing analytics policy and sets it upon initialization.
+        readAnalyticsPolicy();
+        disableOrEnableLogging(enabled);
     }
 
     private DeviceAppAttributes buildDeviceAppAttributes() {
@@ -354,5 +418,46 @@ public class SalesforceAnalyticsManager {
         final String clientId = BootConfig.getBootConfig(context).getRemoteAccessConsumerKey();
         return new DeviceAppAttributes(appVersion, appName, osVersion, osName, appType,
                 mobileSdkVersion, deviceModel, deviceId, clientId);
+    }
+
+    private synchronized void storeAnalyticsPolicy(boolean enabled) {
+        final Context context = SalesforceSDKManager.getInstance().getAppContext();
+        final String filename = AILTN_POLICY_PREF + account.getUserLevelFilenameSuffix();
+        final SharedPreferences sp = context.getSharedPreferences(filename, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor e = sp.edit();
+        e.putBoolean(ANALYTICS_ON_OFF_KEY, enabled);
+        e.commit();
+        this.enabled = enabled;
+    }
+
+    private void readAnalyticsPolicy() {
+        final Context context = SalesforceSDKManager.getInstance().getAppContext();
+        final String filename = AILTN_POLICY_PREF + account.getUserLevelFilenameSuffix();
+        final SharedPreferences sp = context.getSharedPreferences(filename, Context.MODE_PRIVATE);
+        if (!sp.contains(ANALYTICS_ON_OFF_KEY)) {
+            storeAnalyticsPolicy(true);
+        }
+        enabled = sp.getBoolean(ANALYTICS_ON_OFF_KEY, true);
+    }
+
+    private void resetAnalyticsPolicy() {
+        final Context context = SalesforceSDKManager.getInstance().getAppContext();
+        final String filename = AILTN_POLICY_PREF + account.getUserLevelFilenameSuffix();
+        final SharedPreferences sp = context.getSharedPreferences(filename, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor e = sp.edit();
+        e.clear();
+        e.commit();
+    }
+
+    private static ScheduledFuture createPublishHandler() {
+        final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        final Runnable publishRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                AnalyticsPublisherService.startActionPublish(SalesforceSDKManager.getInstance().getAppContext());
+            }
+        };
+        return scheduler.scheduleAtFixedRate(publishRunnable, 0, sPublishFrequencyInHours, TimeUnit.HOURS);
     }
 }
