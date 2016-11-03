@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -43,25 +43,13 @@ namespace Salesforce.SDK.Security
     /// </summary>
     public sealed class HmacSHA256KeyGenerator : IKeyGenerator
     {
-        private readonly string _password;
-        public string Password
-        {
-            get
-            {
-                return _password;
-            }
-        }
+        public string Password { get; }
 
-        private readonly string _salt;
-        public string Salt
-        {
-            get
-            {
-                return _salt;
-            }
-        }
+        public string Salt { get; }
 
-        public HmacSHA256KeyGenerator()
+        public static string HashAlgorithmNames { get; set; }
+
+        public HmacSHA256KeyGenerator(string hashAlgorithmName)
         {
             string password;
             string salt;
@@ -72,8 +60,9 @@ namespace Salesforce.SDK.Security
                 GenerateRandomPasswordAndSalt(out password, out salt);
                 authStorageHelper.PersistEncryptionSettings(password, salt);
             }
-            _password = password;
-            _salt = salt;
+            Password = password;
+            Salt = salt;
+            HashAlgorithmNames = hashAlgorithmName;
         }
 
         public void GenerateKey(string password, string salt, string nonce, out IBuffer keyMaterial, out IBuffer iv)
@@ -105,7 +94,7 @@ namespace Salesforce.SDK.Security
         {
             HardwareToken id = HardwareIdentification.GetPackageSpecificToken(null);
             string normalized = NormalizeHardwareId(id.Id.ToArray());
-            HashAlgorithmProvider alg = HashAlgorithmProvider.OpenAlgorithm("MD5");
+            HashAlgorithmProvider alg = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames);
             IBuffer buff =
                 CryptographicBuffer.ConvertStringToBinary(normalized + typeof (HmacSHA256KeyGenerator).FullName,
                     BinaryStringEncoding.Utf8);
@@ -158,7 +147,7 @@ namespace Salesforce.SDK.Security
             salt = GenerateRandomEncryptionString();
         }
 
-        // Ensure a truly random string that is good for use in encrpytion.
+        // Ensure a truly random string that is good for use in encryption.
         private string GenerateRandomEncryptionString()
         {
             // Define the length, in bytes, of the buffer.

@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -185,9 +185,9 @@ namespace Salesforce.SDK.SmartSync.Manager
             {
                 throw new SmartStoreException("Cannot run ReSync:" + syncId + ": no sync found");
             }
-            if (sync.SyncType != SyncState.SyncTypes.SyncDown)
+            if (sync.Type != SyncState.SyncTypes.SyncDown)
             {
-                throw new SmartStoreException("Cannot run ReSync:" + syncId + ": wrong type: " + sync.SyncType);
+                throw new SmartStoreException("Cannot run ReSync:" + syncId + ": wrong type: " + sync.Type);
             }
             var target = (SyncDownTarget)sync.Target;
             if (target.QueryType != SyncDownTarget.QueryTypes.Soql)
@@ -208,7 +208,7 @@ namespace Salesforce.SDK.SmartSync.Manager
             UpdateSync(sync, SyncState.SyncStatusTypes.Running, 0, callback);
             try
             {
-                switch (sync.SyncType)
+                switch (sync.Type)
                 {
                     case SyncState.SyncTypes.SyncDown:
                         await SyncDown(sync, callback);

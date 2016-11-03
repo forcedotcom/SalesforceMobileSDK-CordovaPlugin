@@ -22,14 +22,14 @@ foreach($name in $names)
 
 }
 
-[System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
+[System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
 $publisher = New-Object System.EnterpriseServices.Internal.Publish
 
 get-childitem | where {$_.Name -eq "TemplateWizard"} | Foreach-Object {$publisher.GacInstall($_)}
 
 
 
-$templateOutput = $SpecialFolders["Personal"] + "\Visual Studio 2013\Templates\ProjectTemplates"
+$templateOutput = $SpecialFolders["Personal"] + "\Visual Studio 2015\Templates\ProjectTemplates"
 $templateSource = $toolsPath + "\SalesforceUniversalApplicationTemplate.zip";
 
 write-output $templateSource

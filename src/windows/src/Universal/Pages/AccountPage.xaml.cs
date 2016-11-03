@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -131,8 +131,7 @@ namespace Salesforce.SDK.Pages
                 var background = new SolidColorBrush(color);
                 PageRoot.Background = background;
                 Background = background;
-                // ServerFlyoutPanel.Background = background;
-                //  AddServerFlyoutPanel.Background = background;
+                
             }
 
             // set foreground from config
@@ -183,7 +182,7 @@ namespace Salesforce.SDK.Pages
 
         private async void accountsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            await AccountManager.SwitchToAccount(AccountsList.SelectedItem as Account);
+            await AccountManager.SwitchToAccountAsync(AccountsList.SelectedItem as Account);
             SDKManager.ResetClientManager();
             if (SDKManager.GlobalClientManager.PeekRestClient() != null)
             {
@@ -232,7 +231,6 @@ namespace Salesforce.SDK.Pages
             }
             else
             {
-                ServerFlyout.Placement = FlyoutPlacementMode.Bottom;
                 TryShowFlyout(ServerFlyout, ApplicationLogo);
             }
         }
@@ -242,7 +240,7 @@ namespace Salesforce.SDK.Pages
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
                 MessageContent.Text = message;
-                TryShowFlyout(MessageFlyout, ApplicationLogo);
+                TryShowFlyout(MessageFlyout, ApplicationLogo, FlyoutPlacementMode.Bottom);
             });
         }
 
@@ -273,8 +271,7 @@ namespace Salesforce.SDK.Pages
             }
             catch (Exception ex)
             {
-                LoggingService.Log("Exception occurred during login flow", LoggingLevel.Critical);
-                LoggingService.Log(ex, LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical, "Exception occurred during login flow");
 
                 hasWebAuthErrors = true;
             }
@@ -392,10 +389,11 @@ namespace Salesforce.SDK.Pages
             await SDKManager.ServerConfiguration.SaveConfigAsync();
         }
 
-        private void TryShowFlyout(Flyout flyout, FrameworkElement location)
+        private void TryShowFlyout(Flyout flyout, FrameworkElement location, FlyoutPlacementMode placementMode=FlyoutPlacementMode.Full)
         {
             try
             {
+                flyout.Placement = placementMode;
                 flyout.ShowAt(location);
             }
             catch (ArgumentException ex)

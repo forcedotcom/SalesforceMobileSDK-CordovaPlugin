@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2013, salesforce.com, inc.
+/*
+ * Copyright (c) 2013-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -39,20 +39,20 @@ namespace Salesforce.SDK
         public const String InstanceServer = "https://cs1.salesforce.com";
         public String ApiVersion = ApiVersionStrings.VersionNumber;
         public const String AccountType = "com.salesforce.windowssdk.smartsynctest.login";
-        public const String OrgId = "00DS0000000HDptMAG";
-        public const String Username = "sdktest@cs1.com";
-        public const String AccountName = "sdktest@cs1.com";
-        public const String UserId = "005S0000003yaERIAY";
+        public const String OrgId = "00DS0000003E98jMAC";
+        public const String Username = "ut2@cs1.mobilesdk.org";
+        public const String AccountName = "ut2@cs1.mobilesdk.org";
+        public const String UserId = "005S0000004s2iyIAA";
         public const String LoginUrl = "https://test.salesforce.com";
         public const String InstanceUrl = "https://cs1.salesforce.com";
         public const String CommunityUrl = "https://cs1.salesforce.com/androidcomm";
         public const String IdentityUrl = "https://test.salesforce.com";
 
         public const String ClientId =
-            "3MVG92.uWdyphVj4bnolD7yuIpCQsNgddWtqRND3faxrv9uKnbj47H4RkwheHA2lKY4cBusvDVp0M6gdGE8hp";
+        "3MVG9Iu66FKeHhINkB1l7xt7kR8czFcCTUhgoA8Ol2Ltf1eYHOU4SqQRSEitYFDUpqRWcoQ2.dBv_a1Dyu5xa";
 
-        public const String RefreshToken =
-            "5Aep861KIwKdekr90KlxVVUI47zdR6dX_VeBWZBS.SiQYYAy5JPlgkezkgDiE1o9mI4jd6mD4ZFYA==";
+        public const string RefreshToken =
+            "5Aep861KIwKdekr90IDidO4EhfJiYo3fzEvTvsEgM9sfDpGX0qFFeQzHG2mZeUH_.XNSBE0Iz38fnWsyYYkUgTz";
 
         public static Account TestAccount => new Account(LoginUrl, ClientId, CallbackUrl,
             Scopes, InstanceUrl, IdentityUrl, AccessToken, RefreshToken);

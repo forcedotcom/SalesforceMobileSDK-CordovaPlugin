@@ -110,8 +110,12 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Analytics\AiltnPublisher.cs" />
+    <Compile Include="Analytics\IAnalyticsPublisher.cs" />
+    <Compile Include="Analytics\SalesforceAnalyticsManager.cs" />
     <Compile Include="App\ApplicationService.cs" />
     <Compile Include="Extensions\Utilities.cs" />
+    <Compile Include="Hybrid\Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App\ISalesforcePage.cs" />
     <Compile Include="App\ISFApplicationHelper.cs" />
@@ -126,13 +130,13 @@
     <Compile Include="Hybrid\BootConfig.cs" />
     <Compile Include="Hybrid\HybridMainPage.cs" />
     <Compile Include="Pages\AccountPage.xaml.cs" />
-    <Compile Include="Native\NativeMainPage.cs" />
     <Compile Include="Native\ServerControl.xaml.cs" />
     <Compile Include="Security\EncryptionSettings.cs" />
     <Compile Include="Security\Encryptor.cs" />
     <Compile Include="Security\HmacSHA256KeyGenerator.cs" />
     <Compile Include="Security\IKeyGenerator.cs" />
     <Compile Include="Strings\LocalizedStrings.cs" />
+    <Compile Include="Upgrade\SDKUpgradeManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Auth\PincodeDialog.xaml">
@@ -150,9 +154,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="project.json" />
-    <PRIResource Include="Strings\en\resources.resw" />
+    <None Include="_CreateNewNuGetPackage\Config.ps1" />
+    <None Include="_CreateNewNuGetPackage\DoNotModify\CreateNuGetPackage.ps1" />
+    <None Include="_CreateNewNuGetPackage\DoNotModify\New-NuGetPackage.ps1" />
+    <None Include="_CreateNewNuGetPackage\DoNotModify\UploadNuGetPackage.ps1" />
+    <None Include="_CreateNewNuGetPackage\RunMeToUploadNuGetPackage.cmd" />
+    <PRIResource Include="Strings\en-US\resources.resw" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Analytics\Analytics.csproj">
+      <Project>{2f8462bb-bcf7-4781-bcda-335e0694cf1b}</Project>
+      <Name>Analytics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{86021bc6-ae6c-47b2-9d08-8e352c46e277}</Project>
       <Name>Core</Name>

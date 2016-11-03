@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -31,6 +31,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Salesforce.SDK.SmartSync.Util;
 
 namespace Salesforce.SDK.Hybrid.SmartSync.Models
@@ -42,12 +43,10 @@ namespace Salesforce.SDK.Hybrid.SmartSync.Models
 
         [JsonProperty]
         internal List<string> FieldList;
-        
-        
+
         public static SyncOptions FromJson(string options)
         {
-            var jObject = JsonConvert.DeserializeObject<JObject>(options);
-            var nativeSyncOptions = SDK.SmartSync.Model.SyncOptions.FromJson(jObject);
+            var nativeSyncOptions = SDK.SmartSync.Model.SyncOptions.FromJson(JObject.Parse(options));
             var syncOptions = JsonConvert.SerializeObject(nativeSyncOptions);
             return JsonConvert.DeserializeObject<SyncOptions>(syncOptions);
         }
@@ -56,7 +55,10 @@ namespace Salesforce.SDK.Hybrid.SmartSync.Models
         {
             var nativeMergeMode = JsonConvert.SerializeObject(mergeMode);
             var nativeSyncOptions = SDK.SmartSync.Model.SyncOptions.OptionsForSyncUp(fieldList.ToList(), JsonConvert.DeserializeObject<SDK.SmartSync.Model.SyncState.MergeModeOptions>(nativeMergeMode));
-            var syncOptions = JsonConvert.SerializeObject(nativeSyncOptions);
+            var syncOptions = JsonConvert.SerializeObject(nativeSyncOptions, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
             return JsonConvert.DeserializeObject<SyncOptions>(syncOptions);
         }
 

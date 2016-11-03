@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -46,5 +46,9 @@ namespace Salesforce.SDK.Settings
         Task<bool> DoesFileExistAsync(string path);
 
         string GetApplicationLocalFolderPath();
+
+        string GetConnectionType();
+
+        string GetAppType();
     }
 }

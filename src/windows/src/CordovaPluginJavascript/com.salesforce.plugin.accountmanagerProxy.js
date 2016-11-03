@@ -1,5 +1,5 @@
  /*
- * Copyright (c) 2015, salesforce.com, inc.
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -24,11 +24,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-var SALESFORCE_MOBILE_SDK_VERSION = "4.0.0";
+var SALESFORCE_MOBILE_SDK_VERSION = "5.0.0";
 var SERVICE = "com.salesforce.sfaccountmanager";
 
 var exec = require("com.salesforce.util.exec").exec;
-var core = require("com.salesforce.SalesforceCore").SalesforceJS;
+var core = require("com.salesforce.SalesforceCoreProxy").SalesforceJS;
 var oauth2 = new core.OAuth2();
 
 var UserAccount = function(authToken, refreshToken, loginServer, idUrl, instanceServer, orgId, userId, username, clientId) {

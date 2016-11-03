@@ -12,8 +12,8 @@
     <UserControl.Resources>
         <strings:LocalizedStrings x:Key="Localize" />
 
-        <Flyout x:Name="ServerFlyout" Placement="Bottom" AutomationProperties.AutomationId="Flyout_ServerFlyout">
-            <StackPanel Width="400" x:Name="ServerFlyoutPanel" Background="Transparent">
+        <Flyout x:Name="ServerFlyout" Placement="Full" AutomationProperties.AutomationId="Flyout_ServerFlyout">
+            <StackPanel Width="Auto" x:Name="ServerFlyoutPanel" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock x:Name="ServerFlyoutLabel"
                            DataContext="choose_connection"
                            Text="{Binding Converter={StaticResource Localize}}"
@@ -25,7 +25,9 @@
                 <ListBox x:Name="ListboxServers"
                          SelectionMode="Single"
                          Margin="5 0 5 25"
-                         AutomationProperties.AutomationId="ListBox_ServerFlyout_ServerList">
+                         AutomationProperties.AutomationId="ListBox_ServerFlyout_ServerList"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -54,9 +56,9 @@
         </Flyout>
 
         <Flyout x:Name="AddServerFlyout"
-                Placement="Bottom"
+                Placement="Full"
                 AutomationProperties.AutomationId="Flyout_AddServer">
-            <StackPanel Width="400" x:Name="AddServerFlyoutPanel" Background="Transparent">
+            <StackPanel Width="400" x:Name="AddServerFlyoutPanel" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock x:Name="AddServerFlyoutLabel"
                            DataContext="new_connection"
                            Text="{Binding Converter={StaticResource Localize}}"
@@ -116,7 +118,7 @@
         <Flyout x:Name="MessageFlyout"
                 Placement="Bottom"
                 AutomationProperties.AutomationId="Flyout_Message">
-            <StackPanel x:Name="MessageFlyoutPanel" Background="Transparent">
+            <StackPanel x:Name="MessageFlyoutPanel" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock x:Name="MessageContent"
                            Grid.Row="1"
                            Margin="5 0 5 15"

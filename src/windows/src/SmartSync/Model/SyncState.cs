@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -26,6 +26,8 @@
  */
 
 using System;
+using System.Reflection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Salesforce.SDK.SmartStore.Store;
 using Salesforce.SDK.SmartSync.Util;
@@ -56,16 +58,25 @@ namespace Salesforce.SDK.SmartSync.Model
             SyncUp
         }
 
+        [JsonProperty]
         public long Id { private set; get; }
-        public SyncTypes SyncType { private set; get; }
+        [JsonProperty]
+        public SyncTypes Type { private set; get; }
+        [JsonProperty]
         public SyncTarget Target { private set; get; }
+        [JsonProperty]
         public SyncOptions Options { private set; get; } // null for sync-down
+        [JsonProperty]
         public String SoupName { private set; get; }
+        [JsonProperty]
         public SyncStatusTypes Status { set; get; }
+        [JsonProperty]
         public int Progress { set; get; }
+        [JsonProperty]
         public int TotalSize { set; get; }
+        [JsonProperty]
         public long MaxTimeStamp { set; get; }
-
+        [JsonProperty]
         public MergeModeOptions MergeMode
         {
             get
@@ -164,12 +175,12 @@ namespace Salesforce.SDK.SmartSync.Model
             var state = new SyncState
             {
                 Id = sync.ExtractValue<long>(SmartStore.Store.SmartStore.SoupEntryId),
-                Target = (syncType == SyncTypes.SyncDown ? (SyncTarget) SyncDownTarget.FromJson(jsonTarget) : SyncUpTarget.FromJSON(jsonTarget)),
+                Target = (syncType == SyncTypes.SyncDown ? (SyncTarget) SyncDownTarget.FromJson(jsonTarget) : SyncUpTarget.FromJson(jsonTarget)),
                 Options = SyncOptions.FromJson(sync.ExtractValue<JObject>(Constants.SyncOptions)),
                 SoupName = sync.ExtractValue<string>(Constants.SyncSoupName),
                 Progress = sync.ExtractValue<int>(Constants.SyncProgress),
                 TotalSize = sync.ExtractValue<int>(Constants.SyncTotalSize),
-                SyncType = syncType,
+                Type = syncType,
                 Status =
                     (SyncStatusTypes)
                         Enum.Parse(typeof (SyncStatusTypes), sync.ExtractValue<string>(Constants.SyncStatus)),
@@ -203,7 +214,7 @@ namespace Salesforce.SDK.SmartSync.Model
             var sync = new JObject
             {
                 {SmartStore.Store.SmartStore.SoupEntryId, Id},
-                {Constants.SyncType, SyncType.ToString()},
+                {Constants.SyncType, Type.ToString()},
                 {Constants.SyncSoupName, SoupName},
                 {Constants.SyncStatus, Status.ToString()},
                 {Constants.SyncProgress, Progress},

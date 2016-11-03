@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2013, salesforce.com, inc.
+/*
+ * Copyright (c) 2013-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@ namespace Salesforce.SDK.Auth
 
         /// <summary>
         /// This should be called when login is complete. A new account is created
-        /// in the AccountManager and the pincode screen is shown if needeed
+        /// in the AccountManager and the pincode screen is shown if needed
         /// </summary>
         /// <param name="loginOptions"></param>
         /// <param name="authResponse"></param>

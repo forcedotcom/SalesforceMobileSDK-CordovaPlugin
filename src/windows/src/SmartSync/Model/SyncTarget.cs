@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014-2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -26,6 +26,7 @@
  */
 
 using System.Reflection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Salesforce.SDK.SmartSync.Util;
 
@@ -38,23 +39,26 @@ namespace Salesforce.SDK.SmartSync.Model
     {
         public const string WindowsImpl = "windowsImpl";
         public const string WindowsImplType = "windowsImplType";
-        public const string IdFieldName = "idFieldName";
-        public const string ModificationDateFieldName = "modificationDateFieldName";
-
-        private readonly string _idFieldName;
-        private readonly string _modificationDateFieldName;
+        public const string IdFieldNameStr = "idFieldName";
+        public const string ModificationDateFieldNameStr = "modificationDateFieldName";
 
         protected SyncTarget()
         {
-            _idFieldName = Constants.Id;
-            _modificationDateFieldName = Constants.LastModifiedDate;
+            IdFieldName = Constants.Id;
+            ModificationDateFieldName = Constants.LastModifiedDate;
         }
 
         protected SyncTarget(JObject target)
         {
-            _idFieldName = target != null ? target.ExtractValue<string>(IdFieldName) : Constants.Id;
-            _modificationDateFieldName = target != null ? target.ExtractValue<string>(ModificationDateFieldName) : Constants.LastModifiedDate;
+            IdFieldName = target != null ? target.ExtractValue<string>(IdFieldNameStr) : Constants.Id;
+            ModificationDateFieldName = target != null ? target.ExtractValue<string>(ModificationDateFieldNameStr) : Constants.LastModifiedDate;
         }
+
+        [JsonProperty]
+        public string IdFieldName { get; }
+
+        [JsonProperty]
+        public string ModificationDateFieldName { get; }
 
         /// <summary>
         /// </summary>
@@ -64,20 +68,20 @@ namespace Salesforce.SDK.SmartSync.Model
             var target = new JObject();
             target[WindowsImpl] = GetType().GetTypeInfo().Assembly.FullName;
             target[WindowsImplType] = GetType().GetTypeInfo().FullName;
-            target[IdFieldName] = _idFieldName;
-            target[ModificationDateFieldName] = _modificationDateFieldName;
+            target[IdFieldNameStr] = IdFieldName;
+            target[ModificationDateFieldNameStr] = ModificationDateFieldName;
 
             return target;
         }
 
         public string GetId()
         {
-            return _idFieldName;
+            return IdFieldName;
         }
 
         public string GetModificationDate()
         {
-            return _modificationDateFieldName;
+            return ModificationDateFieldName;
         }
     }
 }
