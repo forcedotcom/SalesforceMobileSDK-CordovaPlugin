@@ -183,7 +183,6 @@
 	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
     <runs/>
   </js-module>
-  </js-module>
   	<js-module src="src/windows/com.salesforce.plugin.coreProxy.js" name="SalesforceCoreProxy" >
     <runs/>
   </js-module>
