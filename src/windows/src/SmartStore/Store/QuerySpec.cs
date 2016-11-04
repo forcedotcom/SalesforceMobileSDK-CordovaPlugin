@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -45,11 +45,14 @@ namespace Salesforce.SDK.SmartStore.Store
             DESC
         };
 
-        private const string SelectCount = "SELECT count(*) ";
         private const string Select = "SELECT ";
         private const string From = "FROM ";
         private const string Where = "WHERE ";
         private const string OrderBy = "ORDER BY ";
+
+        private const string SelectCount = "SELECT count(*) ";
+        private const string SelectCountFrom = SelectCount + "FROM ({0})";
+
 
         public readonly string BeginKey;
         public readonly string CountSmartSql;
@@ -148,8 +151,7 @@ namespace Salesforce.SDK.SmartStore.Store
         /// <returns></returns>
         private string ComputeCountSql(string smartSql)
         {
-            int fromLocation = smartSql.ToLower().IndexOf(" from ", StringComparison.CurrentCultureIgnoreCase);
-            return SelectCount + smartSql.Substring(fromLocation);
+            return string.Format(SelectCountFrom, smartSql);
         }
 
         /// <summary>

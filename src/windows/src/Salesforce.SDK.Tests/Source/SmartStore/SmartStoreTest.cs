@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -200,7 +200,7 @@ namespace Salesforce.SDK.SmartStore.Store
                     Store.ConvertSmartSql(smartSql);
                     Assert.Fail("Should have thrown exception for " + smartSql);
                 }
-                catch (SmartStoreException e)
+                catch (SmartStoreException)
                 {
                     // Expected
                 }

@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -108,6 +108,9 @@ namespace Salesforce.SDK.SmartSync.Model
             var response = await syncManager.SendRestRequest(request);
             JObject responseJson = response.AsJObject;
             var records = responseJson.ExtractValue<JArray>(Constants.Records);
+
+            NextRecordsUrl = responseJson.ExtractValue<string>(Constants.NextRecordsUrl);
+
             return records;
         }
 

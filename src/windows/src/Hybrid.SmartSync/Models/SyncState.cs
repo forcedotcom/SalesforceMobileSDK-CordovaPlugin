@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -39,61 +39,71 @@ namespace Salesforce.SDK.Hybrid.SmartSync.Models
 {
     public sealed class SyncState
     {
-        private SDK.SmartSync.Model.SyncState NativeSyncState
+        private static SDK.SmartSync.Model.SyncState _syncState;
+
+        public SyncState()
         {
-            get { return new SDK.SmartSync.Model.SyncState(); }
+            _syncState = new SDK.SmartSync.Model.SyncState();
         }
 
-
-        public long Id 
+        public SyncState(string syncState)
         {
-            get { return NativeSyncState.Id; }
+            _syncState = SDK.SmartSync.Model.SyncState.FromJson(JObject.Parse(syncState));
         }
+
+        [JsonProperty]
+        public long Id => _syncState.Id;
+
+        [JsonProperty]
         public SyncTypes SyncType
         {
             get
             {
-                var nativeSyncType = NativeSyncState.SyncType;
+                var nativeSyncType = _syncState.Type;
                 var hybridSyncType = JsonConvert.SerializeObject(nativeSyncType);
                 return JsonConvert.DeserializeObject<SyncTypes>(hybridSyncType);
             }
         }
-        //public SyncTarget Target { private set; get; }
+        [JsonProperty]
+        public SyncUpTarget Target { private set; get; }
+
+        [JsonProperty]
         public SyncOptions Options {
             get
             {
-                var nativeSyncOptions = NativeSyncState.Options;
+                var nativeSyncOptions = _syncState.Options;
                 var hybridSyncOptions = JsonConvert.SerializeObject(nativeSyncOptions);
                 return JsonConvert.DeserializeObject<SyncOptions>(hybridSyncOptions);
             }
         }
-        public String SoupName {
-            get { return NativeSyncState.SoupName; }
-        }
+        [JsonProperty]
+        public String SoupName => _syncState.SoupName;
+
+        [JsonProperty]
         public SyncStatusTypes Status {
             get
             {
-                var nativeStatus = NativeSyncState.Status;
+                var nativeStatus = _syncState.Status;
                 var hybridStatus = JsonConvert.SerializeObject(nativeStatus);
                 return JsonConvert.DeserializeObject<SyncStatusTypes>(hybridStatus);
 
             }
         }
-        public int Progress {
-            get { return NativeSyncState.Progress; }
-        }
-        public int TotalSize {
-            get { return NativeSyncState.TotalSize; }
-        }
-        public long MaxTimeStamp {
-            get { return NativeSyncState.MaxTimeStamp; }
-        }
+        [JsonProperty]
+        public int Progress => _syncState.Progress;
 
+        [JsonProperty]
+        public int TotalSize => _syncState.TotalSize;
+
+        [JsonProperty]
+        public long MaxTimeStamp => _syncState.MaxTimeStamp;
+
+        [JsonProperty]
         public MergeModeOptions MergeMode
         {
             get
             {
-                var mode = NativeSyncState.MergeMode;
+                var mode = _syncState.MergeMode;
                 MergeModeOptions mergeMode;
                 Enum.TryParse(mode.ToString(), out mergeMode);
                 return mergeMode;
@@ -135,10 +145,9 @@ namespace Salesforce.SDK.Hybrid.SmartSync.Models
 
         public static SyncState FromJson(string sync)
         {
-            var jObject = JsonConvert.DeserializeObject<JObject>(sync);
-            var state = SDK.SmartSync.Model.SyncState.FromJson(jObject);
-            var syncState = JsonConvert.SerializeObject(state);
-            return JsonConvert.DeserializeObject<SyncState>(syncState);
+            var state = SDK.SmartSync.Model.SyncState.FromJson(JObject.Parse(sync));
+            var syncState = JsonConvert.SerializeObject(state.AsJson());
+            return new SyncState(syncState);
         }
 
         public static SyncState ById(SmartStore.SmartStore store, long id)
@@ -152,14 +161,13 @@ namespace Salesforce.SDK.Hybrid.SmartSync.Models
 
         public string AsJson()
         {
-            var jObject = NativeSyncState.AsJson();
-            return JsonConvert.SerializeObject(jObject);
+            return JsonConvert.SerializeObject(_syncState.AsJson());
         }
 
         public void Save(SmartStore.SmartStore store)
         {
             var nativeStore = JsonConvert.SerializeObject(store);
-            NativeSyncState.Save(JsonConvert.DeserializeObject<SDK.SmartStore.Store.SmartStore>(nativeStore));
+            _syncState.Save(JsonConvert.DeserializeObject<SDK.SmartStore.Store.SmartStore>(nativeStore));
         }
     }
 

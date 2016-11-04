@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -60,7 +60,7 @@ namespace Salesforce.SDK.Hybrid
 
         /// <summary>
         ///     True for hybrid local application (meaning the html/js/css is bundled in the application)
-        ///     False for hybrid remote application (menaing the html/js/css is served from a server)
+        ///     False for hybrid remote application (meaning the html/js/css is served from a server)
         /// </summary>
         [JsonProperty(PropertyName = "isLocal")]
         public bool IsLocal { get; set; }

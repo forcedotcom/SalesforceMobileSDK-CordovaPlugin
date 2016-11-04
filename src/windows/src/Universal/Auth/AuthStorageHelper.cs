@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2013, salesforce.com, inc.
+/*
+ * Copyright (c) 2013-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -110,9 +110,8 @@ namespace Salesforce.SDK.Auth
             }
             catch (Exception ex)
             {
-                LoggingService.Log($"Exception occured when retrieving vault data for resource {resource}", LoggingLevel.Critical);
-
-                LoggingService.Log(ex, LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical,
+                    $"Exception occurred when retrieving vault data for resource {resource}");
 
                 Debug.WriteLine("Failed to retrieve vault data for resource " + resource);
             }
@@ -129,13 +128,13 @@ namespace Salesforce.SDK.Auth
         {
             try
             {
-                LoggingService.Log($"Attempting to retrieve user Resource={resource}  UserName={userName}", LoggingLevel.Verbose);
+                LoggingService.Log($"Attempting to retrieve user Resource={resource}", LoggingLevel.Verbose);
 
                 var list = SafeRetrieveResource(resource);
 
                 if (list == null)
                 {
-                    LoggingService.Log($"Could not retrieve user Resource={resource} UserName={userName}", LoggingLevel.Verbose);
+                    LoggingService.Log($"Could not retrieve user Resource={resource}", LoggingLevel.Verbose);
                     return null;
                 }
 
@@ -148,9 +147,8 @@ namespace Salesforce.SDK.Auth
             }
             catch (Exception ex)
             {
-                LoggingService.Log($"Exception occured when retrieving vault data for resource {resource}", LoggingLevel.Critical);
-
-                LoggingService.Log(ex, LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical,
+                    $"Exception occurred when retrieving vault data for resource {resource}");
 
                 Debug.WriteLine("Failed to retrieve vault data for resource " + resource);
             }
@@ -163,15 +161,13 @@ namespace Salesforce.SDK.Auth
         {
             try
             {
-                LoggingService.Log($"Attempting to retrieve user {userName}", LoggingLevel.Verbose);
+                LoggingService.Log($"Attempting to retrieve user", LoggingLevel.Verbose);
 
                 return _vault.FindAllByUserName(userName);
             }
             catch (Exception ex)
             {
-                LoggingService.Log($"Exception occured when retrieving vault data for user {userName}", LoggingLevel.Critical);
-
-                LoggingService.Log(ex, LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical, $"Exception occurred when retrieving vault data for user");
 
                 Debug.WriteLine("Failed to retrieve vault data for user");
             }
@@ -189,12 +185,12 @@ namespace Salesforce.SDK.Auth
 
             if (userCredentials != null)
             {
-                LoggingService.Log("removing existing credential", LoggingLevel.Verbose);
-                _vault.Remove(userCredentials);
-
-                // clear the current account from the password vault
                 try
                 {
+                    LoggingService.Log("removing existing credential", LoggingLevel.Verbose);
+                    _vault.Remove(userCredentials);
+
+                    // clear the current account from the password vault
                     var current = _vault.FindAllByResource(PasswordVaultCurrentAccount);
                     if (current != null)
                     {
@@ -234,7 +230,7 @@ namespace Salesforce.SDK.Auth
 
             var account = _vault.Retrieve(creds.Resource, creds.UserName);
 
-            // the serialized acccount is stored in the password field in the vault
+            // the serialized account is stored in the password field in the vault
             var serializedAccount = account.Password;
 
             if (IsNullOrWhiteSpace(serializedAccount))
@@ -254,10 +250,8 @@ namespace Salesforce.SDK.Auth
                 }
                 catch (Exception ex)
                 {
-                    LoggingService.Log("Exception occured when decrypting account, removing account from vault",
-                        LoggingLevel.Warning);
-
-                    LoggingService.Log(ex, LoggingLevel.Warning);
+                    LoggingService.Log(ex, LoggingLevel.Warning,
+                        "Exception occurred when decrypting account, removing account from vault");
 
                     // if we can't decrypt remove the account
                     _vault.Remove(account);
@@ -314,10 +308,11 @@ namespace Salesforce.SDK.Auth
                     {
                         if (ex is ArgumentException)
                             continue;
-                        LoggingService.Log("Exception occured when decrypting account, removing account from vault",
-                            LoggingLevel.Warning);
 
-                        LoggingService.Log(ex, LoggingLevel.Warning);
+                        LoggingService.Log(ex, LoggingLevel.Warning, "Exception occurred when decrypting account");
+
+                        LoggingService.Log("Exception occurred when decrypting account so removing account from vault",
+                            LoggingLevel.Warning);
 
                         // if we can't decrypt remove the account
                         _vault.Remove(next);
@@ -366,10 +361,10 @@ namespace Salesforce.SDK.Auth
                 }
                 catch (Exception ex)
                 {
-                    LoggingService.Log("Exception occured when decrypting account, removing account from vault",
-                        LoggingLevel.Warning);
+                    LoggingService.Log(ex, LoggingLevel.Warning, "Exception occurred when decrypting account");
 
-                    LoggingService.Log(ex, LoggingLevel.Warning);
+                    LoggingService.Log("Exception occurred when decrypting account so removing account from vault",
+                        LoggingLevel.Warning);
 
                     // if we can't decrypt remove the account
                     _vault.Remove(passwordCredential);
@@ -409,8 +404,12 @@ namespace Salesforce.SDK.Auth
             var newPin = new PasswordCredential(PasswordVaultSecuredData, PasswordVaultPincode,
                 JsonConvert.SerializeObject(policy));
             _vault.Add(newPin);
-            LoggingService.Log("pincode added to vault",
-                LoggingLevel.Verbose);
+            if (!string.IsNullOrEmpty(newPin.Password))
+            {
+                _vault.Add(newPin);
+                LoggingService.Log("pincode added to vault",
+                    LoggingLevel.Verbose);
+            }
         }
 
         /// <summary>
@@ -516,8 +515,7 @@ namespace Salesforce.SDK.Auth
             }
             catch (Exception ex)
             {
-                LoggingService.Log("Exception occurred when validating pincode:", LoggingLevel.Critical);
-                LoggingService.Log(ex, LoggingLevel.Critical);
+                LoggingService.Log(ex, LoggingLevel.Critical, "Exception occurred when validating pincode");
             }
 
             return false;
@@ -580,7 +578,7 @@ namespace Salesforce.SDK.Auth
             LoggingService.Log("Pincode wiped", LoggingLevel.Verbose);
         }
 
-        private string RetrievePincode()
+        public string RetrievePincode()
         {
             var pin = SafeRetrieveUser(PasswordVaultSecuredData, PasswordVaultPincode);
 
@@ -684,12 +682,12 @@ namespace Salesforce.SDK.Auth
                     }
                     catch (Exception ex)
                     {
+                        LoggingService.Log(ex, LoggingLevel.Warning, "Encryption Settings values failed to deserialize.");
+
                         // Failed to deserialize the data, we should clear it out and start over.
                         LoggingService.Log("Encryption Settings values can't be deserialized. Assuming bad state and clearing the vault completely",
                             LoggingLevel.Warning);
 
-                        LoggingService.Log(ex, LoggingLevel.Warning);
-                        
                         _vault.Remove(encrpytionSettings);
                         DeletePersistedCredentials();
                         DeletePincode();

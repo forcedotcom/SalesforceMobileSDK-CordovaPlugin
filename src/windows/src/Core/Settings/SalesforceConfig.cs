@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -217,12 +217,13 @@ namespace Salesforce.SDK.Settings
 
         public static async Task<T> RetrieveConfig<T>() where T : SalesforceConfig
         {
-            var configJson = await AppInfoService.GetConfigurationSettingsAsync();
-            if (String.IsNullOrWhiteSpace(configJson))
-                return null;
             try
             {
-                return JsonConvert.DeserializeObject<T>(EncryptionService.Decrypt(configJson));
+                var configJson = await AppInfoService.GetConfigurationSettingsAsync();
+                if (String.IsNullOrWhiteSpace(configJson))
+                    return null;
+
+                return JsonConvert.DeserializeObject<T>(configJson);
             }
             catch (Exception)
             {

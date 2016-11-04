@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -34,6 +34,7 @@ using Newtonsoft.Json.Linq;
 using Salesforce.SDK.Rest;
 using Salesforce.SDK.SmartStore.Store;
 using Salesforce.SDK.SmartSync.Manager;
+using Salesforce.SDK.SmartSync.Model;
 using Salesforce.SDK.SmartSync.Util;
 
 namespace Salesforce.SDK.SmartSync.Model
@@ -49,10 +50,9 @@ namespace Salesforce.SDK.SmartSync.Model
 
         public SyncUpTarget() : base()
         {
-
         }
 
-        public static SyncUpTarget FromJSON(JObject target)
+        public static SyncUpTarget FromJson(JObject target)
         {
             if (target == null)
             {

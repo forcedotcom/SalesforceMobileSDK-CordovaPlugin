@@ -138,7 +138,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"%25ProgramFiles(x86)%25\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\gacutil.exe"  /i "$(TargetPath)"
+    <PostBuildEvent>"%25ProgramFiles(x86)%25\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.1 Tools\gacutil.exe"  /i "$(TargetPath)"
  $(SolutionDir)generate.bat "$(SolutionDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

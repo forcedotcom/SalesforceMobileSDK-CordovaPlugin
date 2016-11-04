@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -132,7 +132,7 @@ namespace Salesforce.SDK.SmartSync.Util
         public const string SyncMaxTimeStamp = "maxTimeStamp";
         public const string SyncAsString = "syncAsString";
         public const string MergeMode = "mergeMode";
-        public const string FieldList = "fieldlist";
+        public const string FieldList = "fieldList";
         public const string QueryType = "type";
         public const string Query = "query";
         public const string Fieldlist = "fieldlist";

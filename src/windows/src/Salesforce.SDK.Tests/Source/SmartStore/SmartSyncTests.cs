@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Security.Cryptography.Core;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json.Linq;
 using Salesforce.SDK.Auth;
@@ -68,7 +69,7 @@ namespace Salesforce.SDK.SmartStore.Store
         {
             SFApplicationHelper.RegisterServices();
             SDKServiceLocator.RegisterService<ILoggingService, Hybrid.Logging.Logger>();
-            var settings = new EncryptionSettings(new HmacSHA256KeyGenerator());
+            var settings = new EncryptionSettings(new HmacSHA256KeyGenerator(HashAlgorithmNames.Sha256));
             Encryptor.init(settings);
             var options = new LoginOptions(TestCredentials.LoginUrl, TestCredentials.ClientId, TestCallbackUrl, "mobile",
                 TestScopes);
@@ -88,7 +89,7 @@ namespace Salesforce.SDK.SmartStore.Store
             _smartStore.ResetDatabase();
             _syncManager = SyncManager.GetInstance();
             _restClient = new RestClient(account.InstanceUrl, account.AccessToken,
-                async () =>
+                async (cancellationToken) =>
                 {
                     account = AccountManager.GetAccount();
                     account = await OAuth2.RefreshAuthTokenAsync(account);
@@ -402,7 +403,7 @@ namespace Salesforce.SDK.SmartStore.Store
             SyncState.SyncStatusTypes expectedStatus,
             int expectedProgress, int expectedSize)
         {
-            Assert.AreEqual(expectedType, sync.SyncType, "Wrong type");
+            Assert.AreEqual(expectedType, sync.Type, "Wrong type");
             Assert.AreEqual(expectedId, sync.Id, "Wrong id");
             Assert.AreEqual(expectedStatus, sync.Status, "Wrong status");
             Assert.AreEqual(expectedProgress, sync.Progress, "Wrong progress");

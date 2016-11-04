@@ -25,7 +25,7 @@ foreach($name in $names)
 write-output "Using $source for source path"
 $shell = new-object -com shell.application
 $paths = @("Universal.Template\")
-$files = @("BlankApp.png", "SharedBlankSalesforceApplication.vstemplate")
+$files = @("Universal.Template\Salesforce.Universal.Template\MyTemplate.vstemplate", "Universal.Template\Salesforce.Universal.Template\__TemplateIcon.png", "Universal.Template\Salesforce.Universal.Template\__PreviewImage.png", "Universal.Template\Salesforce.Universal.Template\App.xaml", "Universal.Template\Salesforce.Universal.Template\App.xaml.cs", "Universal.Template\Salesforce.Universal.Template\ApplicationInsights.config", "Universal.Template\Salesforce.Universal.Template\Assets", "Universal.Template\Salesforce.Universal.Template\MyTemplate.vstemplate", "Universal.Template\Salesforce.Universal.Template\Package.appxmanifest", "Universal.Template\Salesforce.Universal.Template\Pages", "Universal.Template\Salesforce.Universal.Template\project.json", "Universal.Template\Salesforce.Universal.Template\Properties", "Universal.Template\Salesforce.Universal.Template\Salesforce.Universal.Template.csproj", "Universal.Template\Salesforce.Universal.Template\Salesforce.Universal.Template_TemporaryKey.pfx", "Universal.Template\Salesforce.Universal.Template\settings" )
 
 
 $templateBuildPath = $source + "TemplateTemp"
@@ -40,7 +40,7 @@ if ($templateBuild -eq $null)
 	New-Item -ItemType directory -Path $templateBuildPath
 	$templateBuild = $shell.Namespace($templateBuildPath)
 }
-$templateOutput = $SpecialFolders["Personal"] + "\Visual Studio 2013\Templates\ProjectTemplates\SalesforceUniversalApplicationTemplate.zip"
+$templateOutput = $SpecialFolders["Personal"] + "\Visual Studio 2015\Templates\ProjectTemplates\Visual C#\SalesforceUniversalApplicationTemplate.zip"
 $FOF_SILENT_FLAG = 4
 $FOF_NOCONFIRMATION_FLAG = 16
 $pLen = $paths.length

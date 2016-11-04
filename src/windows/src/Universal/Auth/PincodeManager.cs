@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -166,6 +166,16 @@ namespace Salesforce.SDK.Auth
         private static void IdleTimer_Tick(object sender, object e)
         {
             TriggerBackgroundedPinTimer();
+        }
+
+        public static string RetrievePinCodeHash()
+        {
+            var policy = AuthStorageHelper.GetMobilePolicy();
+            if (policy?.PincodeHash != null)
+            {
+                return policy.PincodeHash;
+            }
+            return string.Empty;
         }
     }
 }

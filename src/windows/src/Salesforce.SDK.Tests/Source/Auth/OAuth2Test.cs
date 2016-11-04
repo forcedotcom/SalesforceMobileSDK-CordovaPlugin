@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2013, salesforce.com, inc.
+/*
+ * Copyright (c) 2013-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -31,6 +31,7 @@ using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
 using Salesforce.SDK.Net;
 using System.Net;
+using Windows.Security.Cryptography.Core;
 using Salesforce.SDK.App;
 using Salesforce.SDK.Auth;
 using Salesforce.SDK.Core;
@@ -54,7 +55,7 @@ namespace Salesforce.SDK.Auth
         [TestInitialize]
         public void Setup()
         {
-            var settings = new EncryptionSettings(new HmacSHA256KeyGenerator());
+            var settings = new EncryptionSettings(new HmacSHA256KeyGenerator(HashAlgorithmNames.Sha256));
             Encryptor.init(settings);
         }
 
@@ -108,7 +109,7 @@ namespace Salesforce.SDK.Auth
             IdentityResponse identityResponse = await OAuth2.CallIdentityServiceAsync(account.IdentityUrl, account.AccessToken);
 
             // Check username
-            Assert.AreEqual("sdktest@cs1.com", identityResponse.UserName);
+            Assert.AreEqual(TestCredentials.Username, identityResponse.UserName);
         }
 
         [TestMethod]

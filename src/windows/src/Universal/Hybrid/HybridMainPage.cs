@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -78,7 +78,7 @@ namespace Salesforce.SDK.Hybrid
         }
 
         /// <summary>
-        ///     Concrete hybrid main page page class should override this method and return the cordova view
+        ///     Concrete hybrid main page class should override this method and return the cordova view
         /// </summary>
         /// <returns></returns>
         protected virtual WebView GetWebView()
@@ -284,7 +284,7 @@ namespace Salesforce.SDK.Hybrid
         ///     Login redirect are of the form https://host/?ec=30x&startURL=xyz
         /// </summary>
         /// <param name="uri"></param>
-        /// <returns>null if this is not a login redirect and return the the value for startURL if this is a login redirect</returns>
+        /// <returns>null if this is not a login redirect and return the value for startURL if this is a login redirect</returns>
         private string IsLoginRedirect(Uri uri)
         {
             if (uri != null
@@ -318,7 +318,7 @@ namespace Salesforce.SDK.Hybrid
         public async void LogoutCurrentUser()
         {
             _webAppLoaded = false;
-            await SDKManager.GlobalClientManager.Logout();
+            await SDKManager.GlobalClientManager.LogoutAsync();
             // XXX Authenticate might call Navigate so it must be done on the UI thread
         }
 
