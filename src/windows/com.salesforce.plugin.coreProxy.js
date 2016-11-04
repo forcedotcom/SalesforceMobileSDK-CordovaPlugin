@@ -23,9 +23,11 @@
 * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-/// <reference path="../typings/WinJS-3.0.d.ts"/>
-/// <reference path="../typings/Salesforce.SDK.Hybrid.d.ts"/>
-/// <reference path="../typings/winrt.d.ts"/>
+var SALESFORCE_MOBILE_SDK_VERSION = "5.0.0";
+var SERVICE = "com.salesforce.oauth";
+
+var exec = require("com.salesforce.util.exec").exec;
+
 var SalesforceJS;
 (function (SalesforceJS) {
     var BootConfig = (function () {
