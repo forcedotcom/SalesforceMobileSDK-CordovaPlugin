@@ -59,14 +59,14 @@
     // Need to use SalesforceSDKManagerWithSmartStore when using smartstore
     [SalesforceSDKManager setInstanceClass:[SalesforceSDKManagerWithSmartStore class]];
     [SalesforceSDKManager sharedManager].appConfig = appConfig;
-    __weak typeof(self) weakSelf = self;
+    __weak AppDelegate *weakSelf = self;
     [SalesforceSDKManager sharedManager].postLaunchAction = ^(SFSDKLaunchAction launchActionList) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
+        __strong AppDelegate *strongSelf = weakSelf;
         [strongSelf log:SFLogLevelInfo format:@"Post-launch: launch actions taken: %@", [SalesforceSDKManager launchActionsStringRepresentation:launchActionList]];
         [strongSelf setupRootViewController];
     };
     [SalesforceSDKManager sharedManager].launchErrorAction = ^(NSError *error, SFSDKLaunchAction launchActionList) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
+        __strong AppDelegate *strongSelf = weakSelf;
         [strongSelf log:SFLogLevelError format:@"Error during SDK launch: %@", [error localizedDescription]];
         [strongSelf initializeAppViewState];
         [[SalesforceSDKManager sharedManager] launch];
