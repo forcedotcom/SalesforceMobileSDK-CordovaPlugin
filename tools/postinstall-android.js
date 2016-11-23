@@ -99,7 +99,7 @@ if(data.indexOf("org.apache.http.legacy") < 0 && data.indexOf("allprojects") < 0
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
     shelljs.echo("allprojects {\n\trepositories {\n\t\tmavenCentral\(\)\n\t}\n}").toEnd(path.join(appProjectRoot, 'build.gradle'));
     var oldBuildScriptDepTree = "buildscript {";
-    var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
+    var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:2.2.2'\n\t}\n";
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldBuildScriptDepTree, newBuildScriptDepTree);
     var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
     var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
