@@ -27,7 +27,7 @@
 
   <engines>
     <engine name="cordova-android" version="5.0.0" />
-    <engine name="cordova-ios" version="4.2.0" />
+    <engine name="cordova-ios" version="4.3.0" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
@@ -56,6 +56,15 @@
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
+    </config-file>
+
+
+    <!-- Entitlement -->
+    <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
+      <string>development</string>
+    </config-file>
+    <config-file parent="aps-environment" target="*/Entitlements-Release.plist">
+      <string>production</string>
     </config-file>
 
     <!-- Header files -->
