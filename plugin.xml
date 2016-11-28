@@ -94,6 +94,11 @@
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFLoginViewController.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHostDelegate.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHost.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHostListViewController.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHostStorage.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
 
