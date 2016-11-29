@@ -225,6 +225,12 @@ copy_ios_sdk()
     copy_and_fix UIApplication+SalesforceHybridSDK.m classes
     copy_and_fix InitialViewController.m classes
     copy_and_fix SalesforceSDKCoreDefines.h headers
+    copy_and_fix SFLoginViewController.h headers
+    copy_and_fix SFSDKLoginHostDelegate.h headers
+    copy_and_fix SFSDKLoginHost.h headers
+    copy_and_fix SFSDKLoginHostListViewController.h headers
+    copy_and_fix SFSDKLoginHostStorage.h headers
+    
     echo "Copying needed libraries to src/ios/frameworks"
     copy_lib libSalesforceAnalytics.a
     copy_lib libSalesforceSDKCore.a
