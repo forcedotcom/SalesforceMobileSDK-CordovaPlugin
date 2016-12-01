@@ -294,7 +294,7 @@ update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}"
 cd ${ROOT_FOLDER}
 echo "*** Creating directories ***"
 echo "Starting clean"
-rm -rf tmp src/ios src/android src/windows
+rm -rf tmp src/ios src/android
 echo "Creating tmp directory"
 mkdir -p tmp
 #create ios directories
