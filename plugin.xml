@@ -26,7 +26,7 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-android" version="5.0.0" />
+    <engine name="cordova-android" version="5.2.2" />
     <engine name="cordova-ios" version="4.3.0" />
   </engines>
 
@@ -57,7 +57,6 @@
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
     </config-file>
-
 
     <!-- Entitlement -->
     <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
