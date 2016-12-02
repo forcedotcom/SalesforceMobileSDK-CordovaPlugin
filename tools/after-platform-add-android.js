@@ -15,9 +15,6 @@ var fixAndroidManifest = function(data) {
         // Comment out first activity.
         data = data.replace(/<activity/, "<!--<activity");
         data = data.replace(/<\/activity>/, "</activity>-->");
-        
-        // Change min SDK version.
-        data = data.replace(/android\:minSdkVersion\=\"14\"/, 'android:minSdkVersion="19"');
         console.log('Fixed AndroidManifest.xml');
     } else {
         console.log('Already fixed. Skipping.');
