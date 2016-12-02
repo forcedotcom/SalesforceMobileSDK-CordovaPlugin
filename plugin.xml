@@ -155,6 +155,10 @@
 
     <config-file target="res/xml/config.xml" parent="/*">
 
+      <!-- Sets min and target SDK versions for our plugin -->
+      <preference name="android-minSdkVersion" value="19" />
+      <preference name="android-targetSdkVersion" value="25" />
+
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
       <allow-navigation href="https://*.force.com" />
