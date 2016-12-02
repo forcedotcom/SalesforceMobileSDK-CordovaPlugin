@@ -91,8 +91,8 @@ shelljs.cp('-R', path.join(pluginRoot, 'gradle'), appProjectRoot);
 var data = fs.readFileSync(path.join(appProjectRoot, 'build.gradle'), 'utf8');
 console.log('Fixing application build.gradle');
 
-// First verify that we didn't already modify the build.gradle file
-if(data.indexOf("SalesforceHybrid") < 0)
+// First verify that we didn't already modify the build.gradle file.
+if (data.indexOf("SalesforceHybrid") < 0)
 {
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
