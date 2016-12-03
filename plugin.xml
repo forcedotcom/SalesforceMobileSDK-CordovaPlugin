@@ -140,23 +140,31 @@
 
   <!-- android -->
   <platform name="android">
-    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+
+    <!-- Fixes the activity tag in the Manifest -->
+    <edit-config file="AndroidManifest.xml" target="/manifest/application/activity" mode="merge">
       <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
           android:label="@string/app_name"
           android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
-          android:theme="@android:style/Theme.Black.NoTitleBar">
-        <intent-filter>
-          <action android:name="android.intent.action.MAIN" />
-          <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-      </activity>
-    </config-file>
+          android:theme="@android:style/Theme.Black.NoTitleBar"
+          android:launchMode="singleTop" />
+    </edit-config>
+
+    <!-- Fixes the application tag in the Manifest -->
+    <edit-config file="AndroidManifest.xml" target="/manifest/application" mode="merge">
+      <application android:hardwareAccelerated="true"
+          android:icon="@drawable/sf__icon"
+          android:label="@string/app_name"
+          android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity"
+          android:name="com.salesforce.androidsdk.phonegap.app.HybridApp" />
+    </edit-config>
+
+    <!-- Fixes the min and target SDK versions in the Manifest -->
+    <edit-config file="AndroidManifest.xml" target="/manifest/uses-sdk" mode="merge">
+      <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="25" />
+    </edit-config>
 
     <config-file target="res/xml/config.xml" parent="/*">
-
-      <!-- Sets min and target SDK versions for our plugin -->
-      <preference name="android-minSdkVersion" value="19" />
-      <preference name="android-targetSdkVersion" value="25" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
@@ -181,9 +189,6 @@
     </config-file>
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
-    <hook type="after_platform_add" src="tools/after-platform-add-android.js" />
-    <hook type="after_plugin_add" src="tools/after-platform-add-android.js" />
-    <hook type="after_prepare" src="tools/after-prepare-android.js" />
   </platform>
 
   <!-- windows -->
@@ -211,5 +216,4 @@
   <framework src="src/windows/src/packages/MvvmLightLibs.5.2.0.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.dll" custom="true"/>
   <framework src="src/windows/src/packages/MvvmLightLibs.5.2.0.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.Extras.dll" custom="true"/>
 </platform>
-
 </plugin>
