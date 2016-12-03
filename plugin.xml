@@ -161,7 +161,7 @@
 
     <!-- Fixes the min and target SDK versions in the Manifest -->
     <edit-config file="AndroidManifest.xml" target="/manifest/uses-sdk" mode="merge">
-      <uses-sdk android:minSdkVersion="19" android:maxSdkVersion="25" />
+      <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="25" />
     </edit-config>
 
     <config-file target="res/xml/config.xml" parent="/*">
