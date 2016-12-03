@@ -89,20 +89,20 @@ shelljs.cp('-R', path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.cp('-R', path.join(pluginRoot, 'gradle'), appProjectRoot);
 
 var data = fs.readFileSync(path.join(appProjectRoot, 'build.gradle'), 'utf8');
-console.log('Fixing application build.gradle');
 
 // First verify that we didn't already modify the build.gradle file.
 if (data.indexOf("SalesforceHybrid") < 0)
 {
+    console.log('Fixing application build.gradle');
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    var oldGradleToolsVersion = "com.android.tools.build:gradle:2.1.0";
+    var oldGradleToolsVersion = "com.android.tools.build:gradle:2.2.1";
     var newGradleToolsVersion = "com.android.tools.build:gradle:2.2.2";
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
     var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep);
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '');
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile(project(path: \"CordovaLib\", configuration: \"debug\"))', newLibDep);
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile(project(path: \"CordovaLib\", configuration: \"release\"))', '');
 }
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 
