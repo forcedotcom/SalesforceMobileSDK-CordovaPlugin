@@ -17,6 +17,9 @@
   <js-module src="www/com.salesforce.plugin.smartstore.js" name="plugin.smartstore">
     <clobbers target="navigator.smartstore" />
   </js-module>
+  <js-module src="www/com.salesforce.plugin.smartstore.client.js" name="plugin.smartstore.client">
+    <clobbers target="navigator.smartstoreClient" />
+  </js-module>
   <js-module src="www/com.salesforce.plugin.sfaccountmanager.js" name="plugin.sfaccountmanager"></js-module>
   <js-module src="www/com.salesforce.plugin.smartsync.js" name="plugin.smartsync"></js-module>
   <js-module src="www/com.salesforce.util.bootstrap.js" name="util.bootstrap"></js-module>
