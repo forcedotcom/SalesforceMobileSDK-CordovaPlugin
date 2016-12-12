@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -216,6 +216,17 @@ namespace Salesforce.SDK.SmartStore.Store
                 db.Execute("DROP TABLE IF EXISTS " + SoupNamesTable);
                 CreateMetaTables();
             }
+        }
+
+        public async Task LogoutAsync()
+        {
+            DropAllSoups(DatabasePath);
+            ResetDatabase();
+            if (SDKManager.GlobalClientManager != null)
+            {
+                await SDKManager.GlobalClientManager.LogoutAsync();
+            }
+            AccountManager.SwitchAccount();
         }
 
         public static void DeleteAllDatabases(bool includeGlobal)

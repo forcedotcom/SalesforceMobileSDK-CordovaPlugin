@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2013, salesforce.com, inc.
+/*
+ * Copyright (c) 2013-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -64,7 +64,7 @@ namespace Salesforce.SDK.Auth
         public async Task StartLoginFlowAsync()
         {
             var frame = Window.Current.Content as Frame;
-            if (frame != null)
+            if (frame?.Dispatcher != null)
             {
                 await
                     frame.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
@@ -74,7 +74,7 @@ namespace Salesforce.SDK.Auth
 
         /// <summary>
         /// This should be called when login is complete. A new account is created
-        /// in the AccountManager and the pincode screen is shown if needeed
+        /// in the AccountManager and the pincode screen is shown if needed
         /// </summary>
         /// <param name="loginOptions"></param>
         /// <param name="authResponse"></param>
@@ -96,6 +96,12 @@ namespace Salesforce.SDK.Auth
         public Task PersistCurrentAccountAsync(Account account)
         {
             AuthStorageHelper.GetAuthStorageHelper().PersistCurrentCredentials(account);
+            return Task.FromResult(0);
+        }
+
+        public Task PersistCurrentPincodeAsync(Account account)
+        {
+            AuthStorageHelper.GetAuthStorageHelper().PersistPincode(account.Policy);
             return Task.FromResult(0);
         }
 
@@ -147,8 +153,7 @@ namespace Salesforce.SDK.Auth
                     }
                     catch (ArgumentException ex)
                     {
-                        LoggingService.Log("Exception occurred when clearing cookies", LoggingLevel.Critical);
-                        LoggingService.Log(ex, LoggingLevel.Critical);
+                        LoggingService.Log(ex, LoggingLevel.Critical, "Exception occurred when clearing cookies");
                     }
 
                 });

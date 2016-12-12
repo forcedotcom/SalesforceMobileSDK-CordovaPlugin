@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Salesforce.SDK.Core</id>
+        <version>5.0.0</version>
+        <title>Salesforce.SDK.Core</title>
+        <authors>Salesforce.com</authors>
+        <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+        <projectUrl>https://nuget.org/packages/Salesforce.SDK.NuGet</projectUrl>
+        <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>The Salesforce SDK package is necessary for writing Salesforce applications on Windows. It contains the base features for OAuth, security, account management, and more. Support for windows 10 runtime included.
+
+      Source: https://github.com/forcedotcom/SalesforceMobileSDK-Windows. Please follow the steps in https://github.com/forcedotcom/SalesforceMobileSDK-Windows/blob/master/README.md to install. You will need to use the template included in github in order to make use of this package initially; there are some setup steps that are needed that the template provides.</description>
+        <copyright>Copyright  2016</copyright>
+        <language>en-US</language>
+    </metadata>
+    <files>
+	<file src="bin\Release\Salesforce.SDK.Core.dll" target="lib\portable-net45+win8+wp8" />
+        <file src="bin\Release\Salesforce.SDK.Core.pdb" target="lib\portable-net45+win8+wp8" />
+    </files>
+</package>

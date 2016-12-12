@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -35,11 +35,16 @@ namespace Salesforce.SDK.Hybrid.Logging
 {
     sealed internal class Logger : ILoggingService
     {
-        public void Log(Exception exception, LoggingLevel loggingLevel, [CallerMemberName] string memberName = "", [CallerFilePath] string classFilePath = "", [CallerLineNumber]int line = 0)
+        public void Log(Exception exception, LoggingLevel loggingLevel, string logMessage = "", [CallerMemberName] string memberName = "", [CallerFilePath] string classFilePath = "", [CallerLineNumber]int line = 0)
         {
             if (exception != null)
             {
-                Log(exception.Message, loggingLevel, memberName, classFilePath, line);
+                var message = exception.Message;
+                if (!string.IsNullOrEmpty(logMessage))
+                {
+                    message = $"LogMessage: {logMessage}{Environment.NewLine}Exception Message: {message}";
+                }
+                Log(message, loggingLevel, memberName, classFilePath, line);
             }
         }
 

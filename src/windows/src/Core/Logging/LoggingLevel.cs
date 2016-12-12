@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -28,10 +28,10 @@ namespace Salesforce.SDK.Logging
 {
     public enum LoggingLevel
     {
-        Verbose,
-        Critical,
-        Warning,
-        Information,
-        Error
+        Verbose = 0,
+        Information = 1,
+        Warning = 2,
+        Error = 3,
+        Critical = 4
     }
 }

@@ -1,5 +1,4 @@
 console.log("Running SalesforceMobileSDK plugin android post-install script");
-var targetAndroidApi = 23;
 
 //--------------------------------------
 // Useful functions
@@ -58,6 +57,7 @@ var libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'l
 var appProjectRoot = path.join('platforms', 'android');
 
 console.log('Moving Salesforce libraries to the correct location');
+shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceAnalytics'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
@@ -65,15 +65,18 @@ shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceHybrid'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
 var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
+var oldSalesforceAnalyticsDep = "compile project\(\':libs:SalesforceAnalytics\'\)";
 var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
 var oldSmartSyncDep = "compile project\(\':libs:SmartSync\'\)";
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'), oldSalesforceAnalyticsDep, 'compile project\(\':SalesforceAnalytics\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), oldSmartStoreDep, 'compile project\(\':SmartStore\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldCordovaDep, 'compile project\(\':CordovaLib\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldSmartSyncDep, 'compile project\(\':SmartSync\'\)');
 
 console.log('Fixing root level Gradle file for the generated app');
+shelljs.echo("include \":SalesforceAnalytics\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
@@ -86,24 +89,20 @@ shelljs.cp('-R', path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.cp('-R', path.join(pluginRoot, 'gradle'), appProjectRoot);
 
 var data = fs.readFileSync(path.join(appProjectRoot, 'build.gradle'), 'utf8');
-console.log('Fixing application build.gradle');
 
-// First verify that we didn't already modify the build.gradle file
-if(data.indexOf("org.apache.http.legacy") < 0 && data.indexOf("allprojects") < 0)
+// First verify that we didn't already modify the build.gradle file.
+if (data.indexOf("SalesforceHybrid") < 0)
 {
+    console.log('Fixing application build.gradle');
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    shelljs.echo("allprojects {\n\trepositories {\n\t\tmavenCentral\(\)\n\t}\n}").toEnd(path.join(appProjectRoot, 'build.gradle'));
-    var oldBuildScriptDepTree = "buildscript {";
-    var newBuildScriptDepTree = "buildscript {\n\tdependencies {\n\t\tclasspath 'com.android.tools.build:gradle:1.3.1'\n\t}\n";
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldBuildScriptDepTree, newBuildScriptDepTree);
+    var oldGradleToolsVersion = "com.android.tools.build:gradle:2.2.1";
+    var newGradleToolsVersion = "com.android.tools.build:gradle:2.2.2";
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
     var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
-    var useLegacyStr = "android {\n\tuseLibrary 'org.apache.http.legacy'\n";
-    replaceTextInFile(path.join(appProjectRoot, 'CordovaLib', 'build.gradle'), oldAndroidDepTree, useLegacyStr);
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, useLegacyStr);
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile project(path: \"CordovaLib\", configuration: \"debug\")', newLibDep);
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile project(path: \"CordovaLib\", configuration: \"release\")', '');
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile(project(path: \"CordovaLib\", configuration: \"debug\"))', newLibDep);
+    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile(project(path: \"CordovaLib\", configuration: \"release\"))', '');
 }
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 

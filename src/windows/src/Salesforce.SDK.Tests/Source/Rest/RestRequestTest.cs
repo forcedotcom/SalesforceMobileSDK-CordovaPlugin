@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, salesforce.com, inc.
+ * Copyright (c) 2013-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -46,7 +46,7 @@ namespace Salesforce.SDK.Rest
         private const string TEST_QUERY = "testQuery";
         private const string TEST_SEARCH = "testSearch";
         private const string TEST_FIELDS_string = "{\"fieldX\":\"value with spaces\",\"name\":\"testAccount\"}";
-        private const string TEST_FIELDS_LIST_string = "name,fieldX";
+        private const string TEST_FIELDS_LIST_string = "name%2CfieldX";
         private const string FORM_URLENCODED = "application/x-www-form-urlencoded";
         private const string APPLICATION_JSON = "application/json";
         private static readonly HttpMethod PATCH = new HttpMethod("PATCH");

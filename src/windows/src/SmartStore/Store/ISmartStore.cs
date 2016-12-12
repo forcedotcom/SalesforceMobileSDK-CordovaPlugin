@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace Salesforce.SDK.SmartStore.Store
@@ -12,6 +13,11 @@ namespace Salesforce.SDK.SmartStore.Store
         /// This method will drop all tables from the current database, including soup index and soup names.
         /// </summary>
         void ResetDatabase();
+
+        /// <summary>
+        /// Call this method to logout from the app if the app uses SmartStore
+        /// </summary>
+        Task LogoutAsync();
 
         /// <summary>
         /// Create table for soupName with a column for the soup itself and columns for paths specified in indexSpecs

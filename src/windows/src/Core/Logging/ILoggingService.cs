@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -33,6 +33,6 @@ namespace Salesforce.SDK.Logging
     public interface ILoggingService
     {
         void Log(string message, LoggingLevel loggingLevel, [CallerMemberName]string memberName = "", [CallerFilePath]string classFilePath = "", [CallerLineNumber]int line = 0);
-        void Log(Exception exception, LoggingLevel loggingLevel, [CallerMemberName]string memberName = "", [CallerFilePath]string classFilePath = "", [CallerLineNumber]int line = 0);
+        void Log(Exception exception, LoggingLevel loggingLevel, string logMessage = "", [CallerMemberName]string memberName = "", [CallerFilePath]string classFilePath = "", [CallerLineNumber]int line = 0);
     }
 }

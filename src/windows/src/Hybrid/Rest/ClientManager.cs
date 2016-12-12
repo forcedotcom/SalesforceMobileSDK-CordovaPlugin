@@ -18,7 +18,7 @@ namespace Salesforce.SDK.Hybrid.Rest
 
         public IAsyncOperation<bool> Logout()
         {
-            Task<bool> response = _manager.Logout();
+            Task<bool> response = _manager.LogoutAsync();
             return response.AsAsyncOperation<bool>();
         }
 

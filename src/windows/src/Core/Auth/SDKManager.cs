@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -34,6 +34,9 @@ namespace Salesforce.SDK.Auth
 {
     public class SDKManager
     {
+        //Current version of this SDK
+        public static string SDK_VERSION = "5.0.0";
+
         /// <summary>
         /// The root application page your app should move to after login/pincode. For UI apps only.
         /// </summary>

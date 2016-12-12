@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -38,21 +39,32 @@ namespace Salesforce.SDK.Hybrid.SmartSync.Models
 {
     public sealed class SyncUpTarget
     {
-         private SDK.SmartSync.Model.SyncUpTarget _syncUpTarget;
+        private SDK.SmartSync.Model.SyncUpTarget _syncUpTarget;
 
         public SyncUpTarget()
         {
-            _syncUpTarget = new SDK.SmartSync.Model.SyncUpTarget();
+            _syncUpTarget = SDK.SmartSync.Model.SyncUpTarget.FromJson(new SDK.SmartSync.Model.SyncUpTarget().AsJson());
         }
 
         public SyncUpTarget(string target)
         {
-            _syncUpTarget = new SDK.SmartSync.Model.SyncUpTarget(JsonConvert.DeserializeObject<JObject>(target));
+            _syncUpTarget = SDK.SmartSync.Model.SyncUpTarget.FromJson(JObject.Parse(target));
         }
 
-        public static SyncUpTarget FromJSON(string target)
+        [JsonProperty]
+        public string IdFieldName => _syncUpTarget.IdFieldName;
+        [JsonProperty]
+        public string ModificationDateFieldName => _syncUpTarget.ModificationDateFieldName;
+
+        public string AsJson()
         {
-            var nativeSyncUpTarget = SDK.SmartSync.Model.SyncUpTarget.FromJSON(JsonConvert.DeserializeObject<JObject>(target));
+            var jObject = _syncUpTarget.AsJson();
+            return JsonConvert.SerializeObject(jObject);
+        }
+
+        public static SyncUpTarget FromJson(string target)
+        {
+            var nativeSyncUpTarget = SDK.SmartSync.Model.SyncUpTarget.FromJson(JObject.Parse(target));
             var syncUpTarget = JsonConvert.SerializeObject(nativeSyncUpTarget);
             return JsonConvert.DeserializeObject<SyncUpTarget>(syncUpTarget);
         }

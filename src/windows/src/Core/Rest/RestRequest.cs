@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, salesforce.com, inc.
+ * Copyright (c) 2013-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -127,8 +127,9 @@ namespace Salesforce.SDK.Rest
         /// </summary>
         /// <param name="method">The HTTP method for the request (GET/POST/DELETE etc)</param>
         /// <param name="path">The URI path, this will automatically be resolved against the users current instance host.</param>
-        public RestRequest(HttpMethod method, string path)
-            : this(method, path, null, ContentTypeValues.None, new Dictionary<string, string>())
+        /// <param name="additionalHeaders">optional - additional headers to pass with request</param>
+        public RestRequest(HttpMethod method, string path, Dictionary<string, string> additionalHeaders = null)
+            : this(method, path, null, ContentTypeValues.None, additionalHeaders ?? new Dictionary<string, string>())
         {
         }
 
@@ -212,7 +213,7 @@ namespace Salesforce.SDK.Rest
         ///     http://www.salesforce.com/us/developer/docs/api_rest/index_Left.htm#StartTopic=Content/resources_sobject_basic_info.htm
         /// </summary>
         /// <param name="apiVersion">API version e.g. v26.0</param>
-        /// <param name="objectType">Ojbect type</param>
+        /// <param name="objectType">Object type</param>
         /// <returns>A RestRequest</returns>
         public static RestRequest GetRequestForMetadata(string apiVersion, string objectType)
         {
@@ -225,7 +226,7 @@ namespace Salesforce.SDK.Rest
         ///     http://www.salesforce.com/us/developer/docs/api_rest/index_Left.htm#StartTopic=Content/resources_sobject_describe.htm
         /// </summary>
         /// <param name="apiVersion">API version e.g. v26.0</param>
-        /// <param name="objectType">Ojbect type</param>
+        /// <param name="objectType">Object type</param>
         /// <returns>A RestRequest</returns>
         public static RestRequest GetRequestForDescribe(string apiVersion, string objectType)
         {
@@ -238,7 +239,7 @@ namespace Salesforce.SDK.Rest
         ///     http://www.salesforce.com/us/developer/docs/api_rest/index_Left.htm#StartTopic=Content/resources_sobject_retrieve.htm
         /// </summary>
         /// <param name="apiVersion">API version e.g. v26.0</param>
-        /// <param name="objectType">Ojbect type</param>
+        /// <param name="objectType">Object type</param>
         /// <param name="fields">Fields</param>
         /// <returns>A RestRequest</returns>
         public static RestRequest GetRequestForCreate(string apiVersion, string objectType,
@@ -255,7 +256,7 @@ namespace Salesforce.SDK.Rest
         ///     http://www.salesforce.com/us/developer/docs/api_rest/index_Left.htm#StartTopic=Content/resources_sobject_retrieve.htm
         /// </summary>
         /// <param name="apiVersion">API version e.g. v26.0</param>
-        /// <param name="objectType">Ojbect type</param>
+        /// <param name="objectType">Object type</param>
         /// <param name="objectId">object id</param>
         /// <param name="fieldsList">Fields</param>
         /// <returns>A RestRequest</returns>
@@ -266,7 +267,7 @@ namespace Salesforce.SDK.Rest
             if (fieldsList != null && fieldsList.Length > 0)
             {
                 path.Append("?fields=");
-                path.Append(Uri.EscapeUriString(string.Join(",", fieldsList)));
+                path.Append(Uri.EscapeDataString(string.Join(",", fieldsList)));
             }
 
             return new RestRequest(HttpMethod.Get, path.ToString());
@@ -277,7 +278,7 @@ namespace Salesforce.SDK.Rest
         ///     See
         ///     http://www.salesforce.com/us/developer/docs/api_rest/index_Left.htm#StartTopic=Content/resources_sobject_retrieve.htm
         ///     <param name="apiVersion">API version e.g. v26.0</param>
-        ///     <param name="objectType">Ojbect type</param>
+        ///     <param name="objectType">Object type</param>
         ///     <param name="objectId">object id</param>
         ///     <param name="fields">Fields</param>
         /// </summary>
@@ -317,7 +318,7 @@ namespace Salesforce.SDK.Rest
         ///     http://www.salesforce.com/us/developer/docs/api_rest/index_Left.htm#StartTopic=Content/resources_sobject_retrieve.htm
         /// </summary>
         /// <param name="apiVersion">API version e.g. v26.0</param>
-        /// <param name="objectType">Ojbect type</param>
+        /// <param name="objectType">Object type</param>
         /// <param name="objectId">object id</param>
         /// <returns>A RestRequest</returns>
         public static RestRequest GetRequestForDelete(string apiVersion, string objectType, string objectId)
@@ -336,7 +337,7 @@ namespace Salesforce.SDK.Rest
         {
             var path = new StringBuilder(RestAction.Search.Path(apiVersion));
             path.Append("?q=");
-            path.Append(Uri.EscapeUriString(q));
+            path.Append(Uri.EscapeDataString(q));
             return new RestRequest(HttpMethod.Get, path.ToString());
         }
 
@@ -351,7 +352,7 @@ namespace Salesforce.SDK.Rest
         {
             var path = new StringBuilder(RestAction.Query.Path(apiVersion));
             path.Append("?q=");
-            path.Append(Uri.EscapeUriString(q));
+            path.Append(Uri.EscapeDataString(q));
             return new RestRequest(HttpMethod.Get, path.ToString());
         }
     }

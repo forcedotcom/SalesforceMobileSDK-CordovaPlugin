@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2015, salesforce.com, inc.
+/*
+ * Copyright (c) 2015-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -65,7 +65,7 @@ namespace Salesforce.SDK.Rest
         JObject AsJObject { get; }
 
         /// <summary>
-        /// HTTP status code fo the response returned by the server
+        /// HTTP status code for the response returned by the server
         /// </summary>
         HttpStatusCode StatusCode { get; }
 

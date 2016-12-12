@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2014, salesforce.com, inc.
+/*
+ * Copyright (c) 2014-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -33,6 +33,9 @@ using Windows.UI.Xaml.Controls;
 using Salesforce.SDK.Auth;
 using System.Threading.Tasks;
 using Salesforce.SDK.Core;
+using Salesforce.SDK.Hybrid.Logging;
+using Salesforce.SDK.Logging;
+using Salesforce.SDK.Pages;
 using Salesforce.SDK.Security;
 using Salesforce.SDK.Settings;
 
@@ -116,6 +119,7 @@ namespace Salesforce.SDK.App
                 {
                     throw new Exception("Failed to create initial page");
                 }
+                rootFrame.Navigate(typeof(AccountPage), e.Arguments);
             }
 
             // Ensure the current window is active

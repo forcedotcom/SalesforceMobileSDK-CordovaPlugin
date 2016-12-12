@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="4.3.1">
+        version="5.0.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -12,9 +12,13 @@
   <repo>https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin</repo>
 
   <js-module src="www/com.salesforce.plugin.oauth.js" name="plugin.oauth"></js-module>
+  <js-module src="www/com.salesforce.plugin.network.js" name="plugin.network"></js-module>
   <js-module src="www/com.salesforce.plugin.sdkinfo.js" name="plugin.sdkinfo"></js-module>
   <js-module src="www/com.salesforce.plugin.smartstore.js" name="plugin.smartstore">
     <clobbers target="navigator.smartstore" />
+  </js-module>
+  <js-module src="www/com.salesforce.plugin.smartstore.client.js" name="plugin.smartstore.client">
+    <clobbers target="navigator.smartstoreClient" />
   </js-module>
   <js-module src="www/com.salesforce.plugin.sfaccountmanager.js" name="plugin.sfaccountmanager"></js-module>
   <js-module src="www/com.salesforce.plugin.smartsync.js" name="plugin.smartsync"></js-module>
@@ -25,8 +29,8 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-android" version="5.0.0" />
-    <engine name="cordova-ios" version="4.2.0" />
+    <engine name="cordova-android" version="6.1.0" />
+    <engine name="cordova-ios" version="4.3.0" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
@@ -38,22 +42,32 @@
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
+      <preference name="deployment-target" value="9.0" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
-      <allow-navigation href="https://localhost" subdomains="true" requires-forward-secrecy="false" />
-      <allow-navigation href="https://*.force.com" subdomains="true" requires-forward-secrecy="false" />
-      <allow-navigation href="https://*.salesforce.com" subdomains="true" requires-forward-secrecy="false" />
+      <allow-navigation href="https://localhost" subdomains="true" />
+      <allow-navigation href="https://*.force.com" subdomains="true" />
+      <allow-navigation href="https://*.salesforce.com" subdomains="true" />
 
       <!-- For legacy apps that don't use CSP -->
-      <access origin="https://localhost" subdomains="true" requires-forward-secrecy="false" />
-      <access origin="https://*.force.com" subdomains="true" requires-forward-secrecy="false" />
-      <access origin="https://*.salesforce.com" subdomains="true" requires-forward-secrecy="false" />
+      <access origin="https://localhost" subdomains="true" />
+      <access origin="https://*.force.com" subdomains="true" />
+      <access origin="https://*.salesforce.com" subdomains="true" />
 
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
+      <feature name="com.salesforce.network"><param name="ios-package" value="SFNetworkPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
+    </config-file>
+
+    <!-- Entitlement -->
+    <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
+      <string>development</string>
+    </config-file>
+    <config-file parent="aps-environment" target="*/Entitlements-Release.plist">
+      <string>production</string>
     </config-file>
 
     <!-- Header files -->
@@ -83,6 +97,11 @@
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFLoginViewController.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHostDelegate.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHost.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHostListViewController.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginHostStorage.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
 
@@ -97,9 +116,8 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Libraries -->
+    <source-file src="src/ios/frameworks/libSalesforceAnalytics.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceNetwork.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceRestAPI.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
@@ -126,17 +144,29 @@
 
   <!-- android -->
   <platform name="android">
-    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+
+    <!-- Fixes the activity tag in the Manifest -->
+    <edit-config file="AndroidManifest.xml" target="/manifest/application/activity" mode="merge">
       <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
           android:label="@string/app_name"
           android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
-          android:theme="@android:style/Theme.Black.NoTitleBar">
-        <intent-filter>
-          <action android:name="android.intent.action.MAIN" />
-          <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-      </activity>
-    </config-file>
+          android:theme="@android:style/Theme.Black.NoTitleBar"
+          android:launchMode="singleTop" />
+    </edit-config>
+
+    <!-- Fixes the application tag in the Manifest -->
+    <edit-config file="AndroidManifest.xml" target="/manifest/application" mode="merge">
+      <application android:hardwareAccelerated="true"
+          android:icon="@drawable/sf__icon"
+          android:label="@string/app_name"
+          android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity"
+          android:name="com.salesforce.androidsdk.phonegap.app.HybridApp" />
+    </edit-config>
+
+    <!-- Fixes the min and target SDK versions in the Manifest -->
+    <edit-config file="AndroidManifest.xml" target="/manifest/uses-sdk" mode="merge">
+      <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="25" />
+    </edit-config>
 
     <config-file target="res/xml/config.xml" parent="/*">
 
@@ -150,6 +180,7 @@
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
       <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceOAuthPlugin"/></feature>
+      <feature name="com.salesforce.network"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceNetworkPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SDKInfoPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
@@ -162,9 +193,6 @@
     </config-file>
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
-    <hook type="after_platform_add" src="tools/after-platform-add-android.js" />
-    <hook type="after_plugin_add" src="tools/after-platform-add-android.js" />
-    <hook type="after_prepare" src="tools/after-prepare-android.js" />
   </platform>
 
   <!-- windows -->
@@ -181,15 +209,15 @@
 	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
     <runs/>
   </js-module>
-  <js-module name="SalesforceCore" src="src/windows/salesforce.windows.core.js">
-	<runs/>
+  	<js-module src="src/windows/com.salesforce.plugin.coreProxy.js" name="SalesforceCoreProxy" >
+    <runs/>
   </js-module>
-	<framework src="src/windows/src/Core/Core.csproj"  custom="true" type="projectReference"/>
-    <framework src="src/windows/src/Universal/Universal.csproj"  custom="true" type="projectReference"/>
+  <framework src="src/windows/src/Core/Core.csproj"  custom="true" type="projectReference"/>
+  <framework src="src/windows/src/Analytics/Analytics.csproj"  custom="true" type="projectReference"/>
+  <framework src="src/windows/src/Universal/Universal.csproj"  custom="true" type="projectReference"/>
   <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
   <framework src="src/windows/src/packages/Newtonsoft.Json.7.0.1/lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll" custom="true"/>
-  <framework src="src/windows/src/packages/MvvmLightLibs.5.1.1.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.dll" custom="true"/>
-  <framework src="src/windows/src/packages/MvvmLightLibs.5.1.1.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.Extras.dll" custom="true"/>
+  <framework src="src/windows/src/packages/MvvmLightLibs.5.2.0.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.dll" custom="true"/>
+  <framework src="src/windows/src/packages/MvvmLightLibs.5.2.0.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.Extras.dll" custom="true"/>
 </platform>
-
 </plugin>
