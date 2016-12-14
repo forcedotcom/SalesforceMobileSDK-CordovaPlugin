@@ -1,4 +1,4 @@
-![Build Status](https://forcedotcom.github.io/SalesforceMobileSDK-TestResults/CordovaPlugin-results/latest/buildstatus.svg)
+![Build Status](https://forcedotcom.github.io/SalesforceMobileSDK-TestResults/CordovaPlugin-results/dev/latest/buildstatus.svg)
 
 Steps to use the Cordova plugin for the Salesforce Mobile SDK
 ------------------------
