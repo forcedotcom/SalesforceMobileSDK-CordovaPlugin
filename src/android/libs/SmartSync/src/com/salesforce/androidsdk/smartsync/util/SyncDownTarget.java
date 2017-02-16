@@ -37,9 +37,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -177,6 +175,16 @@ public abstract class SyncDownTarget extends SyncTarget {
             }
         }
         return maxTimeStamp;
+    }
+
+    /**
+     * Return ids of records that should not be written over
+     * during a sync down with merge mode leave-if-changed
+     * @return set of ids 
+     * @throws JSONException
+     */
+    public Set<String> getIdsToSkip(SyncManager syncManager, String soupName) throws JSONException {
+        return getDirtyRecordIds(syncManager, soupName, getIdFieldName());
     }
 
     /**
