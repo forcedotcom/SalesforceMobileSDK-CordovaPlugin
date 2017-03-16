@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
@@ -5,11 +16,12 @@ apply plugin: 'com.jfrog.bintray'
 dependencies {
   compile project(':libs:SalesforceAnalytics')
   compile 'com.squareup.okhttp3:okhttp:3.6.0'
+  compile "com.google.android.gms:play-services-gcm:10.2.0"
 }
 
 android {
   compileSdkVersion 25
-  buildToolsVersion '23.0.1'
+  buildToolsVersion '25.0.0'
 
   buildTypes {
       debug {
