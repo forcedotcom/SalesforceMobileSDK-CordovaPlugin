@@ -1,15 +1,26 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
   compile project(':libs:SmartSync')
-  compile project(':external:cordova:framework')
+  compile 'org.apache.cordova:framework:6.1.2:release@aar'
 }
 
 android {
   compileSdkVersion 25
-  buildToolsVersion '23.0.1'
+  buildToolsVersion '25.0.0'
 
   buildTypes {
     debug {

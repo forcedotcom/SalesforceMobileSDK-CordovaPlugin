@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-present, salesforce.com, inc.
+ * Copyright (c) 2017-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,49 +24,40 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.rest;
+package com.salesforce.androidsdk.push;
 
-import android.content.Context;
-
-import com.salesforce.androidsdk.R;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
+import com.salesforce.androidsdk.accounts.UserAccount;
 import com.salesforce.androidsdk.app.SalesforceSDKManager;
+import com.salesforce.androidsdk.config.BootConfig;
 
-/**
- * This is where all the API version info lives. This allows us to change one
- * line here and affect all our api calls.
- */
-public class ApiVersionStrings {
+import android.app.IntentService;
+import android.content.Intent;
+import android.util.Log;
 
-    public static final String VERSION_NUMBER = "v39.0";
-    public static final String API_PREFIX = "/services/data/";
+public class SFDCRegistrationIntentService extends IntentService {
 
-    public static String getBasePath() {
-        return API_PREFIX + getVersionNumber(SalesforceSDKManager.getInstance().getAppContext());
+    private static final String TAG = "RegIntentService";
+
+    public SFDCRegistrationIntentService() {
+        super(TAG);
     }
 
-    public static String getBaseChatterPath() {
-        return getBasePath() + "/chatter/";
-    }
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        try {
+            InstanceID instanceID = InstanceID.getInstance(this);
+            String token = instanceID.getToken(BootConfig.getBootConfig(this).getPushNotificationClientId(),
+                                               GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
-    public static String getBaseConnectPath() {
-        return getBasePath() + "/connect/";
-    }
-
-    public static String getBaseSObjectPath() {
-        return getBasePath() + "/sobjects/";
-    }
-
-    /**
-     * Returns the API version number to be used.
-     *
-     * @param context Context. Could be null in some test runs.
-     * @return API version number to be used.
-     */
-    public static String getVersionNumber(Context context) {
-        String apiVersion = VERSION_NUMBER;
-        if (context != null) {
-            apiVersion = context.getString(R.string.api_version);
+            UserAccount account = SalesforceSDKManager.getInstance().getUserAccountManager().getCurrentUser();
+            // Store the new token
+            PushMessaging.setRegistrationId(this, token, account);
+            // Send it to SFDC
+            PushMessaging.registerSFDCPush(this, account);
+        } catch (Exception e) {
+            Log.e(TAG, "Error during GCM registration", e);
         }
-        return apiVersion;
     }
 }
