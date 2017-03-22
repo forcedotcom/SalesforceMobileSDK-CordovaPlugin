@@ -195,30 +195,4 @@
 
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
-
-  <!-- windows -->
-  <platform name="windows">
-	<js-module src="src/windows/com.salesforce.plugin.oauthProxy.js" name="SalesforceOAuthProxy">
-    <runs/>
-  </js-module>
-	<js-module src="src/windows/com.salesforce.plugin.accountmanagerProxy.js" name="SalesforceAccountManagerProxy">
-    <runs/>
-  </js-module>
-	<js-module src="src/windows/com.salesforce.plugin.smartstoreProxy.js" name="SalesforceSmartStoreProxy">
-    <runs/>
-  </js-module>
-	<js-module src="src/windows/com.salesforce.plugin.smartsyncProxy.js" name="SalesforceSmartSyncProxy">
-    <runs/>
-  </js-module>
-  	<js-module src="src/windows/com.salesforce.plugin.coreProxy.js" name="SalesforceCoreProxy" >
-    <runs/>
-  </js-module>
-  <framework src="src/windows/src/Core/Core.csproj"  custom="true" type="projectReference"/>
-  <framework src="src/windows/src/Analytics/Analytics.csproj"  custom="true" type="projectReference"/>
-  <framework src="src/windows/src/Universal/Universal.csproj"  custom="true" type="projectReference"/>
-  <framework src="src/windows/src/Hybrid/Hybrid.csproj"  custom="true" type="projectReference"/>
-  <framework src="src/windows/src/packages/Newtonsoft.Json.7.0.1/lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll" custom="true"/>
-  <framework src="src/windows/src/packages/MvvmLightLibs.5.2.0.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.dll" custom="true"/>
-  <framework src="src/windows/src/packages/MvvmLightLibs.5.2.0.0/lib/portable-net45+wp8+wpa81+netcore45+monoandroid1+xamarin.ios10/Galasoft.MvvmLight.Extras.dll" custom="true"/>
-</platform>
 </plugin>
