@@ -101,6 +101,20 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
 + (void)setInstanceClass:(Class)className;
 
 /**
+ * Sets the app name to be used by the analytics framework.
+ *
+ * @param appName App name.
+ */
++ (void)setAiltnAppName:(nonnull NSString *)appName;
+
+/**
+ * Returns the app name being used by the analytics framework.
+ *
+ * @return App name.
+ */
++ (nonnull NSString *)ailtnAppName;
+
+/**
  @return The singleton instance of the SDK Manager.
  */
 + (nonnull instancetype)sharedManager;
@@ -243,11 +257,6 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  @return A log-friendly string of the launch actions that were taken, given in postLaunchAction.
  */
 + (NSString *)launchActionsStringRepresentation:(SFSDKLaunchAction)launchActions;
-
-/**
- @param account The account you would like loaded upon initialization.
- */
-+ (void)setDesiredAccount:(SFUserAccount*)account;
 
 @end
 
