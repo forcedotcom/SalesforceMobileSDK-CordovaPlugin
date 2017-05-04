@@ -1,0 +1,6 @@
+framework module SmartSync {
+  umbrella header "SmartSync.h"
+
+  export *
+  module * { export * }
+}

@@ -70,19 +70,6 @@ parse_opts ()
     fi
 }
 
-# Helper functions
-copy_and_fix ()
-{
-    echo "* Fixing and copying $1 to $2 directory"
-    find tmp -name $1 | xargs sed -E 's/#import <(Salesforce|SmartStore).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
-}
-
-copy_lib ()
-{
-    echo "* Copying $1"
-    find tmp -name $1 -exec cp {} src/ios/frameworks/ \;
-}
-
 get_root_folder ()
 {
     local current_folder=`dirname "${BASH_SOURCE[0]}"`
@@ -145,7 +132,7 @@ update_ios_repo ()
         ./install.sh
         cd build
         rm -rf artifacts
-        ant
+        ./build-all.sh
     fi
     cd ${ROOT_FOLDER}
 }
@@ -159,7 +146,6 @@ update_android_repo ()
 create_ios_dirs()
 {
     echo "Creating ios directories"
-    mkdir -p src/ios/headers
     mkdir -p src/ios/frameworks
     mkdir -p src/ios/classes
     mkdir -p src/ios/resources
@@ -176,69 +162,23 @@ copy_ios_sdk()
 {
     echo "*** iOS ***"
     echo "Copying SalesforceAnalytics library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceAnalytics-Debug.zip -d tmp
+    cp -RL $IOS_SDK_FOLDER/build/artifacts/Debug/SalesforceAnalytics.framework src/ios/frameworks/
     echo "Copying SalesforceSDKCore library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCore-Debug.zip -d tmp
+    cp -RL $IOS_SDK_FOLDER/build/artifacts/Debug/SalesforceSDKCore.framework src/ios/frameworks/
     echo "Copying SmartStore library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SmartStore-Debug.zip -d tmp
+    cp -RL $IOS_SDK_FOLDER/build/artifacts/Debug/SmartStore.framework src/ios/frameworks/
     echo "Copying SmartSync library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
+    cp -RL $IOS_SDK_FOLDER/build/artifacts/Debug/SmartSync.framework src/ios/frameworks/
     echo "Copying SalesforceHybridSDK library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
+    cp -RL $IOS_SDK_FOLDER/build/artifacts/Debug/SalesforceHybridSDK.framework src/ios/frameworks/
     echo "Copying sqlcipher library"    
-    cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
+    cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher/libsqlcipher.a src/ios/frameworks/
     echo "Copying CocoaLumberjack library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/Lumberjack-Debug.zip -d tmp
+    cp -RL $IOS_SDK_FOLDER/build/artifacts/Debug/CocoaLumberjack.framework src/ios/frameworks/
     echo "Copying AppDelegate+SalesforceHybridSDK"    
-    cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
-    cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
-    cp $IOS_SDK_FOLDER/shared/hybrid/InitialViewController.*  tmp
-    echo "Copying and fixing needed headers to src/ios/headers"
-    copy_and_fix AppDelegate+SalesforceHybridSDK.h headers
-    copy_and_fix UIApplication+SalesforceHybridSDK.h headers
-    copy_and_fix InitialViewController.h headers
-    copy_and_fix SFSDKAppConfig.h headers
-    copy_and_fix SFAuthenticationManager.h headers
-    copy_and_fix SFCommunityData.h headers
-    copy_and_fix SFDefaultUserManagementViewController.h headers
-    copy_and_fix SFHybridViewConfig.h headers
-    copy_and_fix SFHybridViewController.h headers
-    copy_and_fix SFIdentityCoordinator.h headers
-    copy_and_fix SFIdentityData.h headers
-    copy_and_fix SFLocalhostSubstitutionCache.h headers
-    copy_and_fix SFLogger.h headers
-    copy_and_fix SFLoggerMacros.h headers
-    copy_and_fix NSNotificationCenter+SFAdditions.h headers
-    copy_and_fix SFOAuthCoordinator.h headers
-    copy_and_fix SFOAuthCredentials.h headers
-    copy_and_fix SFOAuthInfo.h headers
-    copy_and_fix SFPushNotificationManager.h headers
-    copy_and_fix SFUserAccount.h headers
-    copy_and_fix SFUserAccountConstants.h headers
-    copy_and_fix SFUserAccountManager.h headers
-    copy_and_fix SFUserAccountIdentity.h headers
-    copy_and_fix SalesforceSDKManager.h headers
-    copy_and_fix SalesforceSDKManagerWithSmartStore.h headers
-    copy_and_fix SFAuthErrorHandler.h headers
-    copy_and_fix SFAuthErrorHandlerList.h headers
-    copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
-    copy_and_fix UIApplication+SalesforceHybridSDK.m classes
-    copy_and_fix InitialViewController.m classes
-    copy_and_fix SalesforceSDKCoreDefines.h headers
-    copy_and_fix SFLoginViewController.h headers
-    copy_and_fix SFSDKLoginHostDelegate.h headers
-    copy_and_fix SFSDKLoginHost.h headers
-    copy_and_fix SFSDKLoginHostListViewController.h headers
-    copy_and_fix SFSDKLoginHostStorage.h headers
-    
-    echo "Copying needed libraries to src/ios/frameworks"
-    copy_lib libSalesforceAnalytics.a
-    copy_lib libSalesforceSDKCore.a
-    copy_lib libSmartStore.a
-    copy_lib libSmartSync.a
-    copy_lib libSalesforceHybridSDK.a
-    copy_lib libsqlcipher.a
-    copy_lib libCocoaLumberjack.a
+    cp -RL $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  src/ios/classes/
+    cp -RL $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes/
+    cp -RL $IOS_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes/
     echo "Copying Images.xcassets"
     cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
     echo "Copying SalesforceSDKAssets.xcassets"
