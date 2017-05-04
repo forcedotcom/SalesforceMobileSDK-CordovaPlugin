@@ -6,7 +6,7 @@
     "homepage": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin",
     "bugs": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/issues",
     "licenses" : [
-        { "type": "Salesforce.com Mobile SDK License", "url": "https://github.com/forcedotcom/SalesforceMobileSDK-Android/blob/master/LICENSE.md" }
+        { "type": "Salesforce.com Mobile SDK License", "url": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/blob/master/LICENSE.md" }
     ],
     "repository": {
         "type" : "git",
