@@ -1,0 +1,19 @@
+{
+    "name": "SalesforceMobileSDK-CordovaPlugin",
+    "version": "5.2.0",
+    "description": "Salesforce Mobile SDK Cordova Plugin Repository",
+    "keywords": [ "mobilesdk", "android", "ios", "cordova", "salesforce", "mobile", "sdk" ],
+    "homepage": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin",
+    "bugs": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/issues",
+    "licenses" : [
+        { "type": "Salesforce.com Mobile SDK License", "url": "https://github.com/forcedotcom/SalesforceMobileSDK-Android/blob/master/LICENSE.md" }
+    ],
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin.git"
+    },
+    "author": { "name": "Bharath Hariharan", "email": "bhariharan@salesforce.com" },
+    "contributors": [
+        { "name": "Wolfgang Mathurin", "email": "wmathurin@salesforce.com" }
+    ]
+}
