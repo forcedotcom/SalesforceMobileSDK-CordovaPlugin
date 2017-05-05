@@ -8,7 +8,7 @@ Do:
 ./tools/update.sh
 </pre>
 
-If you don't want to regenerate the iOS .a libraries, do:
+If you don't want to regenerate the iOS libraries, do:
 
 <pre>
 ./tools/update.sh nobuild
