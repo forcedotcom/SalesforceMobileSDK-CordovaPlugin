@@ -56,7 +56,7 @@ var registerPushNotificationHandler = function(notificationHandler, fail) {
         push.on('notification', function(data) {
           console.log("notification event");
           console.log(JSON.stringify(data));
-          notificationHandler(message);
+          notificationHandler(data);
           push.finish(function () {
               console.log('finish successfully called');
           });
