@@ -37,9 +37,9 @@ var exec = function(pluginVersion, successCB, errorCB, service, action, args) {
             if (typeof successCB === "function")
                 successCB.apply(null, arguments);
         },
-        function() {
+        function(error) {
             console.timeEnd(tag);
-            console.error(tag + " failed");
+            console.error(tag + " failed - Error: " + error);
             if (typeof errorCB === "function")
                 errorCB.apply(null, arguments);
         },
