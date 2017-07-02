@@ -31,6 +31,7 @@
 #import "SalesforceSDKConstants.h"
 @class SFAuthenticationManager;
 @class SFAuthenticationViewHandler;
+@class SFAuthenticationSafariControllerHandler;
 @class SFAuthErrorHandler;
 @class SFAuthErrorHandlerList;
 @class SFLoginHostUpdateResult;
@@ -174,6 +175,13 @@ typedef void (^SFOAuthFlowFailureCallbackBlock)(SFOAuthInfo *, NSError *);
 - (void)authManagerDidCancelBrowserFlow:(SFAuthenticationManager *)manager;
 
 /**
+ Called when the auth manager is going to present the safari view controller.
+ @param manager The instance of SFAuthenticationManager making the call.
+ @param svc The instance of the safari view controller to be presented.
+ */
+- (void)authManager:(SFAuthenticationManager *)manager willDisplayAuthSafariViewController:(SFSafariViewController *)svc;
+
+/**
  Called when a generic flow authentication is cancelled.
  @param manager The instance of SFAuthenticationManager making the call.
 */
@@ -277,6 +285,13 @@ extern  NSString * const kOAuthRedirectUriKey;
 @property (nonatomic, strong) SFAuthenticationViewHandler *authViewHandler;
 
 /**
+ The property denoting the handler for presenting the authentication controller (for advanced auth flows)
+ You can override this handler if you want to have a custom work flow for displaying the authentication
+ controller.
+ */
+@property (nonatomic, strong) SFAuthenticationSafariControllerHandler *authSafariControllerHandler;
+
+/**
  The auth handler for invalid credentials.
  */
 @property (nonatomic, readonly) SFAuthErrorHandler *invalidCredentialsAuthErrorHandler;
@@ -351,6 +366,11 @@ extern  NSString * const kOAuthRedirectUriKey;
  default: @"sfdc:///axm/detect/oauth/done")
  */
 @property (nonatomic, copy, nullable) NSString *oauthCompletionUrl;
+
+/**
+ The Branded Login path configured for this application.
+ */
+@property (nonatomic, nullable, copy) NSString *brandLoginPath;
 
 /**
  The OAuth scopes associated with the app.

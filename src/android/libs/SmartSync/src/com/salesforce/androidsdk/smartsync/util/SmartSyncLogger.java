@@ -27,8 +27,8 @@
 package com.salesforce.androidsdk.smartsync.util;
 
 import com.salesforce.androidsdk.analytics.logger.SalesforceLogger;
+import com.salesforce.androidsdk.app.SalesforceSDKManager;
 import com.salesforce.androidsdk.rest.RestResponse;
-import com.salesforce.androidsdk.smartsync.app.SmartSyncSDKManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -213,9 +213,18 @@ public class SmartSyncLogger {
         v(tag, msg + ": " + objStr);
     }
 
+    /**
+     * Sets the log level to be used.
+     *
+     * @param level Log level.
+     */
+    public static void setLogLevel(SalesforceLogger.Level level) {
+        getLogger().setLogLevel(level);
+    }
+
     private static SalesforceLogger getLogger() {
         return SalesforceLogger.getLogger(COMPONENT_NAME,
-                SmartSyncSDKManager.getInstance().getAppContext());
+                SalesforceSDKManager.getInstance().getAppContext());
     }
 
     private static String toString(Object obj) {
