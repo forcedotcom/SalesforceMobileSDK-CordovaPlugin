@@ -206,8 +206,7 @@ copy_ios_sdk()
     copy_and_fix SFIdentityCoordinator.h headers
     copy_and_fix SFIdentityData.h headers
     copy_and_fix SFLocalhostSubstitutionCache.h headers
-    copy_and_fix SFLogger.h headers
-    copy_and_fix SFLoggerMacros.h headers
+    copy_and_fix SFSDKLogger.h headers
     copy_and_fix NSNotificationCenter+SFAdditions.h headers
     copy_and_fix SFOAuthCoordinator.h headers
     copy_and_fix SFOAuthCredentials.h headers
