@@ -86,8 +86,7 @@
     <header-file src="src/ios/headers/SFIdentityCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLoggerMacros.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLogger.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
