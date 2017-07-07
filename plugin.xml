@@ -76,8 +76,8 @@
     </config-file>
 
     <!-- Header files -->
-    <header-file src="src/ios/headers/SFAuthenticationManager.h" target-dir="salesforce"/>
-    <header-file src="src/ios/headers/SalesforceSDKConstants.h" target-dir="salesforce"/>
+    <header-file src="src/ios/headers/SFAuthenticationManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SalesforceSDKConstants.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFCommunityData.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSDKAppConfig.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/InitialViewController.h" target-dir="salesforce" />
@@ -108,8 +108,10 @@
     <header-file src="src/ios/headers/SFSDKLoginHost.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSDKLoginHostListViewController.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSDKLoginHostStorage.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h"  />
-    <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h"  />
+    <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/headers/DDLog.h" />
+    <header-file src="src/ios/headers/DDFileLogger.h" />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
