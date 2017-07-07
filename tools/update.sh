@@ -208,6 +208,7 @@ copy_ios_sdk()
     copy_and_fix SFIdentityData.h headers
     copy_and_fix SFLocalhostSubstitutionCache.h headers
     copy_and_fix SFSDKLogger.h headers
+    copy_and_fix SFSDKFileLogger.h headers
     copy_and_fix NSNotificationCenter+SFAdditions.h headers
     copy_and_fix SFOAuthCoordinator.h headers
     copy_and_fix SFOAuthCredentials.h headers
@@ -341,4 +342,3 @@ cd ${ROOT_FOLDER}
 rm -rf $ANDROID_SDK_FOLDER
 rm -rf $IOS_SDK_FOLDER
 rm -rf $SHARED_SDK_FOLDER
-
