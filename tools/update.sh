@@ -199,6 +199,7 @@ copy_ios_sdk()
     copy_and_fix InitialViewController.h headers
     copy_and_fix SFSDKAppConfig.h headers
     copy_and_fix SFAuthenticationManager.h headers
+    copy_and_fix SalesforceSDKConstants.h headers
     copy_and_fix SFCommunityData.h headers
     copy_and_fix SFDefaultUserManagementViewController.h headers
     copy_and_fix SFHybridViewConfig.h headers
