@@ -199,6 +199,7 @@ copy_ios_sdk()
     copy_and_fix InitialViewController.h headers
     copy_and_fix SFSDKAppConfig.h headers
     copy_and_fix SFAuthenticationManager.h headers
+    copy_and_fix SalesforceSDKConstants.h headers
     copy_and_fix SFCommunityData.h headers
     copy_and_fix SFDefaultUserManagementViewController.h headers
     copy_and_fix SFHybridViewConfig.h headers
@@ -207,6 +208,7 @@ copy_ios_sdk()
     copy_and_fix SFIdentityData.h headers
     copy_and_fix SFLocalhostSubstitutionCache.h headers
     copy_and_fix SFSDKLogger.h headers
+    copy_and_fix SFSDKFileLogger.h headers
     copy_and_fix NSNotificationCenter+SFAdditions.h headers
     copy_and_fix SFOAuthCoordinator.h headers
     copy_and_fix SFOAuthCredentials.h headers
@@ -340,4 +342,3 @@ cd ${ROOT_FOLDER}
 rm -rf $ANDROID_SDK_FOLDER
 rm -rf $IOS_SDK_FOLDER
 rm -rf $SHARED_SDK_FOLDER
-
