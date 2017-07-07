@@ -28,7 +28,7 @@
  */
 
 #define DD_LEGACY_MACROS 0
-#import <CocoaLumberjack/DDLog.h>
+#import "DDLog.h"
 #import "SFSDKFileLogger.h"
 
 @interface SFSDKLogger : NSObject
