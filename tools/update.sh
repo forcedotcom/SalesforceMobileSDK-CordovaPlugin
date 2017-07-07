@@ -233,6 +233,7 @@ copy_ios_sdk()
     copy_and_fix SFSDKLoginHostStorage.h headers
     copy_and_fix DDLog.h headers
     copy_and_fix DDFileLogger.h headers
+    copy_and_fix DDLegacyMacros.h headers
 
     echo "Copying needed libraries to src/ios/frameworks"
     copy_lib libSalesforceAnalytics.a

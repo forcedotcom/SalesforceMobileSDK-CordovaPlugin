@@ -112,6 +112,7 @@
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h" />
     <header-file src="src/ios/headers/DDLog.h" />
     <header-file src="src/ios/headers/DDFileLogger.h" />
+    <header-file src="src/ios/headers/DDLegacyMacros.h" />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
