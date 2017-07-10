@@ -97,10 +97,10 @@ if (data.indexOf("SalesforceHybrid") < 0)
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    var oldGradleToolsVersion = "com.android.tools.build:gradle:2.2.1";
-    var newGradleToolsVersion = "com.android.tools.build:gradle:2.3.0";
+    var oldGradleToolsVersion = "com.android.tools.build:gradle:2.2.3";
+    var newGradleToolsVersion = "com.android.tools.build:gradle:2.3.2";
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
-    var newLibDep = "compile \"com.google.android.gms:play-services-gcm:7.5.0\"\ncompile project(':SalesforceHybrid')";
+    var newLibDep = "compile project(':SalesforceHybrid')";
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile(project(path: \"CordovaLib\", configuration: \"debug\"))', newLibDep);
     replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile(project(path: \"CordovaLib\", configuration: \"release\"))', '');
 }

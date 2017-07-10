@@ -74,7 +74,7 @@ parse_opts ()
 copy_and_fix ()
 {
     echo "* Fixing and copying $1 to $2 directory"
-    find tmp -name $1 | xargs sed -E 's/#import <(Salesforce|SmartStore).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
+    find tmp -name $1 | xargs sed -E 's/#import <(SalesforceAnalytics|SalesforceSDKCore|SmartStore|SmartSync|SalesforceHybrid|CocoaLumberjack).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
 }
 
 copy_lib ()
@@ -199,6 +199,7 @@ copy_ios_sdk()
     copy_and_fix InitialViewController.h headers
     copy_and_fix SFSDKAppConfig.h headers
     copy_and_fix SFAuthenticationManager.h headers
+    copy_and_fix SalesforceSDKConstants.h headers
     copy_and_fix SFCommunityData.h headers
     copy_and_fix SFDefaultUserManagementViewController.h headers
     copy_and_fix SFHybridViewConfig.h headers
@@ -206,8 +207,8 @@ copy_ios_sdk()
     copy_and_fix SFIdentityCoordinator.h headers
     copy_and_fix SFIdentityData.h headers
     copy_and_fix SFLocalhostSubstitutionCache.h headers
-    copy_and_fix SFLogger.h headers
-    copy_and_fix SFLoggerMacros.h headers
+    copy_and_fix SFSDKLogger.h headers
+    copy_and_fix SFSDKFileLogger.h headers
     copy_and_fix NSNotificationCenter+SFAdditions.h headers
     copy_and_fix SFOAuthCoordinator.h headers
     copy_and_fix SFOAuthCredentials.h headers
@@ -230,7 +231,10 @@ copy_ios_sdk()
     copy_and_fix SFSDKLoginHost.h headers
     copy_and_fix SFSDKLoginHostListViewController.h headers
     copy_and_fix SFSDKLoginHostStorage.h headers
-    
+    copy_and_fix DDLog.h headers
+    copy_and_fix DDFileLogger.h headers
+    copy_and_fix DDLegacyMacros.h headers
+
     echo "Copying needed libraries to src/ios/frameworks"
     copy_lib libSalesforceAnalytics.a
     copy_lib libSalesforceSDKCore.a
@@ -341,4 +345,3 @@ cd ${ROOT_FOLDER}
 rm -rf $ANDROID_SDK_FOLDER
 rm -rf $IOS_SDK_FOLDER
 rm -rf $SHARED_SDK_FOLDER
-
