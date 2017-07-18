@@ -1,0 +1,6 @@
+framework module SmartStore {
+  umbrella header "SmartStore.h"
+
+  export *
+  module * { export * }
+}

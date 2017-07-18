@@ -1,0 +1,6 @@
+framework module SalesforceHybridSDK {
+  umbrella header "SalesforceHybridSDK.h"
+
+  export *
+  module * { export * }
+}
