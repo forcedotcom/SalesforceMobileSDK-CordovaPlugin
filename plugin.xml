@@ -94,12 +94,12 @@
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
 
     <!-- Dynamic framework binaries -->
-    <framework src="src/ios/frameworks/CocoaLumberjack.framework" custom="true" />
-    <framework src="src/ios/frameworks/SalesforceAnalytics.framework" custom="true" />
-    <framework src="src/ios/frameworks/SalesforceSDKCore.framework" custom="true" />
-    <framework src="src/ios/frameworks/SmartStore.framework" custom="true" />
-    <framework src="src/ios/frameworks/SmartSync.framework" custom="true" />
-    <framework src="src/ios/frameworks/SalesforceHybridSDK.framework" custom="true" />
+    <framework src="src/ios/frameworks/CocoaLumberjack.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SalesforceAnalytics.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SalesforceSDKCore.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SmartStore.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SmartSync.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SalesforceHybridSDK.framework" custom="true" embed="true" />
 
     <!-- System frameworks -->
     <framework src="libxml2.tbd" />
