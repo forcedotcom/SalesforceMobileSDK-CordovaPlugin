@@ -26,14 +26,14 @@
 #import "AppDelegate+SalesforceHybridSDK.h"
 #import "UIApplication+SalesforceHybridSDK.h"
 #import "InitialViewController.h"
-#import "SFLocalhostSubstitutionCache.h"
-#import "SFHybridViewConfig.h"
-#import "SalesforceSDKManager.h"
-#import "SFPushNotificationManager.h"
-#import "SFSDKAppConfig.h"
-#import "SFDefaultUserManagementViewController.h"
-#import "SFSDKLogger.h"
-#import "SalesforceSDKManagerWithSmartStore.h"
+#import <SalesforceHybridSDK/SFLocalhostSubstitutionCache.h>
+#import <SalesforceHybridSDK/SFHybridViewConfig.h>
+#import <SalesforceSDKCore/SalesforceSDKManager.h>
+#import <SalesforceSDKCore/SFPushNotificationManager.h>
+#import <SalesforceSDKCore/SFSDKAppConfig.h>
+#import <SalesforceSDKCore/SFDefaultUserManagementViewController.h>
+#import <SalesforceAnalytics/SFSDKLogger.h>
+#import <SmartStore/SalesforceSDKManagerWithSmartStore.h>
 
 @implementation AppDelegate (SalesforceHybridSDK)
 
