@@ -26,7 +26,6 @@
  */
 package com.salesforce.androidsdk.smartstore.app;
 
-import android.accounts.Account;
 import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
@@ -40,17 +39,20 @@ import com.salesforce.androidsdk.ui.LoginActivity;
 import com.salesforce.androidsdk.util.EventsObservable;
 import com.salesforce.androidsdk.util.EventsObservable.EventType;
 
+import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteOpenHelper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SDK Manager for all native applications that use SmartStore
  */
 public class SmartStoreSDKManager extends SalesforceSDKManager {
-
     private static final String FEATURE_SMART_STORE_USER = "US";
     private static final String FEATURE_SMART_STORE_GLOBAL = "GS";
 
@@ -82,10 +84,10 @@ public class SmartStoreSDKManager extends SalesforceSDKManager {
         if (INSTANCE == null) {
             INSTANCE = new SmartStoreSDKManager(context, keyImpl, mainActivity, loginActivity);
         }
+        initInternal(context);
 
         // Upgrade to the latest version.
         SmartStoreUpgradeManager.getInstance().upgrade();
-        initInternal(context);
         EventsObservable.get().notifyEvent(EventType.AppCreateComplete);
     }
 
@@ -133,26 +135,38 @@ public class SmartStoreSDKManager extends SalesforceSDKManager {
     }
 
     @Override
-    protected void cleanUp(Activity frontActivity, Account account) {
-        if (account != null) {
-            final UserAccount userAccount = getUserAccountManager().buildUserAccount(account);
-            if (userAccount != null && hasSmartStore(userAccount)) {
-                DBOpenHelper.deleteDatabase(getAppContext(), userAccount);
-            }
+    protected void cleanUp(UserAccount userAccount) {
+        if (userAccount != null) {
+            // NB if database file was already deleted, we still need to call DBOpenHelper.deleteDatabase to clean up the DBOpenHelper cache
+            DBOpenHelper.deleteDatabase(getAppContext(), userAccount);
         } else {
             DBOpenHelper.deleteAllUserDatabases(getAppContext());
         }
 
-        /*
-         * Checks how many accounts are left that are authenticated. If only one
-         * account is left, this is the account that is being removed. In this
-         * case, we can safely reset all DBs.
-         */
-        final List<UserAccount> users = getUserAccountManager().getAuthenticatedUsers();
-        if (users != null && users.size() == 1) {
-            DBOpenHelper.deleteDatabase(getAppContext(), users.get(0));
+        super.cleanUp(userAccount);
+    }
+
+    @Override
+    public synchronized void changePasscode(String oldPass, String newPass) {
+        if (isNewPasscode(oldPass, newPass)) {
+            final Map<String, DBOpenHelper> dbMap = DBOpenHelper.getOpenHelpers();
+            if (dbMap != null) {
+                final Collection<DBOpenHelper> dbHelpers = dbMap.values();
+                if (dbHelpers != null) {
+                    for (final DBOpenHelper dbHelper : dbHelpers) {
+                        if (dbHelper != null) {
+
+                            // If the old passcode is null, use the default key.
+                            final SQLiteDatabase db = dbHelper.getWritableDatabase(getEncryptionKeyForPasscode(oldPass));
+
+                            // If the new passcode is null, use the default key.
+                            SmartStore.changeKey(db, getEncryptionKeyForPasscode(oldPass), getEncryptionKeyForPasscode(newPass));
+                        }
+                    }
+                }
+            }
+            super.changePasscode(oldPass, newPass);
         }
-        super.cleanUp(frontActivity, account);
     }
 
     /**
@@ -177,9 +191,12 @@ public class SmartStoreSDKManager extends SalesforceSDKManager {
         if (TextUtils.isEmpty(dbName)) {
             dbName = DBOpenHelper.DEFAULT_DB_NAME;
         }
+        final String passcodeHash = getPasscodeHash();
+        final String passcode = (passcodeHash == null ?
+                getEncryptionKeyForPasscode(null) : passcodeHash);
         final SQLiteOpenHelper dbOpenHelper = DBOpenHelper.getOpenHelper(context,
                 dbName, null, null);
-        return new SmartStore(dbOpenHelper, getEncryptionKey());
+        return new SmartStore(dbOpenHelper, passcode);
     }
 
     /**
@@ -228,9 +245,12 @@ public class SmartStoreSDKManager extends SalesforceSDKManager {
             dbNamePrefix = DBOpenHelper.DEFAULT_DB_NAME;
         }
         SalesforceSDKManager.getInstance().registerUsedAppFeature(FEATURE_SMART_STORE_USER);
+        final String passcodeHash = getPasscodeHash();
+        final String passcode = (passcodeHash == null ?
+                getEncryptionKeyForPasscode(null) : passcodeHash);
         final SQLiteOpenHelper dbOpenHelper = DBOpenHelper.getOpenHelper(context,
                 dbNamePrefix, account, communityId);
-        return new SmartStore(dbOpenHelper, getEncryptionKey());
+        return new SmartStore(dbOpenHelper, passcode);
     }
 
     /**
@@ -394,4 +414,5 @@ public class SmartStoreSDKManager extends SalesforceSDKManager {
                     UserAccountManager.getInstance().getCurrentUser().getCommunityId());
         }
     }
+
 }
