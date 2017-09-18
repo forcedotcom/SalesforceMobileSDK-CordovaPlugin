@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="5.2.0">
+        version="5.3.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -174,7 +174,7 @@
 
     <!-- Fixes the min and target SDK versions in the Manifest -->
     <edit-config file="AndroidManifest.xml" target="/manifest/uses-sdk" mode="merge">
-      <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="25" />
+      <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="26" />
     </edit-config>
 
     <config-file target="res/xml/config.xml" parent="/*">
