@@ -2,7 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.salesforce.androidsdk" 
-	android:versionCode="58"
+	android:versionCode="59"
 	android:versionName="6.0.0.dev">
 
     <uses-sdk android:minSdkVersion="21"
@@ -122,7 +122,6 @@
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <!--TODO: Remove the -sdk-23 tag when the minsdk version is 23-->

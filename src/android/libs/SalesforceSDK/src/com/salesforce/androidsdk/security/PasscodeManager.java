@@ -41,7 +41,6 @@ import com.salesforce.androidsdk.app.SalesforceSDKUpgradeManager;
 import com.salesforce.androidsdk.app.UUIDManager;
 import com.salesforce.androidsdk.util.EventsObservable;
 import com.salesforce.androidsdk.util.EventsObservable.EventType;
-import com.salesforce.androidsdk.util.SalesforceKeyGenerator;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -100,7 +99,7 @@ public class PasscodeManager  {
     private Activity frontActivity;
     private Handler handler;
     private long lastActivity;
-    private boolean locked;
+    boolean locked;
     private int timeoutMs;
     private int minPasscodeLength;
     private LockChecker lockChecker;
