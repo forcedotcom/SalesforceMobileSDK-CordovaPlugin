@@ -24,8 +24,6 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
-#import "SFAuthenticationManager.h"
 #import "SalesforceSDKCoreDefines.h"
 
 @class SFUserAccount, SFSDKAppConfig;
@@ -92,7 +90,7 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  including the orchestration of authentication, passcode displaying, and management of app
  backgrounding and foregrounding state.
  */
-@interface SalesforceSDKManager : NSObject <SFAuthenticationManagerDelegate>
+@interface SalesforceSDKManager : NSObject
 
 /**
  Class instance to be used to instantiate the singleton.
@@ -143,17 +141,17 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
 /**
  The Connected App ID configured for this application.
  */
-@property (nonatomic, copy, nullable) NSString *connectedAppId;
+@property (nonatomic, copy, nullable) NSString *connectedAppId SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.remoteAccessConsumerKey to specify the consumer key.");
 
 /**
  The Connected App Callback URI configured for this application.
  */
-@property (nonatomic, copy, nullable) NSString *connectedAppCallbackUri;
+@property (nonatomic, copy, nullable) NSString *connectedAppCallbackUri SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.oauthRedirectURI to specify the redirect URI.");
 
 /**
  The OAuth scopes configured for this application.
  */
-@property (nonatomic, strong, nullable) NSArray<NSString*> *authScopes;
+@property (nonatomic, strong, nullable) NSArray<NSString*> *authScopes SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.oauthScopes to specify the OAuth scopes.");
 
 /**
  The Branded Login path configured for this application.
@@ -163,7 +161,7 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  Whether or not to attempt authentication as part of the launch process.  Default
  value is YES.
  */
-@property (nonatomic, assign) BOOL authenticateAtLaunch;
+@property (nonatomic, assign) BOOL authenticateAtLaunch SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.shouldAuthenticate to specify whether the app should authenticate at launch.");
 
 /**
  The configured post launch action block to execute when launch completes.
@@ -196,6 +194,16 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  */
 @property (nonatomic, assign) BOOL useSnapshotView;
 
+/**
+ The block to provide custom view to use for IDP selection flow. This block will be used if loginFlowSelectionDialogEnabled in SDSDKIDPconfig is set to YES.
+ */
+@property (nonatomic, copy, nullable) SFIDPLoginFlowSelectionBlock idpLoginFlowSelectionBlock;
+
+
+/**
+ The block to provide custom view to use for IDP user selection flow.
+ */
+@property (nonatomic, copy, nullable) SFIDPUserSelectionBlock idpUserSelectionBlock;
 /**
  The block to provide custom view to use as the "image" that represents the app display when it is backgrounded.
  @discussion
@@ -235,6 +243,27 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  */
 @property (nonatomic, copy) SFSDKUserAgentCreationBlock userAgentString;
 
+/** Use this flag to indicate if the APP will be an identity provider
+ */
+@property (nonatomic,assign) BOOL isIdentityProvider;
+
+/** Use this flag to indicate if the APP supports using an identity provider app for authentication
+ */
+@property (nonatomic,assign) BOOL idpEnabled;
+
+/** Use this flag to indicate if the scheme for the identity provider app
+ */
+@property (nonatomic, copy) NSString *idpAppScheme;
+
+/** Use this flag to setup a user friendly display name  for your current app. This value will be used by the identity
+ *  provider app on the user selection view.
+ */
+@property (nonatomic,copy) NSString *appDisplayName;
+
+/** Use this flag to indicate if the APP supports using an identity provider app for authentication
+ */
+@property (nonatomic,assign) BOOL useLegacyAuthenticationManager;
+
 /**
  Launches the SDK.  This will verify an existing passcode the first time it runs, and attempt to
  authenticate if the current user is not already authenticated.  @see postLaunchAction, launchErrorAction,
@@ -243,6 +272,11 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  @return YES if the launch successfully kicks off, NO if launch is already running.
  */
 - (BOOL)launch;
+
+/**
+ @return app type as a string
+ */
+- (NSString *)getAppTypeAsString;
 
 /**
  Adds an SDK Manager delegate to the list of delegates.
@@ -261,6 +295,11 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  @return A log-friendly string of the launch actions that were taken, given in postLaunchAction.
  */
 + (NSString *)launchActionsStringRepresentation:(SFSDKLaunchAction)launchActions;
+
+/**
+ * @return Dev info (list of name1, value1, name2, value2 etc) to show in SFSDKDevInfoController
+ */
+- (NSArray*) getDevSupportInfos;
 
 @end
 
