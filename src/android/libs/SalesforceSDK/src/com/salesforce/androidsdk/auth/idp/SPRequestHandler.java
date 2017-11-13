@@ -36,6 +36,7 @@ import com.salesforce.androidsdk.auth.HttpAccess;
 import com.salesforce.androidsdk.auth.OAuth2;
 import com.salesforce.androidsdk.config.BootConfig;
 import com.salesforce.androidsdk.security.SalesforceKeyGenerator;
+import com.salesforce.androidsdk.ui.LoginActivity;
 import com.salesforce.androidsdk.util.SalesforceSDKLogger;
 
 import java.net.URI;
@@ -48,26 +49,35 @@ import java.net.URI;
 public class SPRequestHandler {
 
     public static final int IDP_REQUEST_CODE = 375;
-    private static final String CODE_VERIFIER = "code_verifier";
     private static final String TAG = "SPRequestHandler";
 
     private String codeVerifier;
     private String codeChallenge;
     private SPConfig spConfig;
+    private LoginActivity.SPAuthCallback authCallback;
 
     /**
      * Parameterized constructor.
      *
      * @param loginUrl Login URL.
+     * @param authCallback Auth callback.
      */
-    public SPRequestHandler(String loginUrl) {
-        codeVerifier = CODE_VERIFIER;
-        /*
-         * TODO: Switch 'codeVerifier' to a randomly generated 128-byte key instead of
-         * a hardcoded string.
-         */
+    public SPRequestHandler(String loginUrl, LoginActivity.SPAuthCallback authCallback) {
+        this(loginUrl, null, authCallback);
+    }
+
+    /**
+     * Parameterized constructor.
+     *
+     * @param loginUrl Login URL.
+     * @param userHint User hint. Must be of the format 'orgId:userId', both being 18-char IDs.
+     * @param authCallback Auth callback.
+     */
+    public SPRequestHandler(String loginUrl, String userHint, LoginActivity.SPAuthCallback authCallback) {
+        codeVerifier = SalesforceKeyGenerator.getRandom128ByteKey();
         codeChallenge = SalesforceKeyGenerator.getSHA256Hash(codeVerifier);
-        spConfig = buildSPConfig(loginUrl);
+        spConfig = buildSPConfig(loginUrl, userHint);
+        this.authCallback = authCallback;
     }
 
     /**
@@ -111,10 +121,10 @@ public class SPRequestHandler {
         return spConfig;
     }
 
-    private SPConfig buildSPConfig(String loginUrl) {
+    private SPConfig buildSPConfig(String loginUrl, String userHint) {
         final BootConfig bootConfig = BootConfig.getBootConfig(SalesforceSDKManager.getInstance().getAppContext());
         return new SPConfig(bootConfig.getRemoteAccessConsumerKey(), bootConfig.getOauthRedirectURI(),
-                codeChallenge, bootConfig.getOauthScopes(), loginUrl, null);
+                codeChallenge, bootConfig.getOauthScopes(), loginUrl, userHint);
     }
 
     private void handleError(String error) {
@@ -144,16 +154,16 @@ public class SPRequestHandler {
                         spConfig.getOauthCallbackUrl());
             } catch (Exception e) {
                 SalesforceSDKLogger.e(TAG, "Exception occurred while making token request", e);
+                handleError(e.toString());
             }
             return tokenResponse;
         }
 
         @Override
         protected void onPostExecute(OAuth2.TokenEndpointResponse tokenResponse) {
-            /*
-             * TODO: Digest the token response and make a request to the identity URL, then run
-             * post login steps from OAuthWebviewHelper.
-             */
+            if (authCallback != null && tokenResponse != null) {
+                authCallback.receivedTokenResponse(tokenResponse);
+            }
         }
     }
 }

@@ -60,6 +60,7 @@ import com.salesforce.androidsdk.config.AdminPermsManager;
 import com.salesforce.androidsdk.config.AdminSettingsManager;
 import com.salesforce.androidsdk.config.BootConfig;
 import com.salesforce.androidsdk.config.LoginServerManager;
+import com.salesforce.androidsdk.config.RuntimeConfig;
 import com.salesforce.androidsdk.push.PushMessaging;
 import com.salesforce.androidsdk.push.PushNotificationInterface;
 import com.salesforce.androidsdk.rest.ClientManager;
@@ -136,11 +137,9 @@ public class SalesforceSDKManager {
      * Instance of the SalesforceSDKManager to use for this process.
      */
     protected static SalesforceSDKManager INSTANCE;
-
-    /**
-     * Timeout value for push un-registration.
-     */
     private static final int PUSH_UNREGISTER_TIMEOUT_MILLIS = 30000;
+    private static final String FEATURE_BROWSER_LOGIN = "BW";
+    private static final String FEATURE_APP_IS_SP = "SP";
 
     protected Context context;
     protected KeyInterface keyImpl;
@@ -163,8 +162,8 @@ public class SalesforceSDKManager {
     private List<String> additionalOauthKeys;
     private String loginBrand;
     private boolean browserLoginEnabled;
-    private boolean idpLoginFlowEnabled;
     private String idpAppURIScheme;
+    private boolean idpAppLoginFlowActive;
 
     /**
      * PasscodeManager object lock.
@@ -257,6 +256,13 @@ public class SalesforceSDKManager {
         // If your app runs in multiple processes, all the SalesforceSDKManager need to run cleanup during a logout
         cleanupReceiver = new CleanupReceiver();
         context.registerReceiver(cleanupReceiver, new IntentFilter(SalesforceSDKManager.CLEANUP_INTENT_ACTION));
+
+        // Enables IDP login flow if it's set through MDM.
+        final RuntimeConfig runtimeConfig = RuntimeConfig.getRuntimeConfig(context);
+        final String idpAppUrlScheme = runtimeConfig.getString(RuntimeConfig.ConfigKey.IDPAppURLScheme);
+        if (!TextUtils.isEmpty(idpAppUrlScheme)) {
+            this.idpAppURIScheme = idpAppUrlScheme;
+        }
     }
 
     /**
@@ -611,6 +617,11 @@ public class SalesforceSDKManager {
      */
     public synchronized void setBrowserLoginEnabled(boolean browserLoginEnabled) {
         this.browserLoginEnabled = browserLoginEnabled;
+        if (browserLoginEnabled) {
+            SalesforceSDKManager.getInstance().registerUsedAppFeature(FEATURE_BROWSER_LOGIN);
+        } else {
+            SalesforceSDKManager.getInstance().unregisterUsedAppFeature(FEATURE_BROWSER_LOGIN);
+        }
     }
 
     /**
@@ -619,16 +630,25 @@ public class SalesforceSDKManager {
      * @return True - if IDP login flow is enabled, False - otherwise.
      */
     public boolean isIDPLoginFlowEnabled() {
-        return idpLoginFlowEnabled;
+        return !TextUtils.isEmpty(idpAppURIScheme);
     }
 
     /**
-     * Sets whether IDP login flow is enabled.
+     * Returns whether the IDP app is currently going through a login flow.
      *
-     * @param idpLoginFlowEnabled True - if IDP login flow is enabled, False - otherwise.
+     * @return True - if the IDP app is currently going through a login flow, False - otherwise.
      */
-    public synchronized void setIDPLoginFlowEnabled(boolean idpLoginFlowEnabled) {
-        this.idpLoginFlowEnabled = idpLoginFlowEnabled;
+    public boolean isIDPAppLoginFlowActive() {
+        return idpAppLoginFlowActive;
+    }
+
+    /**
+     * Sets whether the IDP app is currently going through a login flow.
+     *
+     * @param idpAppLoginFlowActive True - if the IDP app is kicking off login, False - otherwise.
+     */
+    public synchronized void setIDPAppLoginFlowActive(boolean idpAppLoginFlowActive) {
+        this.idpAppLoginFlowActive = idpAppLoginFlowActive;
     }
 
     /**
