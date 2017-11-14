@@ -26,7 +26,6 @@
  */
 package com.salesforce.androidsdk.phonegap.ui;
 
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.KeyEvent;
@@ -35,10 +34,10 @@ import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.salesforce.androidsdk.accounts.UserAccountManager;
 import com.salesforce.androidsdk.app.SalesforceSDKManager;
 import com.salesforce.androidsdk.auth.HttpAccess.NoNetworkException;
 import com.salesforce.androidsdk.config.BootConfig;
+import com.salesforce.androidsdk.phonegap.app.SalesforceHybridSDKManager;
 import com.salesforce.androidsdk.phonegap.util.SalesforceHybridLogger;
 import com.salesforce.androidsdk.rest.ApiVersionStrings;
 import com.salesforce.androidsdk.rest.ClientManager;
@@ -49,13 +48,10 @@ import com.salesforce.androidsdk.rest.RestClient.AsyncRequestCallback;
 import com.salesforce.androidsdk.rest.RestClient.ClientInfo;
 import com.salesforce.androidsdk.rest.RestRequest;
 import com.salesforce.androidsdk.rest.RestResponse;
-import com.salesforce.androidsdk.security.PasscodeManager;
 import com.salesforce.androidsdk.ui.SalesforceActivityDelegate;
 import com.salesforce.androidsdk.ui.SalesforceActivityInterface;
 import com.salesforce.androidsdk.util.EventsObservable;
 import com.salesforce.androidsdk.util.EventsObservable.EventType;
-import com.salesforce.androidsdk.util.LogoutCompleteReceiver;
-import com.salesforce.androidsdk.util.UserSwitchReceiver;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaActivity;
@@ -106,6 +102,10 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
 
         // Get clientManager
         clientManager = buildClientManager();
+
+        // Setup global stores and syncs defined in static configs
+        SalesforceHybridSDKManager.getInstance().setupGlobalStoreFromDefaultConfig();
+        SalesforceHybridSDKManager.getInstance().setupGlobalSyncsFromDefaultConfig();
 
         // Delegate create
         delegate.onCreate();
@@ -203,7 +203,7 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
                 // Remote
                 else {
                     SalesforceHybridLogger.w(TAG, "onResumeNotLoggedIn - should not authenticate/remote start page - loading web app");
-                    loadRemoteStartPage(!bootconfig.isStartPageAbsoluteUrl());
+                    loadRemoteStartPage(bootconfig.getUnauthenticatedStartPage(), false);
                 }
             }
         } catch (BootConfig.BootConfigException e) {
@@ -219,6 +219,10 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
      */
     private void onResumeLoggedInNotLoaded() {
 
+        // Setup user stores and syncs defined in static configs
+        SalesforceHybridSDKManager.getInstance().setupUserStoreFromDefaultConfig();
+        SalesforceHybridSDKManager.getInstance().setupUserSyncsFromDefaultConfig();
+
         // Local
         if (bootconfig.isLocal()) {
             SalesforceHybridLogger.i(TAG, "onResumeLoggedInNotLoaded - local start page - loading web app");
@@ -231,7 +235,7 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
             // Online
             if (SalesforceSDKManager.getInstance().hasNetwork()) {
                 SalesforceHybridLogger.i(TAG, "onResumeLoggedInNotLoaded - remote start page/online - loading web app");
-                loadRemoteStartPage(!bootconfig.isStartPageAbsoluteUrl());
+                loadRemoteStartPage(bootconfig.getStartPage(), true);
             }
 
             // Offline
@@ -460,20 +464,19 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
      * Load remote start page (front-doored)
      */
     public void loadRemoteStartPage() {
-        loadRemoteStartPage(true);
+        loadRemoteStartPage(bootconfig.getStartPage(), true);
     }
 
     /**
      * Load the remote start page.
-     *
+     * @param startPageUrl The start page to load.
      * @param loadThroughFrontDoor Whether or not to load through front-door.
      */
-    private void loadRemoteStartPage(boolean loadThroughFrontDoor) {
+    private void loadRemoteStartPage(String startPageUrl, boolean loadThroughFrontDoor) {
         assert !bootconfig.isLocal();
-        String startPage = bootconfig.getStartPage();
-        String url = startPage;
+        String url = startPageUrl;
         if (loadThroughFrontDoor) {
-            url = getFrontDoorUrl(url, false);
+            url = getFrontDoorUrl(url, BootConfig.isAbsoluteUrl(url));
         }
         SalesforceHybridLogger.i(TAG, "loadRemoteStartPage called - loading: " + url);
         loadUrl(url);

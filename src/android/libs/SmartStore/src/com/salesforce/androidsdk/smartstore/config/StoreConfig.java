@@ -28,6 +28,7 @@ package com.salesforce.androidsdk.smartstore.config;
 
 import android.content.Context;
 
+import com.salesforce.androidsdk.util.ResourceReaderHelper;
 import com.salesforce.androidsdk.smartstore.store.IndexSpec;
 import com.salesforce.androidsdk.smartstore.store.SmartStore;
 import com.salesforce.androidsdk.smartstore.util.SmartStoreLogger;
@@ -36,16 +37,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.io.Writer;
-
 /**
  * Class encapsulating a SmartStore schema (soups).
  *
- * Config expected JSON in a resource file in JSON with the following:
+ * Config expected in a resource or assets file in JSON with the following:
  * {
  *     soups: [
  *          {
@@ -72,15 +67,31 @@ public class StoreConfig {
     private JSONArray soupsConfig;
 
     /**
-     * Constructor
-     * @param ctx
-     * @param resourceId
+     * Constructor for config stored in resource file
+     * @param ctx Context.
+     * @param resourceId Id of resource file.
      */
     public StoreConfig(Context ctx, int resourceId) {
+        this(ResourceReaderHelper.readResourceFile(ctx, resourceId));
+    }
+
+    /**
+     * Constructor for config stored in asset file
+     * @param ctx Context.
+     * @param assetPath Path of assets file.
+     */
+    public StoreConfig(Context ctx, String assetPath) {
+        this(ResourceReaderHelper.readAssetFile(ctx, assetPath));
+    }
+
+    private StoreConfig(String str) {
         try {
-            String str = getRawResourceAsString(ctx, resourceId);
-            JSONObject config = new JSONObject(str);
-            soupsConfig = config.getJSONArray(SOUPS);
+            if (str == null) {
+                soupsConfig = null;
+            } else {
+                JSONObject config = new JSONObject(str);
+                soupsConfig = config.getJSONArray(SOUPS);
+            }
         } catch (JSONException e) {
             SmartStoreLogger.e(TAG, "Unhandled exception parsing json", e);
         }
@@ -92,13 +103,22 @@ public class StoreConfig {
      * @param store
      */
     public void registerSoups(SmartStore store) {
-        if (soupsConfig == null)
+        if (soupsConfig == null) {
+            SmartStoreLogger.d(TAG, "No store config available");
             return;
+        }
 
         for (int i=0; i<soupsConfig.length(); i++) {
             try {
                 JSONObject soupConfig = soupsConfig.getJSONObject(i);
                 String soupName = soupConfig.getString(SOUP_NAME);
+
+                // Leaving soup alone if it already exists
+                if (store.hasSoup(soupName)) {
+                    SmartStoreLogger.d(TAG, "Soup already exists:" + soupName + " - skipping");
+                    continue;
+                }
+
                 IndexSpec[] indexSpecs = IndexSpec.fromJSON(soupConfig.getJSONArray(INDEXES));
                 SmartStoreLogger.d(TAG, "Registering soup:" + soupName);
                 store.registerSoup(soupName, indexSpecs);
@@ -106,29 +126,6 @@ public class StoreConfig {
                 SmartStoreLogger.e(TAG, "Unhandled exception parsing json", e);
             }
         }
-    }
-
-    private String getRawResourceAsString(Context ctx, int resourceId) {
-        InputStream resourceReader = ctx.getResources().openRawResource(resourceId);
-        Writer writer = new StringWriter();
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(resourceReader, "UTF-8"));
-            String line = reader.readLine();
-            while (line != null) {
-                writer.write(line);
-                line = reader.readLine();
-            }
-        } catch (Exception e) {
-            SmartStoreLogger.e(TAG, "Unhandled exception reading resource", e);
-        } finally {
-            try {
-                resourceReader.close();
-            } catch (Exception e) {
-                SmartStoreLogger.e(TAG, "Unhandled exception closing reader", e);
-            }
-        }
-
-        return writer.toString();
     }
 
 }
