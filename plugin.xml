@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-android" version="6.4.0" />
-    <engine name="cordova-ios" version="4.4.0" />
+    <engine name="cordova-ios" version="4.5.4" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
