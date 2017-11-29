@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-android" version="6.4.0" />
-    <engine name="cordova-ios" version="4.4.0" />
+    <engine name="cordova-ios" version="4.5.4" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
@@ -99,7 +99,10 @@
     <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFUserAccountIdentity.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceSDKManagerWithSmartStore.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SmartStoreSDKManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SalesforceHybridSDKManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SmartSyncSDKManager.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKLoginViewControllerConfig.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
