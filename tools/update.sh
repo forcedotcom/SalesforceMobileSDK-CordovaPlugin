@@ -220,6 +220,7 @@ copy_ios_sdk()
     copy_and_fix SFUserAccountIdentity.h headers
     copy_and_fix SalesforceSDKManager.h headers
     copy_and_fix SalesforceSDKManagerWithSmartStore.h headers
+    copy_and_fix SalesforceHybridSDKManager.h headers
     copy_and_fix SFSDKLoginViewControllerConfig.h headers
     copy_and_fix SFAuthErrorHandler.h headers
     copy_and_fix SFAuthErrorHandlerList.h headers
