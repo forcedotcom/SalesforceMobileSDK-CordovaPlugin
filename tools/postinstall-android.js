@@ -101,6 +101,11 @@ if (data.indexOf("SalesforceHybrid") < 0)
     var newLibDep = "api project(':SalesforceHybrid')";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
+
+// Copying AndroidManifest.xml to its correct location. We need to leave the original copy around too because 'cordova prepare' looks for it.
+console.log('Copying AndroidManifest.xml to its correct location');
+shelljs.cp('-R', path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml'), path.join(appProjectRoot, 'app'));
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 
 function replaceTextInFile(fileName, textInFile, replacementText) {
