@@ -106,6 +106,15 @@ if (data.indexOf("SalesforceHybrid") < 0)
 console.log('Copying AndroidManifest.xml to its correct location');
 shelljs.cp('-R', path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml'), path.join(appProjectRoot, 'app'));
 
+// Replacing values in top level build.gradle to avoid conflicts in Gradle builds.
+console.log('Fixing project workspace build.gradle');
+var oldGradleToolsVersion = "com.android.tools.build:gradle:3.0.0";
+var newGradleToolsVersion = "com.android.tools.build:gradle:3.0.1";
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultMinSdkVersion=19', 'defaultMinSdkVersion=21');
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultTargetSdkVersion=26', 'defaultTargetSdkVersion=27');
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultCompileSdkVersion=26', 'defaultCompileSdkVersion=27');
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 
 function replaceTextInFile(fileName, textInFile, replacementText) {
