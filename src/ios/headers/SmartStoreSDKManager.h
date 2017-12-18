@@ -24,13 +24,26 @@
 
 #import "SalesforceSDKManager.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  * Version of SalesforceSDKManager to be used with all SmartStore-enabled apps. 
  * By default, forceios apps use an instance of this class instead of SalesforceSDKManager.
  */
 
-@interface SalesforceSDKManagerWithSmartStore : SalesforceSDKManager
+@interface SmartStoreSDKManager : SalesforceSDKManager
+
+
+/**
+ * Setup global store using config found globalstore.json
+ */
+- (void) setupGlobalStoreFromDefaultConfig;
+
+/**
+ * Setup user store using config found in userstore.json
+ */
+- (void) setupUserStoreFromDefaultConfig;
 
 @end
 
-
+NS_ASSUME_NONNULL_END

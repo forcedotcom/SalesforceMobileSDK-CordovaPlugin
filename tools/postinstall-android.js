@@ -64,16 +64,14 @@ shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceHybrid'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
-var oldCordovaDep = "compile project\(\':external:cordova:framework\'\)";
-var oldSalesforceAnalyticsDep = "compile project\(\':libs:SalesforceAnalytics\'\)";
-var oldSalesforceSdkDep = "compile project\(\':libs:SalesforceSDK\'\)";
-var oldSmartStoreDep = "compile project\(\':libs:SmartStore\'\)";
-var oldSmartSyncDep = "compile project\(\':libs:SmartSync\'\)";
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'), oldSalesforceAnalyticsDep, 'compile project\(\':SalesforceAnalytics\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'compile project\(\':SalesforceSDK\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), oldSmartStoreDep, 'compile project\(\':SmartStore\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldCordovaDep, 'compile project\(\':CordovaLib\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldSmartSyncDep, 'compile project\(\':SmartSync\'\)');
+var oldSalesforceAnalyticsDep = "api project\(\':libs:SalesforceAnalytics\'\)";
+var oldSalesforceSdkDep = "api project\(\':libs:SalesforceSDK\'\)";
+var oldSmartStoreDep = "api project\(\':libs:SmartStore\'\)";
+var oldSmartSyncDep = "api project\(\':libs:SmartSync\'\)";
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'), oldSalesforceAnalyticsDep, 'api project\(\':SalesforceAnalytics\'\)');
+replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'api project\(\':SalesforceSDK\'\)');
+replaceTextInFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), oldSmartStoreDep, 'api project\(\':SmartStore\'\)');
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldSmartSyncDep, 'api project\(\':SmartSync\'\)');
 
 console.log('Fixing root level Gradle file for the generated app');
 shelljs.echo("include \":SalesforceAnalytics\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
@@ -88,7 +86,7 @@ shelljs.cp('-R', path.join(pluginRoot, 'gradlew.bat'), appProjectRoot);
 shelljs.cp('-R', path.join(pluginRoot, 'gradlew'), appProjectRoot);
 shelljs.cp('-R', path.join(pluginRoot, 'gradle'), appProjectRoot);
 
-var data = fs.readFileSync(path.join(appProjectRoot, 'build.gradle'), 'utf8');
+var data = fs.readFileSync(path.join(appProjectRoot, 'app', 'build.gradle'), 'utf8');
 
 // First verify that we didn't already modify the build.gradle file.
 if (data.indexOf("SalesforceHybrid") < 0)
@@ -96,14 +94,27 @@ if (data.indexOf("SalesforceHybrid") < 0)
     console.log('Fixing application build.gradle');
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    var oldGradleToolsVersion = "com.android.tools.build:gradle:2.2.3";
-    var newGradleToolsVersion = "com.android.tools.build:gradle:2.3.3";
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
-    var newLibDep = "compile project(':SalesforceHybrid')";
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'debugCompile(project(path: \"CordovaLib\", configuration: \"debug\"))', newLibDep);
-    replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'releaseCompile(project(path: \"CordovaLib\", configuration: \"release\"))', '');
+    replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
+    var oldGradleToolsVersion = "com.android.tools.build:gradle:3.0.0";
+    var newGradleToolsVersion = "com.android.tools.build:gradle:3.0.1";
+    replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
+    var newLibDep = "api project(':SalesforceHybrid')";
+    replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
+
+// Copying AndroidManifest.xml to its correct location. We need to leave the original copy around too because 'cordova prepare' looks for it.
+console.log('Copying AndroidManifest.xml to its correct location');
+shelljs.cp('-R', path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml'), path.join(appProjectRoot, 'app'));
+
+// Replacing values in top level build.gradle to avoid conflicts in Gradle builds.
+console.log('Fixing project workspace build.gradle');
+var oldGradleToolsVersion = "com.android.tools.build:gradle:3.0.0";
+var newGradleToolsVersion = "com.android.tools.build:gradle:3.0.1";
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultMinSdkVersion=19', 'defaultMinSdkVersion=21');
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultTargetSdkVersion=26', 'defaultTargetSdkVersion=27');
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultCompileSdkVersion=26', 'defaultCompileSdkVersion=27');
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 
 function replaceTextInFile(fileName, textInFile, replacementText) {
@@ -112,6 +123,5 @@ function replaceTextInFile(fileName, textInFile, replacementText) {
     var result = lines.map(function (line) {
       return line.replace(textInFile, replacementText);
     }).join('\n');
-
     fs.writeFileSync(fileName, result, 'utf8'); 
 }
