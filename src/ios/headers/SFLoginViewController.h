@@ -29,6 +29,7 @@
 @class SFLoginViewController;
 @class SFSDKLoginHost;
 @class SFSDKLoginViewControllerConfig;
+@class SFSDKLoginHostListViewController;
 
 /**
  * Delegate protocol for the owner of SFLoginViewController.
@@ -85,8 +86,34 @@
  a config object */
 @property (nonatomic, strong, nonnull) SFSDKLoginViewControllerConfig *config;
 
+/** This property will give access to the Navigation Bar */
+@property (nonatomic, strong, readonly, nullable) UINavigationBar *navBar;
+
+/** This property will give access to the SFSDKLoginHostListViewController */
+@property (nonatomic, strong, readonly, nonnull) SFSDKLoginHostListViewController *loginHostListViewController;
+
 /** Applies the view's style attributes to the given navigation bar.
  @param navigationBar The navigation bar that the style is applied to.
  */
 - (void)styleNavigationBar:(nullable UINavigationBar *)navigationBar;
+
+/** Present the Host List View.
+ */
+- (void)showHostListView;
+
+/** Hide the Host List View.
+ @param animated Indicates whether or not the hiding should be animated.
+ */
+- (void)hideHostListView:(BOOL)animated;
+
+/** Determine whether or not the back button should be shown on navigation bar
+ */
+- (BOOL)shouldShowBackButton;
+
+/** Go back to the previous host
+ @param sender The sender of this action
+ */
+- (void)backToPreviousHost:(nonnull id)sender;
+
+
 @end

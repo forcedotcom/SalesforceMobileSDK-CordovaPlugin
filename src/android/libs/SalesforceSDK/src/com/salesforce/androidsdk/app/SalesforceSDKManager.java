@@ -49,6 +49,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.webkit.CookieManager;
 
+import com.salesforce.androidsdk.BuildConfig;
 import com.salesforce.androidsdk.R;
 import com.salesforce.androidsdk.accounts.UserAccount;
 import com.salesforce.androidsdk.accounts.UserAccountManager;
@@ -277,13 +278,6 @@ public class SalesforceSDKManager {
         // If your app runs in multiple processes, all the SalesforceSDKManager need to run cleanup during a logout
         cleanupReceiver = new CleanupReceiver();
         context.registerReceiver(cleanupReceiver, new IntentFilter(SalesforceSDKManager.CLEANUP_INTENT_ACTION));
-
-        // Enables IDP login flow if it's set through MDM.
-        final RuntimeConfig runtimeConfig = RuntimeConfig.getRuntimeConfig(context);
-        final String idpAppUrlScheme = runtimeConfig.getString(RuntimeConfig.ConfigKey.IDPAppURLScheme);
-        if (!TextUtils.isEmpty(idpAppUrlScheme)) {
-            this.idpAppURIScheme = idpAppUrlScheme;
-        }
     }
 
     /**
@@ -465,6 +459,13 @@ public class SalesforceSDKManager {
 
         // Initializes the HTTP client.
         HttpAccess.init(context, INSTANCE.getUserAgent());
+
+        // Enables IDP login flow if it's set through MDM.
+        final RuntimeConfig runtimeConfig = RuntimeConfig.getRuntimeConfig(context);
+        final String idpAppUrlScheme = runtimeConfig.getString(RuntimeConfig.ConfigKey.IDPAppURLScheme);
+        if (!TextUtils.isEmpty(idpAppUrlScheme)) {
+            INSTANCE.idpAppURIScheme = idpAppUrlScheme;
+        }
     }
 
     /**
@@ -1234,7 +1235,7 @@ public class SalesforceSDKManager {
      *
      * @author bhariharan
      */
-    private class RevokeTokenTask extends AsyncTask<Void, Void, Void> {
+    private static class RevokeTokenTask extends AsyncTask<Void, Void, Void> {
 
     	private String refreshToken;
     	private String loginServer;
@@ -1515,6 +1516,6 @@ public class SalesforceSDKManager {
         } catch (IllegalAccessException e) {
             SalesforceSDKLogger.e(TAG, "getBuildConfigValue failed", e);
         }
-        return null;
+        return BuildConfig.DEBUG; // we don't want to return a null value; return this value at minimum
     }
 }
