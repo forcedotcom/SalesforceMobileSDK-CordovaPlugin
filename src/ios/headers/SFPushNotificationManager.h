@@ -23,6 +23,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "SalesforceSDKConstants.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
