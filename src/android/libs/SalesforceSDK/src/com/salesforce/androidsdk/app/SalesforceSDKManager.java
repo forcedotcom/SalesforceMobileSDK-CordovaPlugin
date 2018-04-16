@@ -454,9 +454,6 @@ public class SalesforceSDKManager {
         // Upgrades to the latest version.
         SalesforceSDKUpgradeManager.getInstance().upgrade();
 
-        // Initializes the encryption module.
-        Encryptor.init(context);
-
         // Initializes the HTTP client.
         HttpAccess.init(context, INSTANCE.getUserAgent());
 
@@ -893,30 +890,15 @@ public class SalesforceSDKManager {
         }
 	}
 
-    /**
-     * Unregisters from push notifications for both GCM (Android) and SFDC, and waits either for
-     * unregistration to complete or for the operation to time out. The timeout period is defined
-     * in PUSH_UNREGISTER_TIMEOUT_MILLIS. 
-     *
-     * If timeout occurs while the user is logged in, this method attempts to unregister the push
-     * unregistration receiver, and then removes the user's account.
-     *
-     * @param clientMgr ClientManager instance.
-     * @param showLoginPage True - if the login page should be shown, False - otherwise.
-     * @param refreshToken Refresh token.
-     * @param loginServer Login server.
-     * @param account Account instance.
-     * @param frontActivity Front activity.
-     */
     private void unregisterPush(final ClientManager clientMgr, final boolean showLoginPage,
     		final String refreshToken, final String loginServer,
-            final Account account, final Activity frontActivity) {
+            final Account account, final Activity frontActivity, boolean isLastAccount) {
         final IntentFilter intentFilter = new IntentFilter(PushMessaging.UNREGISTERED_ATTEMPT_COMPLETE_EVENT);
         final BroadcastReceiver pushUnregisterReceiver = new BroadcastReceiver() {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(PushMessaging.UNREGISTERED_ATTEMPT_COMPLETE_EVENT)) {
+                if (PushMessaging.UNREGISTERED_ATTEMPT_COMPLETE_EVENT.equals(intent.getAction())) {
                     postPushUnregister(this, clientMgr, showLoginPage,
                     		refreshToken, loginServer, account, frontActivity);
                 }
@@ -926,7 +908,7 @@ public class SalesforceSDKManager {
 
         // Unregisters from notifications on logout.
 		final UserAccount userAcc = getUserAccountManager().buildUserAccount(account);
-        PushMessaging.unregister(context, userAcc);
+        PushMessaging.unregister(context, userAcc, isLastAccount);
 
         /*
          * Starts a background thread to wait up to the timeout period. If
@@ -935,7 +917,8 @@ public class SalesforceSDKManager {
         (new Thread() {
             public void run() {
                 long startTime = System.currentTimeMillis();
-                while ((System.currentTimeMillis() - startTime) < PUSH_UNREGISTER_TIMEOUT_MILLIS && !loggedOut) {
+                while ((System.currentTimeMillis() - startTime) < PUSH_UNREGISTER_TIMEOUT_MILLIS
+                        && !loggedOut) {
 
                     // Waits for half a second at a time.
                     SystemClock.sleep(500);
@@ -946,20 +929,6 @@ public class SalesforceSDKManager {
         }).start();
     }
 
-    /**
-     * This method is called either when unregistration for push notifications 
-     * is complete and the user has logged out, or when a timeout occurs while waiting. 
-     * If the user has not logged out, this method attempts to unregister the push 
-     * notification unregistration receiver, and then removes the user's account.
-     *
-     * @param pushReceiver Broadcast receiver.
-     * @param clientMgr ClientManager instance.
-     * @param showLoginPage True - if the login page should be shown, False - otherwise.
-     * @param refreshToken Refresh token.
-     * @param loginServer Login server.
-     * @param account Account instance.
-     * @param frontActivity Front activity.
-     */
     private synchronized void postPushUnregister(BroadcastReceiver pushReceiver,
     		final ClientManager clientMgr, final boolean showLoginPage,
     		final String refreshToken, final String loginServer,
@@ -968,7 +937,7 @@ public class SalesforceSDKManager {
             try {
                 context.unregisterReceiver(pushReceiver);
             } catch (Exception e) {
-                SalesforceSDKLogger.e(TAG, "Exception occurred while unregistering", e);
+                SalesforceSDKLogger.e(TAG, "Exception occurred while un-registering", e);
             }
     		removeAccount(clientMgr, showLoginPage, refreshToken, loginServer, account, frontActivity);
         }
@@ -1034,10 +1003,11 @@ public class SalesforceSDKManager {
 		 * if the refresh token is available.
 		 */
 		final UserAccount userAcc = getUserAccountManager().buildUserAccount(account);
+		int numAccounts = mgr.getAccountsByType(getAccountType()).length;
     	if (PushMessaging.isRegistered(context, userAcc) && refreshToken != null) {
     		loggedOut = false;
     		unregisterPush(clientMgr, showLoginPage, refreshToken,
-    				loginServer, account, frontActivity);
+    				loginServer, account, frontActivity, (numAccounts == 1));
     	} else {
     		removeAccount(clientMgr, showLoginPage, refreshToken,
                     loginServer, account, frontActivity);
@@ -1192,7 +1162,7 @@ public class SalesforceSDKManager {
           .append("   accountType: ").append(getAccountType()).append("\n")
           .append("   userAgent: ").append(getUserAgent()).append("\n")
           .append("   mainActivityClass: ").append(getMainActivityClass()).append("\n")
-          .append("   isFileSystemEncrypted: ").append(Encryptor.isFileSystemEncrypted()).append("\n");
+          .append("\n");
         if (passcodeManager != null) {
 
             // passcodeManager may be null at startup if the app is running in debug mode.
