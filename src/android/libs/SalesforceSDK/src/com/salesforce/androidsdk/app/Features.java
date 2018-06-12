@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-present, salesforce.com, inc.
+ * Copyright (c) 2018-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,29 +24,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.push;
+package com.salesforce.androidsdk.app;
 
-import android.content.Intent;
-import android.support.v4.app.JobIntentService;
+/**
+ * Flags for ftr_ field in user agent
+ */
+public class Features {
 
-import com.google.android.gms.iid.InstanceIDListenerService;
-import com.salesforce.androidsdk.app.SalesforceSDKManager;
 
-public class SFDCInstanceIDListenerService extends InstanceIDListenerService {
+    public static final String FEATURE_AILTN_ENABLED = "AI";
+    public static final String FEATURE_APP_IS_IDP = "IP";
+    public static final String FEATURE_APP_IS_SP = "SP";
+    public static final String FEATURE_BROWSER_LOGIN = "BW";
+    public static final String FEATURE_CERT_AUTH = "CT";
+    public static final String FEATURE_LOCALHOST = "LH";
+    public static final String FEATURE_MDM = "MM";
+    public static final String FEATURE_MULTI_USERS = "MU";
+    public static final String FEATURE_PUSH_NOTIFICATIONS = "PN";
+    public static final String FEATURE_USER_AUTH = "UA";
 
-    private static final int JOB_ID = 21;
-
-    /**
-     * Called if InstanceID token is updated. This may occur if the security of
-     * the previous token had been compromised. This call is initiated by the
-     * InstanceID provider.
-     */
-    @Override
-    public void onTokenRefresh() {
-
-        // Fetch updated Instance ID token and notify our app's server of any changes (if applicable).
-        final Intent intent = new Intent(this, SFDCRegistrationIntentService.class);
-        JobIntentService.enqueueWork(SalesforceSDKManager.getInstance().getAppContext(),
-                SFDCRegistrationIntentService.class, JOB_ID, intent);
-    }
 }

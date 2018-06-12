@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-present, salesforce.com, inc.
+ * Copyright (c) 2018-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -29,66 +29,73 @@ package com.salesforce.androidsdk.smartsync.target;
 import com.salesforce.androidsdk.rest.RestRequest;
 import com.salesforce.androidsdk.rest.RestResponse;
 import com.salesforce.androidsdk.smartsync.manager.SyncManager;
+import com.salesforce.androidsdk.smartsync.util.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Target for sync defined by a SOSL query
+ * Sync down target for object metadata. This uses the 'describe' API to fetch object metadata.
+ *
+ * @author bhariharan
  */
-public class SoslSyncDownTarget extends SyncDownTarget {
-	
-	public static final String QUERY = "query";
-    public static final String SEARCH_RECORDS = "searchRecords";
-    private String query;
+public class MetadataSyncDownTarget extends SyncDownTarget {
+
+    public static final String SOBJECT_TYPE = "sobjectType";
+
+    private String objectType;
 
     /**
-     * Construct SoslSyncDownTarget from json
-     * @param target
-     * @throws JSONException
+     * Parameterized constructor.
+     *
+     * @param target JSON representation.
+     * @throws JSONException Exception thrown.
      */
-    public SoslSyncDownTarget(JSONObject target) throws JSONException {
+    public MetadataSyncDownTarget(JSONObject target) throws JSONException {
         super(target);
-        this.query = target.getString(QUERY);
+        this.objectType = target.getString(SOBJECT_TYPE);
     }
 
-	/**
-     * Construct SoslSyncDownTarget from sosl query
-	 * @param query
-	 */
-	public SoslSyncDownTarget(String query) {
+    /**
+     * Parameterized constructor.
+     *
+     * @param objectType Object type.
+     */
+    public MetadataSyncDownTarget(String objectType) {
         super();
-        this.queryType = QueryType.sosl;
-        this.query = query;
-	}
+        this.queryType = QueryType.metadata;
+        this.objectType = objectType;
+    }
 
     /**
-     * @return json representation of target
-     * @throws JSONException
+     * JSON representation of this target.
+     *
+     * @return JSON representation of this target.
+     * @throws JSONException Exception thrown.
      */
     public JSONObject asJSON() throws JSONException {
-        JSONObject target = super.asJSON();
-        target.put(QUERY, query);
+        final JSONObject target = super.asJSON();
+        target.put(SOBJECT_TYPE, objectType);
         return target;
     }
 
     @Override
     public JSONArray startFetch(SyncManager syncManager, long maxTimeStamp) throws IOException, JSONException {
-        return startFetch(syncManager, maxTimeStamp, query);
-    }
+        final RestRequest request = RestRequest.getRequestForDescribe(syncManager.apiVersion, objectType);
+        final RestResponse response = syncManager.sendSyncWithSmartSyncUserAgent(request);
+        final JSONObject responseJSON = response.asJSONObject();
+        if (responseJSON != null) {
+            responseJSON.put(Constants.ID, objectType);
+        }
+        final JSONArray records = new JSONArray();
+        records.put(response.asJSONObject());
 
-    private JSONArray startFetch(SyncManager syncManager, long maxTimeStamp, String queryRun) throws IOException, JSONException {
-        RestRequest request = RestRequest.getRequestForSearch(syncManager.apiVersion, queryRun);
-        RestResponse response = syncManager.sendSyncWithSmartSyncUserAgent(request);
-        JSONArray records = response.asJSONObject().getJSONArray(SEARCH_RECORDS);
-
-        // Recording total size
-        totalSize = records.length();
+        // Recording total size.
+        totalSize = 1;
         return records;
     }
 
@@ -98,20 +105,21 @@ public class SoslSyncDownTarget extends SyncDownTarget {
     }
 
     @Override
-    protected Set<String> getRemoteIds(SyncManager syncManager, Set<String> localIds) throws IOException, JSONException {
-        if (localIds == null) {
-            return null;
-        }
+    protected Set<String> getRemoteIds(SyncManager syncManager, Set<String> localIds) {
+        return null;
+    }
 
-        // Makes network request and parses the response.
-        final JSONArray records = startFetch(syncManager, 0, query);
-        return new HashSet<>(parseIdsFromResponse(records));
+    @Override
+    public int cleanGhosts(SyncManager syncManager, String soupName, long syncId) {
+        return 0;
     }
 
     /**
-     * @return sosl query for this target
+     * Returns the object type associated with this target.
+     *
+     * @return Object type.
      */
-	public String getQuery() {
-		return query;
-	}
+    public String getObjectType() {
+        return objectType;
+    }
 }

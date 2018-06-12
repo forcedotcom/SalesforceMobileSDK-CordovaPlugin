@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-present, salesforce.com, inc.
+ * Copyright (c) 2018-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,29 +24,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.push;
+package com.salesforce.androidsdk.smartstore.app;
 
-import android.content.Intent;
-import android.support.v4.app.JobIntentService;
+/**
+ * Flags for ftr_ field in user agent
+ */
+public class Features {
 
-import com.google.android.gms.iid.InstanceIDListenerService;
-import com.salesforce.androidsdk.app.SalesforceSDKManager;
+    public static final String FEATURE_RELATED_RECORDS = "RR";
+    public static final String FEATURE_SMART_STORE_GLOBAL = "GS";
+    public static final String FEATURE_SMART_STORE_USER = "US";
 
-public class SFDCInstanceIDListenerService extends InstanceIDListenerService {
-
-    private static final int JOB_ID = 21;
-
-    /**
-     * Called if InstanceID token is updated. This may occur if the security of
-     * the previous token had been compromised. This call is initiated by the
-     * InstanceID provider.
-     */
-    @Override
-    public void onTokenRefresh() {
-
-        // Fetch updated Instance ID token and notify our app's server of any changes (if applicable).
-        final Intent intent = new Intent(this, SFDCRegistrationIntentService.class);
-        JobIntentService.enqueueWork(SalesforceSDKManager.getInstance().getAppContext(),
-                SFDCRegistrationIntentService.class, JOB_ID, intent);
-    }
 }
