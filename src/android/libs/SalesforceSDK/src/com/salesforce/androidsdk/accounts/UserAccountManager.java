@@ -36,6 +36,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.salesforce.androidsdk.app.Features;
 import com.salesforce.androidsdk.app.SalesforceSDKManager;
 import com.salesforce.androidsdk.auth.AuthenticatorService;
 import com.salesforce.androidsdk.rest.ClientManager;
@@ -180,7 +181,14 @@ public class UserAccountManager {
         	return null;
         }
 
-        // Reads the stored user ID and org ID.
+		// Register feature MU if more than one user
+		if (accounts.length > 1) {
+			SalesforceSDKManager.getInstance().registerUsedAppFeature(Features.FEATURE_MULTI_USERS);
+		} else {
+			SalesforceSDKManager.getInstance().unregisterUsedAppFeature(Features.FEATURE_MULTI_USERS);
+		}
+
+		// Reads the stored user ID and org ID.
         final SharedPreferences sp = context.getSharedPreferences(CURRENT_USER_PREF,
 				Context.MODE_PRIVATE);
         final String storedUserId = sp.getString(USER_ID_KEY, "");
