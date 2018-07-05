@@ -8,7 +8,7 @@
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
   <license>Apache 2.0</license>
-  <keywords>salesforce,oauth,smartstore</keywords>
+  <keywords>salesforce,oauth,smartstore,smartsync</keywords>
   <repo>https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin</repo>
 
   <js-module src="www/com.salesforce.plugin.oauth.js" name="plugin.oauth"></js-module>
@@ -36,13 +36,12 @@
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
   <dependency id="cordova-plugin-whitelist" version="1.2.0" />
-  <dependency id="phonegap-plugin-push" version="1.4.5" />
 
   <!-- ios -->
   <platform name="ios">
 
-  <!-- Required by the Mobile SDK plugin for WKWebView -->
-  <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.2" />
+    <!-- Required by the Mobile SDK plugin for WKWebView -->
+    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.2" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
