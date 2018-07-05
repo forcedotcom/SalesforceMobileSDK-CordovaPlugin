@@ -24,11 +24,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Version this js was shipped with
+// Version this js was shipped with.
 var SALESFORCE_MOBILE_SDK_VERSION = "7.0.0";
 
 /**
- * Register push notification handler
+ * Register push notification handler.
  */
 var registerPushNotificationHandler = function(notificationHandler, fail) {
     if (!window.PushNotification) {
@@ -36,42 +36,40 @@ var registerPushNotificationHandler = function(notificationHandler, fail) {
         fail("PushPlugin not found");
         return;
     }
-
     cordova.require("com.salesforce.plugin.sdkinfo").getInfo(function(info) {
         var bootconfig = info.bootConfig;
-
         var push = PushNotification.init({
-                "android": {
-                    "senderID": bootconfig.androidPushNotificationClientId
-                },
-                "ios": {"alert": "true", "badge": "true", "sound": "true"},
-                "windows": {}
-            });
-
+            "android": {
+                "senderID": bootconfig.androidPushNotificationClientId
+            },
+            "ios": {
+                "alert": "true",
+                "badge": "true",
+                "sound": "true"
+            }
+        });
         push.on('registration', function(data) {
-            console.log("registration event " + JSON.stringify(data));
+            console.log("Registration event " + JSON.stringify(data));
             console.log(JSON.stringify(data));
         });
-
         push.on('notification', function(data) {
-          console.log("notification event");
+          console.log("Notification event");
           console.log(JSON.stringify(data));
           notificationHandler(data);
           push.finish(function () {
-              console.log('finish successfully called');
+              console.log('Finish successfully called');
           });
         });
-
         push.on('error', function(e) {
-            console.log("push error");
-            console.error("push error " + JSON.stringify(e));
+            console.log("Push error");
+            console.error("Push error " + JSON.stringify(e));
             fail(e);
         });
     });
 };
 
 /**
- * Part of the module that is public
+ * Part of the module that is public.
  */
 module.exports = {
     registerPushNotificationHandler: registerPushNotificationHandler
