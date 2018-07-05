@@ -32,8 +32,8 @@ var SALESFORCE_MOBILE_SDK_VERSION = "7.0.0";
  */
 var registerPushNotificationHandler = function(notificationHandler, fail) {
     if (!window.PushNotification) {
-        console.error("PushPlugin not found");
-        fail("PushPlugin not found");
+        console.error("PushPlugin not found. Please install the plugin from https://github.com/phonegap/phonegap-plugin-push.");
+        fail("PushPlugin not found. Please install the plugin from https://github.com/phonegap/phonegap-plugin-push.");
         return;
     }
     cordova.require("com.salesforce.plugin.sdkinfo").getInfo(function(info) {
