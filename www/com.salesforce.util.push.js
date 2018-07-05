@@ -24,7 +24,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Version this js was shipped with.
+// Version this js was shipped with
 var SALESFORCE_MOBILE_SDK_VERSION = "7.0.0";
 
 /**
@@ -53,12 +53,12 @@ var registerPushNotificationHandler = function(notificationHandler, fail) {
             console.log(JSON.stringify(data));
         });
         push.on('notification', function(data) {
-          console.log("Notification event");
-          console.log(JSON.stringify(data));
-          notificationHandler(data);
-          push.finish(function () {
-              console.log('Finish successfully called');
-          });
+            console.log("Notification event");
+            console.log(JSON.stringify(data));
+            notificationHandler(data);
+            push.finish(function () {
+                console.log('Finish successfully called');
+            });
         });
         push.on('error', function(e) {
             console.log("Push error");
