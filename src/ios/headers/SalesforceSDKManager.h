@@ -141,29 +141,10 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
 @property (nonatomic, readonly) SFAppType appType;
 
 /**
- The Connected App ID configured for this application.
- */
-@property (nonatomic, copy, nullable) NSString *connectedAppId SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.remoteAccessConsumerKey to specify the consumer key.");
-
-/**
- The Connected App Callback URI configured for this application.
- */
-@property (nonatomic, copy, nullable) NSString *connectedAppCallbackUri SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.oauthRedirectURI to specify the redirect URI.");
-
-/**
- The OAuth scopes configured for this application.
- */
-@property (nonatomic, strong, nullable) NSArray<NSString*> *authScopes SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.oauthScopes to specify the OAuth scopes.");
-
-/**
  The Branded Login path configured for this application.
  */
 @property (nonatomic, nullable, copy) NSString *brandLoginPath;
-/**
- Whether or not to attempt authentication as part of the launch process.  Default
- value is YES.
- */
-@property (nonatomic, assign) BOOL authenticateAtLaunch SFSDK_DEPRECATED(6.0, 7.0, "Use appConfig.shouldAuthenticate to specify whether the app should authenticate at launch.");
+
 
 /**
  The configured post launch action block to execute when launch completes.
@@ -258,9 +239,6 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  */
 @property (nonatomic,copy) NSString *appDisplayName;
 
-/** Use this flag to indicate if the APP supports using an identity provider app for authentication
- */
-@property (nonatomic,assign) BOOL useLegacyAuthenticationManager;
 
 /** Use this flag to indicate if the dev support dialog should be enabled in the APP
  */
@@ -274,6 +252,16 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  @return YES if the launch successfully kicks off, NO if launch is already running.
  */
 - (BOOL)launch;
+
+/**
+ Initializes the SDK.
+ */
++ (void)initializeSDK;
+
+/**
+ Initializes the SDK.  Class instance to be used to instantiate the sdkManager.
+ */
++ (void)initializeSDKWithClass:(Class)className;
 
 /**
  @return app type as a string
@@ -296,7 +284,7 @@ typedef void (^SFSnapshotViewControllerDismissalBlock)(UIViewController* snapsho
  @param launchActions Bit-coded descriptor of actions taken during launch.
  @return A log-friendly string of the launch actions that were taken, given in postLaunchAction.
  */
-+ (NSString *)launchActionsStringRepresentation:(SFSDKLaunchAction)launchActions;
++ (NSString *)launchActionsStringRepresentation:(SFSDKLaunchAction)launchActions ;
 
 /**
  * Show dev support dialog

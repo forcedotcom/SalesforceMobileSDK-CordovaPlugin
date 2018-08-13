@@ -110,6 +110,14 @@ FOUNDATION_EXTERN NSString * const kSFNotificationUserWillLogout;
  */
 FOUNDATION_EXTERN NSString * const kSFNotificationUserDidLogout;
 
+/** Notification sent prior to user switch
+ */
+FOUNDATION_EXTERN NSString * const kSFNotificationUserWillSwitch;
+
+/** Notification sent after user switch
+ */
+FOUNDATION_EXTERN NSString * const kSFNotificationUserDidSwitch;
+
 /** Notification sent when all users of org have logged off.
  */
 FOUNDATION_EXTERN NSString * const kSFNotificationOrgDidLogout;
@@ -166,9 +174,17 @@ FOUNDATION_EXTERN NSString * const kSFNotificationUserInfoAuthTypeKey;
  */
 FOUNDATION_EXTERN NSString * const kSFUserInfoAddlOptionsKey;
 
-/**  Key to use to lookup SFNotificationUserInfo object in Notitications dictionary
+/**  Key to use to lookup SFNotificationUserInfo object in Notifications dictionary
  */
 FOUNDATION_EXTERN NSString * const kSFNotificationUserInfoKey;
+
+/**  Key to used to lookup current previous current User object in Notifications dictionary
+ */
+FOUNDATION_EXTERN NSString * const kSFNotificationFromUserKey;
+
+/**  Key to used to lookup new cuurent User object in Notifications dictionary
+ */
+FOUNDATION_EXTERN NSString * const kSFNotificationToUserKey;
 
 @protocol SFSDKOAuthClientDelegate;
 @protocol SFSDKOAuthClientSafariViewDelegate;
@@ -282,12 +298,9 @@ FOUNDATION_EXTERN NSString * const kSFNotificationUserInfoKey;
 @property (nonatomic, readonly) BOOL logoutSettingEnabled;
 
 /**
- Advanced authentication configuration.  Default is SFOAuthAdvancedAuthConfigurationNone.  Leave the
- default value unless you need advanced authentication, as it requires an additional round trip to the
- service to retrieve org authentication configuration.
+ Indicates if the app is configured to require browser based authentication.
  */
-@property (nonatomic, assign) SFOAuthAdvancedAuthConfiguration advancedAuthConfiguration;
-
+@property (nonatomic, readonly) BOOL useBrowserAuth;
 /**
  An array of additional keys (NSString) to parse during OAuth
  */
@@ -355,15 +368,10 @@ FOUNDATION_EXTERN NSString * const kSFNotificationUserInfoKey;
  */
 @property (nonatomic,assign, readonly) BOOL idpEnabled;
 
-/** Use this property to use SFAuthenticationManager for authentication
- *
- */
-@property (nonatomic,assign) BOOL useLegacyAuthenticationManager;
-
 /** Use this property to indicate the url scheme  for the Identity Provider app
  *
  */
-@property (nonatomic, copy) NSString *idpAppURIScheme;
+@property (nonatomic, copy, nullable) NSString *idpAppURIScheme;
 
 /** Use this property to indicate to provide a user-friendly name for your app. This name will be displayed
  *  in the user selection view of the identity provider app.
