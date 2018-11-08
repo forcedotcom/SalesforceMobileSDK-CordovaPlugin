@@ -130,7 +130,7 @@ ROOT_FOLDER=$(get_root_folder)
 ANDROID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Android.git"
 ANDROID_SDK_FOLDER="SalesforceMobileSDK-Android"
 IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid.git"
-IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
+IOS_SDK_FOLDER="SalesforceMobileSDK-iOS-Hybrid"
 SHARED_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Shared.git"
 SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 
@@ -175,6 +175,8 @@ create_android_dirs()
 copy_ios_sdk()
 {
     echo "*** iOS ***"
+    echo "Copying SalesforceSDKCommon library"
+    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
     echo "Copying SalesforceAnalytics library"
     unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceAnalytics-Debug.zip -d tmp
     echo "Copying SalesforceSDKCore library"
@@ -187,8 +189,6 @@ copy_ios_sdk()
     unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
     echo "Copying sqlcipher library"    
     cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
-    echo "Copying CocoaLumberjack library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/Lumberjack-Debug.zip -d tmp
     echo "Copying AppDelegate+SalesforceHybridSDK"    
     cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
     cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
@@ -207,8 +207,7 @@ copy_ios_sdk()
     copy_and_fix SFIdentityCoordinator.h headers
     copy_and_fix SFIdentityData.h headers
     copy_and_fix SFLocalhostSubstitutionCache.h headers
-    copy_and_fix SFSDKLogger.h headers
-    copy_and_fix SFSDKFileLogger.h headers
+    copy_and_fix SFLogger.h headers
     copy_and_fix NSNotificationCenter+SFAdditions.h headers
     copy_and_fix SFOAuthCoordinator.h headers
     copy_and_fix SFOAuthCredentials.h headers
@@ -234,24 +233,22 @@ copy_ios_sdk()
     copy_and_fix SFSDKLoginHost.h headers
     copy_and_fix SFSDKLoginHostListViewController.h headers
     copy_and_fix SFSDKLoginHostStorage.h headers
-    copy_and_fix DDLog.h headers
-    copy_and_fix DDFileLogger.h headers
-    copy_and_fix DDLegacyMacros.h headers
+    copy_and_fix sqlite3.h headers
 
     echo "Copying needed libraries to src/ios/frameworks"
+    copy_lib libSalesforceSDKCommon.a
     copy_lib libSalesforceAnalytics.a
     copy_lib libSalesforceSDKCore.a
     copy_lib libSmartStore.a
     copy_lib libSmartSync.a
     copy_lib libSalesforceHybridSDK.a
     copy_lib libsqlcipher.a
-    copy_lib libCocoaLumberjack.a
     echo "Copying Images.xcassets"
-    cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
+    cp -RL $IOS_SDK_FOLDER/external/SalesforceMobileSDK-iOS/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
     echo "Copying SalesforceSDKAssets.xcassets"
-    cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKAssets.xcassets src/ios/resources/SalesforceSDKAssets.xcassets
+    cp -RL $IOS_SDK_FOLDER/external/SalesforceMobileSDK-iOS/shared/resources/SalesforceSDKAssets.xcassets src/ios/resources/SalesforceSDKAssets.xcassets
     echo "Copying SalesforceSDKResources.bundle"
-    cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKResources.bundle src/ios/resources/
+    cp -RL $IOS_SDK_FOLDER/external/SalesforceMobileSDK-iOS/shared/resources/SalesforceSDKResources.bundle src/ios/resources/
 }
 
 copy_android_sdk()
