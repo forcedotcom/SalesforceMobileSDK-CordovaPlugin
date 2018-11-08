@@ -233,7 +233,6 @@ copy_ios_sdk()
     copy_and_fix SFSDKLoginHost.h headers
     copy_and_fix SFSDKLoginHostListViewController.h headers
     copy_and_fix SFSDKLoginHostStorage.h headers
-    copy_and_fix sqlite3.h headers
 
     echo "Copying needed libraries to src/ios/frameworks"
     copy_lib libSalesforceSDKCommon.a
