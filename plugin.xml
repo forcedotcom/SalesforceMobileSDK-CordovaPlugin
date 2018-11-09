@@ -85,8 +85,7 @@
     <header-file src="src/ios/headers/SFIdentityCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLogger.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKFileLogger.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
@@ -111,9 +110,6 @@
     <header-file src="src/ios/headers/SFSDKLoginHostStorage.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h" />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h" />
-    <header-file src="src/ios/headers/DDLog.h" />
-    <header-file src="src/ios/headers/DDFileLogger.h" />
-    <header-file src="src/ios/headers/DDLegacyMacros.h" />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
@@ -126,13 +122,13 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Libraries -->
+    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceAnalytics.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
-    <source-file src="src/ios/frameworks/libCocoaLumberjack.a" framework="true" />
 
     <!-- System frameworks -->
     <framework src="libxml2.tbd" />
