@@ -118,13 +118,19 @@ replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultMinSdkVersi
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultTargetSdkVersion=27', 'defaultTargetSdkVersion=28');
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), 'defaultCompileSdkVersion=27', 'defaultCompileSdkVersion=28');
 
+// Fixing AndroidManifest.xml to work with new versions of Android Studio.
+var usesSdkTagRegex = /<uses-sdk.*>/g;
+replaceTextInFile(path.join(appProjectRoot, 'app', 'AndroidManifest.xml'), usesSdkTagRegex, '');
+replaceTextInFile(path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml'), usesSdkTagRegex, '');
+replaceTextInFile(path.join(appProjectRoot, 'CordovaLib', 'AndroidManifest.xml'), usesSdkTagRegex, '');
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 
 function replaceTextInFile(fileName, textInFile, replacementText) {
     var contents = fs.readFileSync(fileName, 'utf8');
     var lines = contents.split(/\r*\n/);
     var result = lines.map(function (line) {
-      return line.replace(textInFile, replacementText);
+        return line.replace(textInFile, replacementText);
     }).join('\n');
     fs.writeFileSync(fileName, result, 'utf8'); 
 }
