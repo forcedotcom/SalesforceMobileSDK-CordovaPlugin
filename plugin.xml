@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-android" version="7.1.2" />
-    <engine name="cordova-ios" version="4.5.4" />
+    <engine name="cordova-ios" version="4.5.5" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
@@ -45,7 +45,7 @@
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="10.0" />
+      <preference name="deployment-target" value="11.0" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" subdomains="true" />
