@@ -74,7 +74,7 @@ parse_opts ()
 copy_and_fix ()
 {
     echo "* Fixing and copying $1 to $2 directory"
-    find tmp -name $1 | xargs sed -E 's/#import <(SalesforceAnalytics|SalesforceSDKCore|SmartStore|SmartSync|SalesforceHybrid|CocoaLumberjack).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
+    find tmp -name $1 | xargs sed -E 's/#import <(SalesforceSDKCommon|SalesforceAnalytics|SalesforceSDKCore|SmartStore|SmartSync|SalesforceHybrid).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
 }
 
 copy_lib ()
