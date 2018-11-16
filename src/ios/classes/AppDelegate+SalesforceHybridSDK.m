@@ -53,9 +53,9 @@
     [SalesforceHybridSDKManager initializeSDK];
     
     //App Setup for any changes to the current authenticated user
-    __weak typeof (self) weakSelf = self;
+    __weak __typeof (self) weakSelf = self;
     [SFSDKAuthHelper registerBlockForCurrentUserChangeNotifications:^{
-        __strong typeof (weakSelf) strongSelf = weakSelf;
+        __strong __typeof (weakSelf) strongSelf = weakSelf;
         [strongSelf resetViewState:^{
             [strongSelf setupRootViewController];
         }];
@@ -91,7 +91,7 @@
     self.window.autoresizesSubviews = YES;
     
     [self initializeAppViewState];
-     __weak typeof (self) weakSelf = self;
+     __weak __typeof (self) weakSelf = self;
     [SFSDKAuthHelper loginIfRequired:^{
         [weakSelf setupRootViewController];
     }];
