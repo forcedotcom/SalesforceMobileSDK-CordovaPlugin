@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-android" version="7.1.2" />
-    <engine name="cordova-ios" version="4.5.4" />
+    <engine name="cordova-ios" version="4.5.5" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
@@ -41,11 +41,11 @@
   <platform name="ios">
 
     <!-- Required by the Mobile SDK plugin for WKWebView -->
-    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.2" />
+    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="10.0" />
+      <preference name="deployment-target" value="11.0" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" subdomains="true" />
@@ -102,6 +102,12 @@
     <header-file src="src/ios/headers/SFSDKLoginViewControllerConfig.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKAuthConstants.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKAppLockViewConfig.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFAppLockViewControllerTypes.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSecurityLockout.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKAuthHelper.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKHybridLogger.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLoginViewController.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSDKLoginHostDelegate.h" target-dir="salesforce" />

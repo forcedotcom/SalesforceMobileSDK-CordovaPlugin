@@ -74,7 +74,7 @@ parse_opts ()
 copy_and_fix ()
 {
     echo "* Fixing and copying $1 to $2 directory"
-    find tmp -name $1 | xargs sed -E 's/#import <(SalesforceAnalytics|SalesforceSDKCore|SmartStore|SmartSync|SalesforceHybrid|CocoaLumberjack).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
+    find tmp -name $1 | xargs sed -E 's/#import <(SalesforceSDKCommon|SalesforceAnalytics|SalesforceSDKCore|SmartStore|SmartSync|SalesforceHybrid).*\/(.*)>/#import "\2"/' > src/ios/$2/$1
 }
 
 copy_lib ()
@@ -224,6 +224,12 @@ copy_ios_sdk()
     copy_and_fix SFSDKLoginViewControllerConfig.h headers
     copy_and_fix SFAuthErrorHandler.h headers
     copy_and_fix SFAuthErrorHandlerList.h headers
+    copy_and_fix SFSDKAuthConstants.h headers
+    copy_and_fix SFSDKAppLockViewConfig.h headers
+    copy_and_fix SFAppLockViewControllerTypes.h headers
+    copy_and_fix SFSecurityLockout.h headers
+    copy_and_fix SFSDKAuthHelper.h headers
+    copy_and_fix SFSDKHybridLogger.h headers
     copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
     copy_and_fix UIApplication+SalesforceHybridSDK.m classes
     copy_and_fix InitialViewController.m classes
