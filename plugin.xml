@@ -41,7 +41,7 @@
   <platform name="ios">
 
     <!-- Required by the Mobile SDK plugin for WKWebView -->
-    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.2" />
+    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
