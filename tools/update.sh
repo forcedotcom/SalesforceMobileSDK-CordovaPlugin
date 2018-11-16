@@ -226,6 +226,7 @@ copy_ios_sdk()
     copy_and_fix SFAuthErrorHandlerList.h headers
     copy_and_fix SFSDKAuthConstants.h headers
     copy_and_fix SFSDKAppLockViewConfig.h headers
+    copy_and_fix SFAppLockViewControllerTypes.h headers
     copy_and_fix SFSecurityLockout.h headers
     copy_and_fix AppDelegate+SalesforceHybridSDK.m classes
     copy_and_fix UIApplication+SalesforceHybridSDK.m classes

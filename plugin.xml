@@ -104,6 +104,7 @@
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSDKAuthConstants.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSDKAppLockViewConfig.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFAppLockViewControllerTypes.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSecurityLockout.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLoginViewController.h" target-dir="salesforce" />
