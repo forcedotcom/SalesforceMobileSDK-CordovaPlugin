@@ -30,7 +30,7 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-android" version="7.0.0" />
+    <engine name="cordova-android" version="7.1.2" />
     <engine name="cordova-ios" version="4.5.4" />
   </engines>
 
@@ -167,11 +167,6 @@
           android:label="@string/app_name"
           android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity"
           android:name="com.salesforce.androidsdk.phonegap.app.HybridApp" />
-    </edit-config>
-
-    <!-- Fixes the min and target SDK versions in the Manifest -->
-    <edit-config file="app/src/main/AndroidManifest.xml" target="/manifest/uses-sdk" mode="merge">
-      <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="28" />
     </edit-config>
 
     <config-file target="res/xml/config.xml" parent="/*">
