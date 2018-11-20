@@ -41,8 +41,6 @@
   <!-- ios -->
   <platform name="ios">
 
-  <!-- Required by the Mobile SDK plugin for WKWebView -->
-  <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.2" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
@@ -66,13 +64,6 @@
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
     </config-file>
 
-    <!-- Entitlement -->
-    <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
-      <string>development</string>
-    </config-file>
-    <config-file parent="aps-environment" target="*/Entitlements-Release.plist">
-      <string>production</string>
-    </config-file>
 
     <!-- Header files -->
     <header-file src="src/ios/headers/SFAuthenticationManager.h" target-dir="salesforce" />

@@ -327,7 +327,8 @@ public class LoginActivity extends AccountAuthenticatorActivity
 	public void loadingLoginPage(String loginUrl) {
 		final ActionBar ab = getActionBar();
 		if (ab != null) {
-			ab.setTitle(loginUrl);
+            ab.setTitle(loginUrl);
+            ab.hide(); // MBPS_CD Customize- hide NavBar
 		}
 	}
 

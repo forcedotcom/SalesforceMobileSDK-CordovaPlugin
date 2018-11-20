@@ -108,6 +108,14 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.autoresizesSubviews = YES;
     
+    //MBPS_CD Customize - hideNavBar, disable shake event.
+    [[UIApplication sharedApplication] setApplicationSupportsShakeToEdit:NO];
+    SFSDKLoginViewControllerConfig *loginViewConfig =
+    [[SFSDKLoginViewControllerConfig  alloc] init];
+    loginViewConfig.showSettingsIcon = NO;
+    loginViewConfig.showNavbar = NO;
+    [SFUserAccountManager sharedInstance].loginViewControllerConfig = loginViewConfig;
+    
     [self initializeAppViewState];
     [[SalesforceSDKManager sharedManager] launch];
     return YES; // we don't want to run's Cordova didFinishLaunchingWithOptions - it creates another window with a webview
