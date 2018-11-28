@@ -453,6 +453,10 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
      * Load local start page
      */
     public void loadLocalStartPage() {
+        //MBPS_CD Customize- hide NavBarStop reload application when app on resume status but haven't login
+        if(webAppLoaded) {
+            return;
+        }
         assert bootconfig.isLocal();
         String startPage = bootconfig.getStartPage();
         SalesforceHybridLogger.i(TAG, "loadLocalStartPage called - loading: " + startPage);
