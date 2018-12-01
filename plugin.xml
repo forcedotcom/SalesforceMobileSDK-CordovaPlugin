@@ -30,8 +30,8 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-android" version="7.0.0" />
-    <engine name="cordova-ios" version="4.5.4" />
+    <engine name="cordova-android" version="7.1.4" />
+    <engine name="cordova-ios" version="4.5.5" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
