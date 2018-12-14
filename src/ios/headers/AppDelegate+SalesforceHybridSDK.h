@@ -24,7 +24,7 @@
 
 #import "AppDelegate.h"
 #import "SFHybridViewController.h"
-
+#import "SFUserAccountManager.h"
 @interface AppDelegate (SalesforceHybridSDK) <SFUserAccountManagerDelegate>
 
 @end

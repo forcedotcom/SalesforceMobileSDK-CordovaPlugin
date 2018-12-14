@@ -1,6 +1,6 @@
 {
     "name": "SalesforceMobileSDK-CordovaPlugin",
-    "version": "6.2.0",
+    "version": "7.0.0",
     "description": "Salesforce Mobile SDK Cordova Plugin Repository",
     "keywords": [ "mobilesdk", "android", "ios", "cordova", "salesforce", "mobile", "sdk" ],
     "homepage": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin",

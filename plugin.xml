@@ -3,12 +3,12 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="6.2.0">
+        version="7.0.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
   <license>Apache 2.0</license>
-  <keywords>salesforce,oauth,smartstore</keywords>
+  <keywords>salesforce,oauth,smartstore,smartsync</keywords>
   <repo>https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin</repo>
 
   <js-module src="www/com.salesforce.plugin.oauth.js" name="plugin.oauth"></js-module>
@@ -30,23 +30,22 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-android" version="7.0.0" />
-    <engine name="cordova-ios" version="4.5.4" />
+    <engine name="cordova-android" version="7.1.2" />
+    <engine name="cordova-ios" version="4.5.5" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
   <dependency id="cordova-plugin-whitelist" version="1.2.0" />
-  <dependency id="phonegap-plugin-push" version="1.4.5" />
 
   <!-- ios -->
   <platform name="ios">
 
-  <!-- Required by the Mobile SDK plugin for WKWebView -->
-  <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.2" />
+    <!-- Required by the Mobile SDK plugin for WKWebView -->
+    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="10.0" />
+      <preference name="deployment-target" value="11.0" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" subdomains="true" />
@@ -86,8 +85,7 @@
     <header-file src="src/ios/headers/SFIdentityCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLogger.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKFileLogger.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
@@ -104,6 +102,12 @@
     <header-file src="src/ios/headers/SFSDKLoginViewControllerConfig.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKAuthConstants.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKAppLockViewConfig.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFAppLockViewControllerTypes.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSecurityLockout.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKAuthHelper.h" target-dir="salesforce" />
+    <header-file src="src/ios/headers/SFSDKHybridLogger.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFLoginViewController.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/SFSDKLoginHostDelegate.h" target-dir="salesforce" />
@@ -112,9 +116,6 @@
     <header-file src="src/ios/headers/SFSDKLoginHostStorage.h" target-dir="salesforce" />
     <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h" />
     <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h" />
-    <header-file src="src/ios/headers/DDLog.h" />
-    <header-file src="src/ios/headers/DDFileLogger.h" />
-    <header-file src="src/ios/headers/DDLegacyMacros.h" />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
@@ -127,13 +128,13 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Libraries -->
+    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceAnalytics.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
     <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
     <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
-    <source-file src="src/ios/frameworks/libCocoaLumberjack.a" framework="true" />
 
     <!-- System frameworks -->
     <framework src="libxml2.tbd" />
@@ -172,11 +173,6 @@
           android:label="@string/app_name"
           android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity"
           android:name="com.salesforce.androidsdk.phonegap.app.HybridApp" />
-    </edit-config>
-
-    <!-- Fixes the min and target SDK versions in the Manifest -->
-    <edit-config file="app/src/main/AndroidManifest.xml" target="/manifest/uses-sdk" mode="merge">
-      <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="27" />
     </edit-config>
 
     <config-file target="res/xml/config.xml" parent="/*">

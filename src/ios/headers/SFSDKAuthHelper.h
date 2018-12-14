@@ -1,10 +1,9 @@
 /*
- SFSDKFileLogger.h
- SalesforceAnalytics
+ SFSDKAuthHelper.h
+ SalesforceSDKCore
  
- Created by Bharath Hariharan on 6/8/17.
- 
- Copyright (c) 2017-present, salesforce.com, inc. All rights reserved.
+ Created by Raj Rao on 07/19/18.
+ Copyright (c) 2018-present, salesforce.com, inc. All rights reserved.
  
  Redistribution and use of this software in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
@@ -26,31 +25,19 @@
  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#import <Foundation/Foundation.h>
 
-#import "DDFileLogger.h"
+NS_SWIFT_NAME(AuthHelper)
+@interface SFSDKAuthHelper : NSObject
 
-@interface SFSDKFileLogger : DDFileLogger
++ (void)loginIfRequired:(void (^)(void))completionBlock;
 
-/**
- * Component name associated with this file logger.
- */
-@property (nonatomic, readonly, strong, nonnull) NSString *componentName;
++ (void)handleLogout:(void (^)(void))completionBlock;
 
-/**
- * Initializes a file logger for the specified component.
- */
-- (nonnull instancetype)initWithComponent:(nonnull NSString *)componentName;
++ (void)registerBlockForCurrentUserChangeNotifications:(void (^)(void))completionBlock;
 
-/**
- * Flushes the log file and resets it to its original state.
- */
-- (void)flushLogWithCompletionBlock:(void (^ _Nullable)(void))completionBlock;
++ (void)registerBlockForLogoutNotifications:(void (^)(void))completionBlock;
 
-/**
- * Returns all log lines stored in this file.
- *
- * @return All log lines stored in this file.
- */
-- (nullable NSString *)readFile;
++ (void)registerBlockForSwitchUserNotifications:(void (^)(void))completionBlock;
 
 @end
