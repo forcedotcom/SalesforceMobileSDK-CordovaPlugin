@@ -92,9 +92,15 @@
     
     [self initializeAppViewState];
      __weak __typeof (self) weakSelf = self;
-    [SFSDKAuthHelper loginIfRequired:^{
-        [weakSelf setupRootViewController];
-    }];
+
+    if (SalesforceHybridSDKManager.sharedManager.appConfig.shouldAuthenticate) {
+        [SFSDKAuthHelper loginIfRequired:^{
+            [weakSelf setupRootViewController];
+        }];
+    } else {
+        [self setupRootViewController];
+    }
+
     return YES; // we don't want to run's Cordova didFinishLaunchingWithOptions - it creates another window with a webview
                 // if devs want to customize their AppDelegate.m, then they should get rid of AppDelegate+SalesforceHybrid.m
                 // and bring all of its code in their AppDelegate.m
