@@ -257,7 +257,8 @@ public class SalesforceSDKManager {
             this.loginActivityClass = loginActivity;
     	}
     	this.features = new ConcurrentSkipListSet<>(String.CASE_INSENSITIVE_ORDER);
-
+        // MBPS_CD Customize- disable DevSupport Tool
+        this.setDevSupportEnabled(false);
         /*
          * Checks if an analytics app name has already been set by the app.
          * If not, fetches the default app name to be used and sets it.

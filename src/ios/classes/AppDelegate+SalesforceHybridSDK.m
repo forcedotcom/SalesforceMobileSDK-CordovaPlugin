@@ -50,7 +50,8 @@
 {
     // Need to use SalesforceHybridSDKManager in hybrid apps
     [SalesforceSDKManager setInstanceClass:[SalesforceHybridSDKManager class]];
-    
+   
+
     //Uncomment the following line inorder to enable/force the use of advanced authentication flow.
     //[SFUserAcountManager sharedInstance].advancedAuthConfiguration = SFOAuthAdvancedAuthConfigurationRequire;
     // OR
@@ -75,6 +76,8 @@
      };
      */
     __weak __typeof(self) weakSelf = self;
+    // MBPS_CD Customize- disable DevSupport Tool
+    [SalesforceSDKManager sharedManager].isDevSupportEnabled = NO;
     [SalesforceSDKManager sharedManager].postLaunchAction = ^(SFSDKLaunchAction launchActionList) {
         __strong __typeof(weakSelf) strongSelf = weakSelf;
         [SFSDKLogger log:[self class] level:DDLogLevelInfo format:@"Post-launch: launch actions taken: %@", [SalesforceSDKManager launchActionsStringRepresentation:launchActionList]];
