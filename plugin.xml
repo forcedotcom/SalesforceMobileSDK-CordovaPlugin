@@ -74,48 +74,9 @@
     </config-file>
 
     <!-- Header files -->
-    <header-file src="src/ios/headers/SFAuthenticationManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceSDKConstants.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFCommunityData.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAppConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/InitialViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFDefaultUserManagementViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFHybridViewConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFHybridViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFIdentityCoordinator.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFOAuthInfo.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFPushNotificationManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccount.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccountConstants.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccountIdentity.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SmartStoreSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceHybridSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SmartSyncSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginViewControllerConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAuthConstants.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAppLockViewConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFAppLockViewControllerTypes.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSecurityLockout.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAuthHelper.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKHybridLogger.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLoginViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHostDelegate.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHost.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHostListViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHostStorage.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h" />
-    <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/classes/UIApplication+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/classes/InitialViewController.h" />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
