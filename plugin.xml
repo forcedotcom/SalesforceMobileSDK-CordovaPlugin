@@ -65,7 +65,7 @@
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
     </config-file>
 
-    <!-- Entitlement -->
+    <!-- Entitlements -->
     <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
       <string>development</string>
     </config-file>
@@ -88,13 +88,23 @@
     <resource-file src="src/ios/resources/Images.xcassets" />
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
-    <!-- Libraries -->
-    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceAnalytics.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
+    <!-- Mobile SDK frameworks -->
+    <framework src="SalesforceSDKCommon" type="podspec" spec="7.0.0" />
+    <framework src="SalesforceAnalytics" type="podspec" spec="7.0.0" />
+    <framework src="SalesforceSDKCore" type="podspec" spec="7.0.0" />
+    <framework src="SmartStore" type="podspec" spec="7.0.0" />
+    <framework src="SmartSync" type="podspec" spec="7.0.0" />
+    <framework src="SalesforceHybridSDK" type="podspec" spec="7.0.0" />
+
+    <!-- Mobile SDK frameworks -->
+    <!--<framework src="src/ios/frameworks/SalesforceSDKCommon.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SalesforceAnalytics.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SalesforceSDKCore.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SmartStore.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SmartSync.framework" custom="true" embed="true" />
+    <framework src="src/ios/frameworks/SalesforceHybridSDK.framework" custom="true" embed="true" />-->
+
+    <!-- Static binaries -->
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
 
     <!-- System frameworks -->
