@@ -43,6 +43,9 @@
     <!-- Required by the Mobile SDK plugin for WKWebView -->
     <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
 
+    <!-- Required by the Mobile SDK plugin for Cocoapods -->
+    <dependency id="cordova-plugin-cocoapod-support" url="https://github.com/blakgeek/cordova-plugin-cocoapods-support" commit="v1.6.0" />
+
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
       <preference name="deployment-target" value="11.0" />
@@ -96,13 +99,17 @@
     <framework src="SmartSync" type="podspec" spec="7.0.0" />
     <framework src="SalesforceHybridSDK" type="podspec" spec="7.0.0" />
 
-    <!-- Mobile SDK frameworks -->
-    <!--<framework src="src/ios/frameworks/SalesforceSDKCommon.framework" custom="true" embed="true" />
-    <framework src="src/ios/frameworks/SalesforceAnalytics.framework" custom="true" embed="true" />
-    <framework src="src/ios/frameworks/SalesforceSDKCore.framework" custom="true" embed="true" />
-    <framework src="src/ios/frameworks/SmartStore.framework" custom="true" embed="true" />
-    <framework src="src/ios/frameworks/SmartSync.framework" custom="true" embed="true" />
-    <framework src="src/ios/frameworks/SalesforceHybridSDK.framework" custom="true" embed="true" />-->
+    <!-- Mobile SDK frameworks pod specs -->
+    <pods-config ios-min-version="11.0" use-frameworks="true" />
+    <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+    <!--
+
+      Comment out the line above and uncomment this line for release versions.
+      Make sure the release tag specified is accurate.
+
+      <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v7.1.0" />
+
+    -->
 
     <!-- Static binaries -->
     <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
