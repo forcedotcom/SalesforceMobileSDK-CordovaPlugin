@@ -44,7 +44,7 @@
     <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
 
     <!-- Required by the Mobile SDK plugin for Cocoapods -->
-    <dependency id="cordova-plugin-cocoapod-support" url="https://github.com/blakgeek/cordova-plugin-cocoapods-support" commit="v1.6.0" />
+    <dependency id="cordova-plugin-cocoapod-support" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
