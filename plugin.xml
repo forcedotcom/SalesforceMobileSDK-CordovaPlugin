@@ -94,12 +94,20 @@
     <!-- Mobile SDK frameworks pod specs -->
     <pods-config ios-min-version="11.0" use-frameworks="true" />
     <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+    <pod name="Cordova" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+    <pod name="SmartSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <!--
 
-      Comment out the line above and uncomment this line for release versions.
-      Make sure the release tag specified is accurate.
+      Replace 'dev' in the 'branch' tag above with the current release version tag while releasing.
 
-      <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v7.1.0" />
+      For example,
+        branch="dev"
+      would become
+        tag="v7.1.0"
 
     -->
 
