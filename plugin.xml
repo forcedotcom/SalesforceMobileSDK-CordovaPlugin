@@ -111,9 +111,6 @@
 
     -->
 
-    <!-- Static binaries -->
-    <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
-
     <!-- System frameworks -->
     <framework src="libxml2.tbd" />
     <framework src="libz.tbd" />
