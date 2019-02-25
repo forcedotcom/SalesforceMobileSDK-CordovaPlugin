@@ -3,7 +3,6 @@
 #set -x  # turn trace on 
 set -e   # stop at first error
 
-
 OPT_BUILD="yes"
 OPT_BRANCH=""
 OPT_OS=""
@@ -124,16 +123,6 @@ SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 update_ios_repo ()
 {   
     update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
-    
-    if [ "$OPT_BUILD" == "yes" ]
-    then
-        echo "Building the iOS SDK"
-        cd ${IOS_SDK_FOLDER}
-        ./install.sh
-        cd build
-        rm -rf artifacts
-        ant
-    fi
     cd ${ROOT_FOLDER}
 }
 
@@ -146,7 +135,6 @@ update_android_repo ()
 create_ios_dirs()
 {
     echo "Creating ios directories"
-    mkdir -p src/ios/frameworks
     mkdir -p src/ios/classes
     mkdir -p src/ios/resources
 }
@@ -161,33 +149,11 @@ create_android_dirs()
 copy_ios_sdk()
 {
     echo "*** iOS ***"
-    echo "Copying SalesforceSDKCommon library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCommon-Debug.zip -d tmp
-    echo "Copying SalesforceAnalytics library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceAnalytics-Debug.zip -d tmp
-    echo "Copying SalesforceSDKCore library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceSDKCore-Debug.zip -d tmp
-    echo "Copying SmartStore library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SmartStore-Debug.zip -d tmp
-    echo "Copying SmartSync library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SmartSync-Debug.zip -d tmp
-    echo "Copying SalesforceHybridSDK library"
-    unzip $IOS_SDK_FOLDER/build/artifacts/SalesforceHybridSDK-Debug.zip -d tmp
-    echo "Copying sqlcipher library"    
-    cp -RL $IOS_SDK_FOLDER/external/ThirdPartyDependencies/sqlcipher tmp
     echo "Copying AppDelegate+SalesforceHybridSDK"    
-    cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  tmp
-    cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  tmp
-    cp $IOS_SDK_FOLDER/shared/hybrid/InitialViewController.*  tmp
+    cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  src/ios/classes
+    cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
+    cp $IOS_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
-    echo "Copying needed libraries to src/ios/frameworks"
-    copy_lib libSalesforceSDKCommon.a
-    copy_lib libSalesforceAnalytics.a
-    copy_lib libSalesforceSDKCore.a
-    copy_lib libSmartStore.a
-    copy_lib libSmartSync.a
-    copy_lib libSalesforceHybridSDK.a
-    copy_lib libsqlcipher.a
     echo "Copying Images.xcassets"
     cp -RL $IOS_SDK_FOLDER/external/SalesforceMobileSDK-iOS/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
     echo "Copying SalesforceSDKAssets.xcassets"
@@ -243,9 +209,8 @@ update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}"
 cd ${ROOT_FOLDER}
 echo "*** Creating directories ***"
 echo "Starting clean"
-rm -rf tmp src/ios src/android
-echo "Creating tmp directory"
-mkdir -p tmp
+rm -rf src/ios src/android
+
 #create ios directories
 if [ "$OPT_OS" == "ios" ]
 then
@@ -285,7 +250,6 @@ echo "Copying split cordova.force.js out of bower_components"
 cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
 
 echo "*** Cleanup ***"
-rm -rf tmp
 cd ${ROOT_FOLDER}
 rm -rf $ANDROID_SDK_FOLDER
 rm -rf $IOS_SDK_FOLDER
