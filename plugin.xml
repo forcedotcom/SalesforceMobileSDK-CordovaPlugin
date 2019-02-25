@@ -94,7 +94,7 @@
     <!-- Mobile SDK frameworks pod specs -->
     <pods-config ios-min-version="11.0" use-frameworks="true" />
     <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
-    <pod name="Cordova" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+    <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.0.0_sdk" />
     <pod name="SmartSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
