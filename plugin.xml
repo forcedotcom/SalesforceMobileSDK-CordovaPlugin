@@ -97,8 +97,8 @@
     <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.0.0_sdk" />
     <pod name="SmartSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="FMDB" />
-    <pod name="SQLCipher" />
+    <pod name="FMDB/SQLCipher" version="2.7.5" />
+    <pod name="SQLCipher/fts" version="4.0.1" />
     <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
