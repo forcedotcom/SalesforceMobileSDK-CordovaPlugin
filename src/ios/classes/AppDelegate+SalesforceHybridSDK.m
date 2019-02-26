@@ -26,15 +26,15 @@
 #import "AppDelegate+SalesforceHybridSDK.h"
 #import "UIApplication+SalesforceHybridSDK.h"
 #import "InitialViewController.h"
-#import "SFLocalhostSubstitutionCache.h"
-#import "SFHybridViewConfig.h"
-#import "SalesforceSDKManager.h"
-#import "SFUserAccountManager.h"
-#import "SFPushNotificationManager.h"
-#import "SFSDKAppConfig.h"
-#import "SFSDKAuthHelper.h"
-#import "SalesforceHybridSDKManager.h"
-#import "SFSDKHybridLogger.h"
+#import <SalesforceHybridSDK/SFLocalhostSubstitutionCache.h>
+#import <SalesforceHybridSDK/SFHybridViewConfig.h>
+#import <SalesforceSDKCore/SalesforceSDKManager.h>
+#import <SalesforceSDKCore/SFUserAccountManager.h>
+#import <SalesforceSDKCore/SFPushNotificationManager.h>
+#import <SalesforceSDKCore/SFSDKAppConfig.h>
+#import <SalesforceSDKCore/SFSDKAuthHelper.h>
+#import <SalesforceHybridSDK/SalesforceHybridSDKManager.h>
+#import <SalesforceHybridSDK/SFSDKHybridLogger.h>
 
 @implementation AppDelegate (SalesforceHybridSDK)
 
@@ -51,6 +51,13 @@
 {
     // Need to use SalesforceHybridSDKManager in hybrid apps
     [SalesforceHybridSDKManager initializeSDK];
+    
+#ifdef DEBUG
+    [SalesforceHybridSDKManager sharedManager].isDevSupportEnabled = YES;
+#else
+    [SalesforceHybridSDKManager sharedManager].isDevSupportEnabled = NO;
+#endif
+
     
     //App Setup for any changes to the current authenticated user
     __weak __typeof (self) weakSelf = self;
@@ -93,13 +100,9 @@
     [self initializeAppViewState];
      __weak __typeof (self) weakSelf = self;
 
-    if (SalesforceHybridSDKManager.sharedManager.appConfig.shouldAuthenticate) {
-        [SFSDKAuthHelper loginIfRequired:^{
-            [weakSelf setupRootViewController];
-        }];
-    } else {
-        [self setupRootViewController];
-    }
+    [SFSDKAuthHelper loginIfRequired:^{
+        [weakSelf setupRootViewController];
+    }];
 
     return YES; // we don't want to run's Cordova didFinishLaunchingWithOptions - it creates another window with a webview
                 // if devs want to customize their AppDelegate.m, then they should get rid of AppDelegate+SalesforceHybrid.m
