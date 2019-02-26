@@ -39,6 +39,7 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.File;
 import java.io.IOException;
@@ -198,9 +199,22 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
             final String endPoint = arg0.optString(END_POINT_KEY);
             final String path = arg0.optString(PATH_KEY);
             final String queryParamString = arg0.optString(QUERY_PARAMS_KEY);
+            Boolean isJsonArray = false;
             JSONObject queryParams = new JSONObject();
-            if (!TextUtils.isEmpty(queryParamString)) {
-                queryParams = new JSONObject(queryParamString);
+            JSONArray queryParamsArray = new JSONArray();
+            Object json = new JSONTokener(queryParamString).nextValue();
+            if (json instanceof JSONObject) {
+                // Object
+                isJsonArray = false;
+                if (!TextUtils.isEmpty(queryParamString)) {
+                    queryParams = new JSONObject(queryParamString);
+                }
+            } else if (json instanceof JSONArray) {
+                // Array
+                isJsonArray = true;
+                if (!TextUtils.isEmpty(queryParamString)) {
+                    queryParamsArray = new JSONArray(queryParamString);
+                }
             }
             final JSONObject headerParams = arg0.optJSONObject(HEADER_PARAMS_KEY);
             final Iterator<String> headerKeys = headerParams.keys();
@@ -222,7 +236,11 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
                     || method == RestRequest.RestMethod.HEAD) {
                 urlParams = buildQueryString(queryParams);
             } else {
-                requestBody = buildRequestBody(queryParams, fileParams);
+                if (isJsonArray) {
+                    requestBody = buildRequestBodyArray(queryParamsArray);
+                } else {
+                    requestBody = buildRequestBody(queryParams, fileParams);
+                }
             }
             final String separator = urlParams.isEmpty()
                     ? ""
@@ -256,6 +274,10 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
             }
         }
         return sb.toString();
+    }
+
+    private static RequestBody buildRequestBodyArray(JSONArray params) throws URISyntaxException {
+        return RequestBody.create(RestRequest.MEDIA_TYPE_JSON, params.toString());
     }
 
     private static RequestBody buildRequestBody(JSONObject params, JSONObject fileParams) throws URISyntaxException {
