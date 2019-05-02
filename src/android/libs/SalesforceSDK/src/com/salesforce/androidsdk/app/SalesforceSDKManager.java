@@ -163,7 +163,6 @@ public class SalesforceSDKManager {
     private PushNotificationInterface pushNotificationInterface;
     private Class<? extends PushService> pushServiceType = PushService.class;
     private String uid; // device id
-    private volatile boolean loggedOut = false;
     private SortedSet<String> features;
     private List<String> additionalOauthKeys;
     private String loginBrand;
@@ -807,7 +806,7 @@ public class SalesforceSDKManager {
         }
 	}
 
-    private void unregisterPush(final ClientManager clientMgr, final boolean showLoginPage,
+    private synchronized void unregisterPush(final ClientManager clientMgr, final boolean showLoginPage,
     		final String refreshToken, final String loginServer,
             final Account account, final Activity frontActivity, boolean isLastAccount) {
         final IntentFilter intentFilter = new IntentFilter(PushMessaging.UNREGISTERED_ATTEMPT_COMPLETE_EVENT);
@@ -834,30 +833,27 @@ public class SalesforceSDKManager {
         (new Thread() {
             public void run() {
                 long startTime = System.currentTimeMillis();
-                while ((System.currentTimeMillis() - startTime) < PUSH_UNREGISTER_TIMEOUT_MILLIS
-                        && !loggedOut) {
+                while ((System.currentTimeMillis() - startTime) < PUSH_UNREGISTER_TIMEOUT_MILLIS) {
 
                     // Waits for half a second at a time.
                     SystemClock.sleep(500);
                 }
                 postPushUnregister(pushUnregisterReceiver, clientMgr, showLoginPage,
                 		refreshToken, loginServer, account, frontActivity);
-            };
+            }
         }).start();
     }
 
-    private synchronized void postPushUnregister(BroadcastReceiver pushReceiver,
+    private void postPushUnregister(BroadcastReceiver pushReceiver,
     		final ClientManager clientMgr, final boolean showLoginPage,
     		final String refreshToken, final String loginServer,
             final Account account, Activity frontActivity) {
-        if (!loggedOut) {
-            try {
-                context.unregisterReceiver(pushReceiver);
-            } catch (Exception e) {
-                SalesforceSDKLogger.e(TAG, "Exception occurred while un-registering", e);
-            }
-    		removeAccount(clientMgr, showLoginPage, refreshToken, loginServer, account, frontActivity);
+        try {
+            context.unregisterReceiver(pushReceiver);
+        } catch (Exception e) {
+            SalesforceSDKLogger.e(TAG, "Exception occurred while un-registering", e);
         }
+        removeAccount(clientMgr, showLoginPage, refreshToken, loginServer, account, frontActivity);
     }
 
     /**
@@ -910,9 +906,10 @@ public class SalesforceSDKManager {
 		String refreshToken = null;
 		String loginServer = null;
 		if (account != null) {
-			refreshToken = SalesforceSDKManager.decrypt(mgr.getPassword(account));
+		    final String encryptionKey = SalesforceSDKManager.getEncryptionKey();
+			refreshToken = SalesforceSDKManager.decrypt(mgr.getPassword(account), encryptionKey);
 	        loginServer = SalesforceSDKManager.decrypt(mgr.getUserData(account,
-	        		AuthenticatorService.KEY_INSTANCE_URL));
+	        		AuthenticatorService.KEY_INSTANCE_URL), encryptionKey);
 		}
 
 		/*
@@ -922,7 +919,6 @@ public class SalesforceSDKManager {
 		final UserAccount userAcc = getUserAccountManager().buildUserAccount(account);
 		int numAccounts = mgr.getAccountsByType(getAccountType()).length;
     	if (PushMessaging.isRegistered(context, userAcc) && refreshToken != null) {
-    		loggedOut = false;
     		unregisterPush(clientMgr, showLoginPage, refreshToken,
     				loginServer, account, frontActivity, (numAccounts == 1));
     	} else {
@@ -944,7 +940,6 @@ public class SalesforceSDKManager {
     private void removeAccount(ClientManager clientMgr, final boolean showLoginPage,
     		String refreshToken, String loginServer,
     		Account account, Activity frontActivity) {
-    	loggedOut = true;
     	cleanUp(frontActivity, account);
 
     	/*
@@ -990,7 +985,7 @@ public class SalesforceSDKManager {
     	isLoggingOut = false;
 
     	// Revokes the existing refresh token.
-        if (shouldLogoutWhenTokenRevoked() && account != null && refreshToken != null) {
+        if (shouldLogoutWhenTokenRevoked() && refreshToken != null) {
         	new RevokeTokenTask(refreshToken, loginServer).execute();
         }
     }
@@ -1019,7 +1014,7 @@ public class SalesforceSDKManager {
      *
      * @return The app name to use when constructing the user agent string
      */
-    protected String provideAppName() {
+    public String provideAppName() {
         try {
             PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return context.getString(packageInfo.applicationInfo.labelRes);
@@ -1125,9 +1120,22 @@ public class SalesforceSDKManager {
      *
      * @param data Data to be encrypted.
      * @return Encrypted data.
+     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link SalesforceSDKManager#encrypt(String, String)} instead
+     * and use {@link SalesforceSDKManager#getEncryptionKey()} to fetch the encryption key to pass in.
      */
     public static String encrypt(String data) {
-        return Encryptor.encrypt(data, getEncryptionKey());
+        return encrypt(data, getEncryptionKey());
+    }
+
+    /**
+     * Encrypts the given data with the given key.
+     *
+     * @param data Data to be encrypted.
+     * @param key Encryption key.
+     * @return Encrypted data.
+     */
+    public static String encrypt(String data, String key) {
+        return Encryptor.encrypt(data, key);
     }
 
     /**
@@ -1144,9 +1152,22 @@ public class SalesforceSDKManager {
      *
      * @param data Data to be decrypted.
      * @return Decrypted data.
+     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link SalesforceSDKManager#decrypt(String, String)} instead
+     * and use {@link SalesforceSDKManager#getEncryptionKey()} to fetch the encryption key to pass in.
      */
     public static String decrypt(String data) {
-        return Encryptor.decrypt(data, getEncryptionKey());
+        return decrypt(data, getEncryptionKey());
+    }
+
+    /**
+     * Decrypts the given data with the given key.
+     *
+     * @param data Data to be decrypted.
+     * @param key Encryption key.
+     * @return Decrypted data.
+     */
+    public static String decrypt(String data, String key) {
+        return Encryptor.decrypt(data, key);
     }
 
     /**
