@@ -1,15 +1,8 @@
-Steps to update ios/android/shared used by plugin
+To update ios/android/shared used by plugin
 -------------------------------------------------
-Git clone SalesforceMobileSDK-Shared, SalesforceMobileSDK-Android and SalesforceMobileSDK-iOS in the same directory as SalesforceMobileSDK-CordovaPlugin
-Make sure to run ./install.sh for SalesforceMobileSDK-Android and SalesforceMobileSDK-iOS
-Do:
 
-<pre>
-./tools/update.sh
-</pre>
+Run: ./tools/update.sh -b <branch name> -o <os name>
+  Where <branch name> is the branch to update to.
+  Where <os name> is the name of the platform to update.
 
-If you don't want to regenerate the iOS libraries, do:
 
-<pre>
-./tools/update.sh nobuild
-</pre>

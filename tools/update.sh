@@ -3,29 +3,25 @@
 #set -x  # turn trace on 
 set -e   # stop at first error
 
-OPT_BUILD="yes"
 OPT_BRANCH=""
 OPT_OS=""
 
 usage ()
 {
-    echo "usage: $0 -b <branch name> -o <os name> [-n]"
-    echo "  Where <branch name> is the branch of each SDK to build."
-    echo "  Where <os name> is the name of the platform to build"
-    echo "  -n specifies that the iOS SDK should not be rebuilt."
+    echo "usage: $0 -b <branch name> -o <os name>"
+    echo "  Where <branch name> is the branch to update to."
+    echo "  Where <os name> is the name of the platform to update."
 }
 
 parse_opts ()
 {
-    while getopts :b:o:n command_line_opt
+    while getopts :b:o command_line_opt
     do
         case ${command_line_opt} in
             b)
                 OPT_BRANCH=${OPTARG};;
             o)
                 OPT_OS=${OPTARG};;
-            n)
-                OPT_BUILD="no";;
             ?)
                 echo "Unknown option '-${OPTARG}'."
                 usage
