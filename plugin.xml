@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="7.0.0">
+        version="7.1.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -30,8 +30,8 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-android" version="7.1.2" />
-    <engine name="cordova-ios" version="4.5.5" />
+    <engine name="cordova-android" version="8.0.0" />
+    <engine name="cordova-ios" version="5.0.0" />
   </engines>
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
@@ -42,6 +42,9 @@
 
     <!-- Required by the Mobile SDK plugin for WKWebView -->
     <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
+
+    <!-- Required by the Mobile SDK plugin for Cocoapods -->
+    <dependency id="cordova-plugin-cocoapod-support" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
@@ -65,7 +68,7 @@
       <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
     </config-file>
 
-    <!-- Entitlement -->
+    <!-- Entitlements -->
     <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
       <string>development</string>
     </config-file>
@@ -74,48 +77,9 @@
     </config-file>
 
     <!-- Header files -->
-    <header-file src="src/ios/headers/SFAuthenticationManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceSDKConstants.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFCommunityData.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAppConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/InitialViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFDefaultUserManagementViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFHybridViewConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFHybridViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFIdentityCoordinator.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFIdentityData.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLocalhostSubstitutionCache.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLogger.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/NSNotificationCenter+SFAdditions.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFOAuthCoordinator.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFOAuthCredentials.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFOAuthInfo.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFPushNotificationManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccount.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccountConstants.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccountManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFUserAccountIdentity.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SmartStoreSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceHybridSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SmartSyncSDKManager.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginViewControllerConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFAuthErrorHandler.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFAuthErrorHandlerList.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAuthConstants.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAppLockViewConfig.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFAppLockViewControllerTypes.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSecurityLockout.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKAuthHelper.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKHybridLogger.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SalesforceSDKCoreDefines.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFLoginViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHostDelegate.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHost.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHostListViewController.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/SFSDKLoginHostStorage.h" target-dir="salesforce" />
-    <header-file src="src/ios/headers/AppDelegate+SalesforceHybridSDK.h" />
-    <header-file src="src/ios/headers/UIApplication+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/classes/UIApplication+SalesforceHybridSDK.h" />
+    <header-file src="src/ios/classes/InitialViewController.h" />
 
     <!-- Source files -->
     <source-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.m" />
@@ -127,14 +91,27 @@
     <resource-file src="src/ios/resources/Images.xcassets" />
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
-    <!-- Libraries -->
-    <source-file src="src/ios/frameworks/libSalesforceSDKCommon.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceAnalytics.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceSDKCore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSmartStore.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSmartSync.a" framework="true" />
-    <source-file src="src/ios/frameworks/libSalesforceHybridSDK.a" framework="true" />
-    <source-file src="src/ios/frameworks/libsqlcipher.a" framework="true" />
+    <!-- Mobile SDK frameworks pod specs -->
+    <pods-config ios-min-version="11.0" use-frameworks="true" />
+    <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+    <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.0.0_sdk" />
+    <pod name="SmartSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
+    <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.0.1" />
+    <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <!--
+
+      Replace 'dev' in the 'branch' tag above with the current release version tag while releasing.
+
+      For example,
+        branch="dev"
+      would become
+        tag="v7.1.0"
+
+    -->
 
     <!-- System frameworks -->
     <framework src="libxml2.tbd" />
