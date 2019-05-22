@@ -36,14 +36,14 @@ update_package_json ()
 {
     local file=$1
     local version=$2
-    sed -i "s/\"version\":.*\"[^\"]*\"/\"version\": \"${version}\"/g" ${file}
+    gsed -i "s/\"version\":.*\"[^\"]*\"/\"version\": \"${version}\"/g" ${file}
 }
 
 update_plugin_xml ()
 {
     local file=$1
     local version=$2
-    sed -i "s/version.*=.*\"[^\"]*\">/version=\"${version}\">/g" ${file}
+    gsed -i "s/version.*=.*\"[^\"]*\">/version=\"${version}\">/g" ${file}
 }
 
 
