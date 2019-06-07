@@ -54,11 +54,17 @@
       <allow-navigation href="https://localhost" subdomains="true" />
       <allow-navigation href="https://*.force.com" subdomains="true" />
       <allow-navigation href="https://*.salesforce.com" subdomains="true" />
+      <allow-navigation href="https://*.visualforce.com" subdomains="true" />
+      <allow-navigation href="https://*.documentforce.com" subdomains="true" />
+      <allow-navigation href="https://*.salesforce-communities.com" subdomains="true" />
 
       <!-- For legacy apps that don't use CSP -->
       <access origin="https://localhost" subdomains="true" />
       <access origin="https://*.force.com" subdomains="true" />
       <access origin="https://*.salesforce.com" subdomains="true" />
+      <access origin="https://*.visualforce.com" subdomains="true" />
+      <access origin="https://*.documentforce.com" subdomains="true" />
+      <access origin="https://*.salesforce-communities.com" subdomains="true" />
 
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
       <feature name="com.salesforce.network"><param name="ios-package" value="SFNetworkPlugin"/></feature>
