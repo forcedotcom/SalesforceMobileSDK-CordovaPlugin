@@ -54,7 +54,7 @@ update_plugin_xml ()
     then
         newPodSpecVersion="branch=\"dev\""
     fi
-    gsed -i "s/\(.*<pod.*git=\"https:\/\/github.com\/forcedotcom\/SalesforceMobileSDK-[^\"]*\"\).*$/\1 ${newPodSpecVersion} \/>/g" ${file}
+    gsed -i "s/\(.*<pod.*git=\"https:\/\/github.com\/.*\/SalesforceMobileSDK-[^\"]*\"\).*$/\1 ${newPodSpecVersion} \/>/g" ${file}
 }
 
 
