@@ -54,11 +54,17 @@
       <allow-navigation href="https://localhost" subdomains="true" />
       <allow-navigation href="https://*.force.com" subdomains="true" />
       <allow-navigation href="https://*.salesforce.com" subdomains="true" />
+      <allow-navigation href="https://*.visualforce.com" subdomains="true" />
+      <allow-navigation href="https://*.documentforce.com" subdomains="true" />
+      <allow-navigation href="https://*.salesforce-communities.com" subdomains="true" />
 
       <!-- For legacy apps that don't use CSP -->
       <access origin="https://localhost" subdomains="true" />
       <access origin="https://*.force.com" subdomains="true" />
       <access origin="https://*.salesforce.com" subdomains="true" />
+      <access origin="https://*.visualforce.com" subdomains="true" />
+      <access origin="https://*.documentforce.com" subdomains="true" />
+      <access origin="https://*.salesforce-communities.com" subdomains="true" />
 
       <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
       <feature name="com.salesforce.network"><param name="ios-package" value="SFNetworkPlugin"/></feature>
@@ -158,11 +164,18 @@
       <allow-navigation href="https://localhost" />
       <allow-navigation href="https://*.force.com" />
       <allow-navigation href="https://*.salesforce.com" />
+      <allow-navigation href="https://*.visualforce.com" />
+      <allow-navigation href="https://*.documentforce.com" />
+      <allow-navigation href="https://*.salesforce-communities.com" />
 
       <!-- For legacy apps that don't use CSP -->
       <access origin="https://localhost" />
       <access origin="https://*.force.com" />
       <access origin="https://*.salesforce.com" />
+      <access origin="https://*.visualforce.com" />
+      <access origin="https://*.documentforce.com" />
+      <access origin="https://*.salesforce-communities.com" />
+
       <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceOAuthPlugin"/></feature>
       <feature name="com.salesforce.network"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceNetworkPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SFAccountManagerPlugin"/></feature>
