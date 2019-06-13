@@ -1,8 +1,9 @@
-!#!/bin/bash
+#!/bin/bash
 
 #set -x
 
 OPT_VERSION=""
+OPT_IS_DEV="no"
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
@@ -10,8 +11,9 @@ NC='\033[0m' # No Color
 usage ()
 {
     echo "Use this script to set Mobile SDK version number in source files"
-    echo "Usage: $0 -v <version>"
+    echo "Usage: $0 -v <version> [-d <isDev>]"
     echo "  where: version is the version e.g. 7.1.0"
+    echo "         isDev is yes or no (default) to indicate whether it is a dev build"
 }
 
 parse_opts ()
@@ -20,6 +22,7 @@ parse_opts ()
     do
         case ${command_line_opt} in
             v)  OPT_VERSION=${OPTARG};;
+            d)  OPT_IS_DEV=${OPTARG};;
         esac
     done
 
@@ -36,24 +39,32 @@ update_package_json ()
 {
     local file=$1
     local version=$2
-    sed -i "s/\"version\":.*\"[^\"]*\"/\"version\": \"${version}\"/g" ${file}
+    gsed -i "s/\"version\":.*\"[^\"]*\"/\"version\": \"${version}\"/g" ${file}
 }
 
 update_plugin_xml ()
 {
     local file=$1
     local version=$2
-    sed -i "s/version.*=.*\"[^\"]*\">/version=\"${version}\">/g" ${file}
+    local isDev=$3
+    local newPodSpecVersion="tag=\"v${version}\""
+    gsed -i "s/version.*=.*\"[^\"]*\">/version=\"${version}\">/g" ${file}
+
+    if [ $isDev == "yes" ]
+    then
+        newPodSpecVersion="branch=\"dev\""
+    fi
+    gsed -i "s/\(.*<pod.*git=\"https:\/\/github.com\/.*\/SalesforceMobileSDK-[^\"]*\"\).*$/\1 ${newPodSpecVersion} \/>/g" ${file}
 }
 
 
 parse_opts "$@"
 
-echo -e "${YELLOW}*** SETTING VERSION TO ${OPT_VERSION} ***${NC}"
+echo -e "${YELLOW}*** SETTING VERSION TO ${OPT_VERSION}, IS DEV = ${OPT_IS_DEV} ***${NC}"
 
 echo "*** Updating package.json ***"
 update_package_json "./package.json" "${OPT_VERSION}"
 
 echo "*** Updating plugin.xml ***"
-update_plugin_xml "./plugin.xml" "${OPT_VERSION}"
+update_plugin_xml "./plugin.xml" "${OPT_VERSION}" "${OPT_IS_DEV}"
 

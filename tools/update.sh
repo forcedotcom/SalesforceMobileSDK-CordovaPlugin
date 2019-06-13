@@ -15,7 +15,7 @@ usage ()
 
 parse_opts ()
 {
-    while getopts :b:o command_line_opt
+    while getopts :b:o: command_line_opt
     do
         case ${command_line_opt} in
             b)
