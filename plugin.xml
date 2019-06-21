@@ -36,7 +36,7 @@
 
   <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
   <dependency id="cordova-plugin-whitelist" version="1.2.0" />
-  <dependency id="phonegap-plugin-push" version="1.4.5" />
+<!--  <dependency id="phonegap-plugin-push" version="1.4.5" />-->
 
   <!-- ios -->
   <platform name="ios">
