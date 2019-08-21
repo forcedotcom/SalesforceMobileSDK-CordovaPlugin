@@ -98,7 +98,9 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Mobile SDK frameworks pod specs -->
-    <pods-config ios-min-version="11.0" use-frameworks="true" />
+    <pods-config ios-min-version="11.0" use-frameworks="true">
+      <source url="https://cdn.cocoapods.org/"/>
+    </pods-config>
     <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
     <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.0.0_sdk" />
     <pod name="SmartSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
