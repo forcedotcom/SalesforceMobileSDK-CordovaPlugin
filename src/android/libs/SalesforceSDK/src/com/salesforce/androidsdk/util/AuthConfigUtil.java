@@ -31,7 +31,11 @@ import android.text.TextUtils;
 import com.salesforce.androidsdk.auth.HttpAccess;
 import com.salesforce.androidsdk.rest.RestResponse;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Request;
 import okhttp3.Response;
@@ -84,9 +88,15 @@ public class AuthConfigUtil {
 
         private static final String MOBILE_SDK_KEY = "MobileSDK";
         private static final String USE_NATIVE_BROWSER_KEY = "UseAndroidNativeBrowserForAuthentication";
+        private static final String SAML_PROVIDERS_KEY = "SamlProviders";
+        private static final String SSO_URL_KEY = "SsoUrl";
+        private static final String LOGIN_PAGE_KEY = "LoginPage";
+        private static final String LOGIN_PAGE_URL_KEY = "LoginPageUrl";
 
         private JSONObject authConfig;
         private boolean browserLoginEnabled;
+        private List<String> ssoUrls;
+        private String loginPageUrl;
 
         /**
          * Parameterized constructor.
@@ -99,6 +109,23 @@ public class AuthConfigUtil {
                 final JSONObject mobileSDK = authConfig.optJSONObject(MOBILE_SDK_KEY);
                 if (mobileSDK != null) {
                     browserLoginEnabled = mobileSDK.optBoolean(USE_NATIVE_BROWSER_KEY);
+                }
+                final JSONArray samlProviders = authConfig.optJSONArray(SAML_PROVIDERS_KEY);
+                if (samlProviders != null && samlProviders.length() > 0) {
+                    ssoUrls = new ArrayList<>();
+                    for (int i = 0; i < samlProviders.length(); i++) {
+                        final JSONObject provider = samlProviders.optJSONObject(i);
+                        if (provider != null) {
+                            final String ssoUrl = provider.optString(SSO_URL_KEY);
+                            if (!TextUtils.isEmpty(ssoUrl)) {
+                                ssoUrls.add(ssoUrl);
+                            }
+                        }
+                    }
+                }
+                final JSONObject loginPageConfig = authConfig.optJSONObject(LOGIN_PAGE_KEY);
+                if (loginPageConfig != null) {
+                    loginPageUrl = loginPageConfig.optString(LOGIN_PAGE_URL_KEY);
                 }
             }
         }
@@ -119,6 +146,24 @@ public class AuthConfigUtil {
          */
         public boolean isBrowserLoginEnabled() {
             return browserLoginEnabled;
+        }
+
+        /**
+         * Returns the configured SSO URLs.
+         *
+         * @return Configured SSO URLs.
+         */
+        public List<String> getSsoUrls() {
+            return ssoUrls;
+        }
+
+        /**
+         * Returns the configured login page URL.
+         *
+         * @return Configured login page URL.
+         */
+        public String getLoginPageUrl() {
+            return loginPageUrl;
         }
     }
 }

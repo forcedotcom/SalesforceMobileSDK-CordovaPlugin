@@ -27,6 +27,8 @@
 package com.salesforce.androidsdk.smartsync.util;
 
 import com.salesforce.androidsdk.smartstore.store.IndexSpec;
+import com.salesforce.androidsdk.smartstore.store.QuerySpec;
+import com.salesforce.androidsdk.smartstore.store.SmartSqlHelper;
 import com.salesforce.androidsdk.smartstore.store.SmartStore;
 import com.salesforce.androidsdk.smartsync.manager.SyncManager;
 import com.salesforce.androidsdk.smartsync.target.SyncDownTarget;
@@ -37,6 +39,9 @@ import com.salesforce.androidsdk.util.JSONObjectHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -57,6 +62,7 @@ public class SyncState {
     public static final String SYNC_MAX_TIME_STAMP = "maxTimeStamp";
 	public static final String SYNC_START_TIME = "startTime";
 	public static final String SYNC_END_TIME = "endTime";
+	public static final String SYNC_ERROR = "error";
 
 	private long id;
 	private Type type;
@@ -72,26 +78,29 @@ public class SyncState {
 	// Start and end time in milliseconds since 1970
 	private long startTime;
 	private long endTime;
-	
+
+	//Error return from SFDC API
+	private String errorJSON;
 	
 	/**
 	 * Create syncs soup if needed
 	 * @param store
 	 */
 	public static void setupSyncsSoupIfNeeded(SmartStore store) {
-    	if (store.hasSoup(SYNCS_SOUP) && store.getSoupIndexSpecs(SYNCS_SOUP).length == 2) {
+    	if (store.hasSoup(SYNCS_SOUP) && store.getSoupIndexSpecs(SYNCS_SOUP).length == 3) {
 			return;
 		}
 
 		final IndexSpec[] indexSpecs = {
-			new IndexSpec(SYNC_TYPE, SmartStore.Type.string),
-			new IndexSpec(SYNC_NAME, SmartStore.Type.string)
+			new IndexSpec(SYNC_TYPE, SmartStore.Type.json1),
+			new IndexSpec(SYNC_NAME, SmartStore.Type.json1),
+			new IndexSpec(SYNC_STATUS, SmartStore.Type.json1)
 		};
 
 		// Syncs soup exists but doesn't have all the required indexes
 		if (store.hasSoup(SYNCS_SOUP)) {
 			try {
-				store.alterSoup(SYNCS_SOUP, indexSpecs, false);
+				store.alterSoup(SYNCS_SOUP, indexSpecs, true /* reindexing to json1 is quick */);
 			}
 			catch (JSONException e) {
 				throw new SyncManager.SmartSyncException(e);
@@ -102,7 +111,43 @@ public class SyncState {
 			store.registerSoup(SYNCS_SOUP, indexSpecs);
 		}
 	}
-	
+
+	/**
+	 * Cleanup syncs soup if needed
+	 * At startup, no sync could be running already
+	 * If a sync is in the running state, we change it to stopped
+	 * @param store
+	 */
+	public static void cleanupSyncsSoupIfNeeded(SmartStore store) {
+		try {
+			List<SyncState> syncs = getSyncsWithStatus(store, Status.RUNNING);
+			for (SyncState sync : syncs) {
+				sync.setStatus(Status.STOPPED);
+				sync.save(store);
+			}
+		} catch (JSONException e) {
+			throw new SyncManager.SmartSyncException(e);
+		}
+	}
+
+
+	/**
+	 * Get syncs with given status in the given store
+	 * @param store
+	 * @param status
+	 * @return list of SyncState
+	 * @throws JSONException
+	 */
+	public static List<SyncState> getSyncsWithStatus(SmartStore store, Status status) throws JSONException {
+		List<SyncState> syncs = new ArrayList<>();
+		QuerySpec query = QuerySpec.buildSmartQuerySpec(String.format("select {%1$s:%2$s} from {%1$s} where {%1$s:%3$s} = '%4$s'", SYNCS_SOUP, SmartSqlHelper.SOUP, SYNC_STATUS, status.name()), Integer.MAX_VALUE);
+		JSONArray rows = store.query(query, 0);
+		for (int i=0; i<rows.length(); i++) {
+			syncs.add(SyncState.fromJSON(rows.getJSONArray(i).getJSONObject(0)));
+		}
+		return syncs;
+	}
+
 	/**
 	 * Create sync state in database for a sync down and return corresponding SyncState
 	 * NB: Throws exception if there is already a sync with the same name (when name is not null)
@@ -128,6 +173,7 @@ public class SyncState {
         sync.put(SYNC_MAX_TIME_STAMP, -1);
 		sync.put(SYNC_START_TIME, 0);
 		sync.put(SYNC_END_TIME, 0);
+		sync.put(SYNC_ERROR, "");
 
 		if (name != null && hasSyncWithName(store, name)) {
 			throw new SyncManager.SmartSyncException("Failed to create sync down: there is already a sync with name:" + name);
@@ -141,7 +187,7 @@ public class SyncState {
     	return SyncState.fromJSON(sync);
 	}
 
-	
+
 	/**
 	 * Create sync state in database for a sync up and return corresponding SyncState
 	 * NB: Throws exception if there is already a sync with the same name (when name is not null)
@@ -167,6 +213,7 @@ public class SyncState {
         sync.put(SYNC_MAX_TIME_STAMP, -1);
 		sync.put(SYNC_START_TIME, 0);
 		sync.put(SYNC_END_TIME, 0);
+		sync.put(SYNC_ERROR, "");
 
 		if (name != null && hasSyncWithName(store, name)) {
 			throw new SyncManager.SmartSyncException("Failed to create sync up: there is already a sync with name:" + name);
@@ -200,6 +247,7 @@ public class SyncState {
         state.maxTimeStamp = sync.optLong(SYNC_MAX_TIME_STAMP, -1);
 		state.startTime = sync.optLong(SYNC_START_TIME, 0);
 		state.endTime = sync.optLong(SYNC_START_TIME, 0);
+		state.errorJSON = JSONObjectHelper.optString(sync, SYNC_ERROR, "");
 		return state;
 	}
 	
@@ -303,7 +351,17 @@ public class SyncState {
         sync.put(SYNC_MAX_TIME_STAMP, maxTimeStamp);
 		sync.put(SYNC_START_TIME, startTime);
 		sync.put(SYNC_END_TIME, endTime);
+		sync.put(SYNC_ERROR, errorJSON);
 		return sync;
+	}
+
+	@Override
+	public String toString() {
+		try {
+			return asJSON().toString().replaceAll("\n", " ");
+		} catch (JSONException e) {
+			return super.toString();
+		}
 	}
 	
 	/**
@@ -317,7 +375,11 @@ public class SyncState {
 			throw new SyncManager.SmartSyncException("Failed to save sync state");
 		}
 	}
-	
+
+	public String getName() {
+		return name;
+	}
+
 	public long getId() {
 		return id;
 	}
@@ -366,6 +428,10 @@ public class SyncState {
 		return endTime;
 	}
 
+	public String getError() {
+		return errorJSON;
+	}
+
 	public void setMaxTimeStamp(long maxTimeStamp) {
         this.maxTimeStamp = maxTimeStamp;
     }
@@ -379,14 +445,18 @@ public class SyncState {
 	}
 	
 	public void setStatus(Status status) {
-		if (this.status == Status.NEW && status == Status.RUNNING) {
+		if (this.status != Status.RUNNING && status == Status.RUNNING) {
 			this.startTime = System.currentTimeMillis();
 		}
-		if (this.status == Status.RUNNING && (status == Status.DONE || status == Status.FAILED)) {
+		if (this.status == Status.RUNNING && (status == Status.DONE || status == Status.FAILED || status == Status.STOPPED)) {
 			this.endTime = System.currentTimeMillis();
 		}
 
 		this.status = status;
+	}
+
+	public void setError(String error) {
+		this.errorJSON = error;
 	}
 	
 	public boolean isDone() {
@@ -396,7 +466,11 @@ public class SyncState {
 	public boolean hasFailed() {
 		return this.status == Status.FAILED;
 	}
-	
+
+	public boolean isStopped() {
+		return this.status == Status.STOPPED;
+	}
+
 	public boolean isRunning() {
 		return this.status == Status.RUNNING;
 	}
@@ -419,11 +493,11 @@ public class SyncState {
      */
     public enum Status {
     	NEW,
+		STOPPED,
     	RUNNING,
     	DONE,
     	FAILED
     }
-
 
     /**
      * Enum for merge modes

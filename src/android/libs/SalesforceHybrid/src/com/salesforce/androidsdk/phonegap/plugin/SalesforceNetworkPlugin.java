@@ -29,6 +29,7 @@ package com.salesforce.androidsdk.phonegap.plugin;
 import android.text.TextUtils;
 import android.util.Base64;
 
+import com.salesforce.androidsdk.phonegap.app.SalesforceHybridSDKManager;
 import com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity;
 import com.salesforce.androidsdk.phonegap.util.SalesforceHybridLogger;
 import com.salesforce.androidsdk.rest.RestClient;
@@ -75,6 +76,7 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
     private static final String RETURN_BINARY = "returnBinary";
     private static final String ENCODED_BODY = "encodedBody";
     private static final String CONTENT_TYPE = "contentType";
+    private static final String DOES_NOT_REQUIRE_AUTHENTICATION = "doesNotRequireAuthentication";
 
     /**
      * Supported plugin actions that the client can take.
@@ -85,7 +87,7 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
 
     @Override
     public boolean execute(String actionStr, JavaScriptPluginVersion jsVersion, JSONArray args,
-                           CallbackContext callbackContext) throws JSONException {
+                           CallbackContext callbackContext) {
         Action action;
         try {
             action = Action.valueOf(actionStr);
@@ -110,9 +112,10 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
         try {
             final RestRequest request = prepareRestRequest(args);
             final boolean returnBinary = ((JSONObject) args.get(0)).optBoolean(RETURN_BINARY, false);
+            final boolean doesNotRequireAuth = ((JSONObject) args.get(0)).optBoolean(DOES_NOT_REQUIRE_AUTHENTICATION, false);
 
             // Sends the request.
-            final RestClient restClient = getRestClient();
+            final RestClient restClient = getRestClient(doesNotRequireAuth);
             if (restClient == null) {
                 return;
             }
@@ -253,9 +256,15 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
         return null;
     }
 
-    private RestClient getRestClient() {
+    private RestClient getRestClient(boolean doesNotRequireAuth) {
         final SalesforceDroidGapActivity currentActivity = (SalesforceDroidGapActivity) cordova.getActivity();
-        return currentActivity != null ? currentActivity.getRestClient() : null;
+        if (currentActivity == null) {
+            return null;
+        }
+        if (doesNotRequireAuth) {
+            return currentActivity.buildClientManager().peekUnauthenticatedRestClient();
+        }
+        return currentActivity.getRestClient();
     }
 
     private static String buildQueryString(JSONObject params) throws UnsupportedEncodingException {
