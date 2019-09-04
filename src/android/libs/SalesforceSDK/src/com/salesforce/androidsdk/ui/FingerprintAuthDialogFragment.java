@@ -31,6 +31,7 @@ import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.fingerprint.FingerprintManager;
@@ -48,6 +49,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.salesforce.androidsdk.R;
+import com.salesforce.androidsdk.app.SalesforceSDKManager;
 
 import javax.crypto.Cipher;
 
@@ -58,7 +60,6 @@ import javax.crypto.Cipher;
 @TargetApi(VERSION_CODES.M)
 public class FingerprintAuthDialogFragment extends DialogFragment {
 
-    private Button mCancelButton;
     private TextView mStatusText;
     private PasscodeActivity mContext;
 
@@ -76,7 +77,7 @@ public class FingerprintAuthDialogFragment extends DialogFragment {
         super.onResume();
 
         /*
-         * TODO: Remove this check once minAPI > 23.
+         * TODO: Remove this check once minAPI >= 23.
          */
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             FingerprintManager fingerprintManager = (FingerprintManager) mContext.getSystemService(Context.FINGERPRINT_SERVICE);
@@ -137,14 +138,21 @@ public class FingerprintAuthDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.sf__fingerprint_dialog, container, false);
-        mCancelButton = v.findViewById(R.id.sf__use_password_button);
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
+        final Button cancelButton = v.findViewById(R.id.sf__use_password_button);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
                 dismiss();
+                mContext.biometricDeclined();
             }
         });
-        mStatusText = (TextView) v.findViewById(R.id.sf__fingerprint_status);
+        mStatusText = v.findViewById(R.id.sf__fingerprint_status);
+
+        TextView textView = v.findViewById(R.id.sf__fingerprint_description);
+        textView.setText(getString(R.string.sf__fingerprint_description, SalesforceSDKManager.getInstance().provideAppName()));
+
+        getDialog().setCanceledOnTouchOutside(false);
         return v;
     }
 

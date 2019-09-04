@@ -30,106 +30,167 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.text.Html;
+import android.os.CancellationSignal;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.salesforce.androidsdk.R;
 import com.salesforce.androidsdk.accounts.UserAccount;
 import com.salesforce.androidsdk.accounts.UserAccountManager;
 import com.salesforce.androidsdk.app.SalesforceSDKManager;
-import com.salesforce.androidsdk.app.SalesforceSDKUpgradeManager;
 import com.salesforce.androidsdk.security.PasscodeManager;
 
-import java.lang.reflect.Method;
 import java.util.List;
+
 
 /**
  * Passcode activity: takes care of creating/verifying a user passcode.
  */
-public class PasscodeActivity extends Activity implements OnEditorActionListener, OnClickListener {
+public class PasscodeActivity extends Activity {
 
     private static final String EXTRA_KEY = "input_text";
-    private static final String LOGOUT_EXTRA = "logout_key";
     protected static final int MAX_PASSCODE_ATTEMPTS = 10;
 
     final private int REQUEST_CODE_ASK_PERMISSIONS = 11;
 
     private PasscodeMode currentMode;
-    private TextView title, instr, error;
-    private EditText entry;
+    private TextView title, instr, bioInstrTitle, bioInstr;
+    private PasscodeField passcodeField;
+    private LinearLayout passcodeBox, biometricBox;
+    private Button logoutButton, notNowButton, enableButton, verifyButton;
+    private View fingerImage;
     private PasscodeManager passcodeManager;
     private String firstPasscode;
     private boolean logoutEnabled;
-    private AlertDialog logoutAlertDialog;
-    private boolean isLogoutAlertShowing;
+    private boolean forceBiometric;
 
     public enum PasscodeMode {
         Create,
         CreateConfirm,
         Check,
-        Change
+        Change,
+        EnableBiometric,
+        BiometricCheck
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        passcodeManager = SalesforceSDKManager.getInstance().getPasscodeManager();
 
         // Protect against screenshots.
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
                 WindowManager.LayoutParams.FLAG_SECURE);
-        setContentView(getLayoutId());
-        final TextView forgotPasscodeView = getForgotPasscodeView();
-        if (forgotPasscodeView != null) {
-            forgotPasscodeView.setText(Html.fromHtml(getForgotPasscodeString()));
-            forgotPasscodeView.setOnClickListener(this);
+        setContentView(R.layout.sf__passcode);
+
+        title = findViewById(R.id.sf__passcode_title);
+        instr = findViewById(R.id.sf__passcode_instructions);
+        passcodeField = findViewById(R.id.sf__passcode_text);
+        passcodeField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                final String passcode = s.toString();
+                if (passcodeManager.getPasscodeLengthKnown() && passcode.length() == passcodeManager.getPasscodeLength()) {
+                    onSubmit(passcode);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+        if (passcodeManager.getPasscodeLengthKnown()) {
+            passcodeField.setHint(getString(R.string.sf__accessibility_passcode_length_hint, passcodeManager.getPasscodeLength()));
         }
-        logoutAlertDialog = buildLogoutDialog();
-        title = getTitleView();
-        error = getErrorView();
-        instr = getInstructionsView();
-        entry = getEntryView();
-        entry.setOnEditorActionListener(this);
-        passcodeManager = SalesforceSDKManager.getInstance().getPasscodeManager();
-        final Intent i = getIntent();
-        boolean shouldChangePasscode = false;
-        if (i != null) {
-            shouldChangePasscode = i.getBooleanExtra(PasscodeManager.CHANGE_PASSCODE_KEY, false);
-        }
-        if (shouldChangePasscode) {
+        passcodeBox = findViewById(R.id.sf__passcode_box);
+        logoutButton = findViewById(R.id.sf__passcode_logout_button);
+        logoutButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signoutAllUsers();
+            }
+        });
+        verifyButton = findViewById(R.id.sf__passcode_verify_button);
+        verifyButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Editable passcode = passcodeField.getText();
+                if (passcode != null) {
+                    onSubmit(passcode.toString());
+                }
+            }
+        });
+
+        fingerImage = findViewById(R.id.sf__fingerprint_icon);
+        bioInstrTitle = findViewById(R.id.sf__biometric_instructions_title);
+        passcodeField.announceForAccessibility(bioInstrTitle.getText());
+        bioInstr = findViewById(R.id.sf__biometric_instructions);
+        bioInstr.setText(getString(R.string.sf__biometric_allow_instructions, SalesforceSDKManager.getInstance().provideAppName()));
+        biometricBox = findViewById(R.id.sf__biometric_box);
+        notNowButton = findViewById(R.id.sf__biometric_not_now_button);
+        notNowButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                biometricDeclined();
+            }
+        });
+        enableButton = findViewById(R.id.sf__biometric_enable_button);
+        enableButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchBiometricAuth();
+            }
+        });
+
+        clearUi();
+        // Asking passcode manager is a change passcode flow is required
+        if (passcodeManager.isPasscodeChangeRequired()) {
             setMode(PasscodeMode.Change);
         } else {
-            final PasscodeMode mode = passcodeManager.hasStoredPasscode(this) ? PasscodeMode.Check : PasscodeMode.Create;
-            setMode(mode);
-            if (mode == PasscodeMode.Check) {
-                showFingerprintDialog();
+            if (passcodeManager.hasStoredPasscode(this)) {
+                PasscodeMode mode = passcodeManager.biometricEnabled() ? PasscodeMode.BiometricCheck : PasscodeMode.Check;
+                setMode(mode);
+            } else {
+                setMode(PasscodeMode.Create);
             }
         }
         logoutEnabled = true;
+        forceBiometric = false;
         if (savedInstanceState != null) {
             final String inputText = savedInstanceState.getString(EXTRA_KEY);
-            if (entry != null && inputText != null) {
-                entry.setText(inputText.trim());
+            if (passcodeField != null && inputText != null) {
+                passcodeField.setText(inputText.trim());
             }
-            isLogoutAlertShowing = savedInstanceState.getBoolean(LOGOUT_EXTRA);
-            if (isLogoutAlertShowing) {
-                logoutAlertDialog.show();
-            }
+        }
+    }
+
+    protected void biometricDeclined() {
+        if (passcodeManager.biometricEnabled()) {
+            setMode(PasscodeMode.Check);
+        } else {
+            passcodeManager.setBiometricEnabled(PasscodeActivity.this, false);
+            passcodeManager.unlock();
+            done();
         }
     }
 
@@ -147,13 +208,8 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
      */
     @Override
     protected void onSaveInstanceState(Bundle savedInstance) {
-        if (entry != null && entry.getText() != null) {
-            savedInstance.putString(EXTRA_KEY, entry.getText().toString());
-        }
-        if (isLogoutAlertShowing) {
-        	logoutAlertDialog.dismiss();
-            savedInstance.putBoolean(LOGOUT_EXTRA, true);
-            isLogoutAlertShowing = false;
+        if (passcodeField != null && passcodeField.getText() != null) {
+            savedInstance.putString(EXTRA_KEY, passcodeField.getText().toString());
         }
     }
 
@@ -163,32 +219,86 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
 
     public void setMode(PasscodeMode newMode) {
         if (newMode == currentMode) return;
+        if (newMode == PasscodeMode.EnableBiometric && !canShowBiometric()) {
+            return;
+        }
+
+        clearUi();
         switch(newMode) {
         case Check:
-            title.setText(getEnterTitle());
-            instr.setText(getEnterInstructions());
-            getForgotPasscodeView().setVisibility(View.VISIBLE);
+            title.setText(getString(R.string.sf__passcode_enter_title));
+            title.setVisibility(View.VISIBLE);
+            instr.setText(getString(R.string.sf__passcode_enter_instructions));
+            instr.setVisibility(View.VISIBLE);
+            passcodeBox.setVisibility(View.VISIBLE);
+            passcodeField.setVisibility(View.VISIBLE);
+
+            if (!passcodeManager.getPasscodeLengthKnown()) {
+                verifyButton.setVisibility(View.VISIBLE);
+            }
+            showKeyboard();
+            sendAccessibilityEvent(instr.getText().toString());
             break;
         case Create:
-            title.setText(getCreateTitle());
-            instr.setText(getCreateInstructions());
-            getForgotPasscodeView().setVisibility(View.INVISIBLE);
+            title.setText(getString(R.string.sf__passcode_create_title));
+            title.setVisibility(View.VISIBLE);
+            // Check if passcodes did not match
+            int instructionText = (currentMode == PasscodeMode.CreateConfirm) ? R.string.sf__passcodes_dont_match
+                                                                              : R.string.sf__passcode_create_instructions;
+            instr.setText(getString(instructionText));
+            instr.setVisibility(View.VISIBLE);
+            passcodeBox.setVisibility(View.VISIBLE);
+            passcodeField.setVisibility(View.VISIBLE);
+            passcodeField.requestFocus();
+            showKeyboard();
+            sendAccessibilityEvent(instr.getText().toString());
             break;
         case CreateConfirm:
-            title.setText(getConfirmTitle());
-            instr.setText(getConfirmInstructions());
-            getForgotPasscodeView().setVisibility(View.INVISIBLE);
+            title.setText(getString(R.string.sf__passcode_confirm_title));
+            title.setVisibility(View.VISIBLE);
+            instr.setText(getString(R.string.sf__passcode_confirm_instructions));
+            instr.setVisibility(View.VISIBLE);
+            passcodeBox.setVisibility(View.VISIBLE);
+            passcodeField.setVisibility(View.VISIBLE);
+            passcodeField.requestFocus();
+            showKeyboard();
+            sendAccessibilityEvent(instr.getText().toString());
             break;
         case Change:
-            title.setText(getCreateTitle());
-            instr.setText(getChangeInstructions());
-            getForgotPasscodeView().setVisibility(View.INVISIBLE);
+            title.setText(getString(R.string.sf__passcode_change_title));
+            title.setVisibility(View.VISIBLE);
+            instr.setText(getString(R.string.sf__passcode_change_instructions));
+            instr.setVisibility(View.VISIBLE);
+            passcodeBox.setVisibility(View.VISIBLE);
+            passcodeField.setVisibility(View.VISIBLE);
+            passcodeField.requestFocus();
+            showKeyboard();
+            sendAccessibilityEvent(instr.getText().toString());
         	break;
+        case EnableBiometric:
+            hideKeyboard();
+            title.setText(getString(R.string.sf__biometric_title));
+            title.setVisibility(View.VISIBLE);
+            biometricBox.setVisibility(View.VISIBLE);
+            bioInstrTitle.setVisibility(View.VISIBLE);
+            sendAccessibilityEvent(bioInstrTitle.getText().toString());
+            bioInstr.setVisibility(View.VISIBLE);
+            notNowButton.setVisibility(View.VISIBLE);
+            enableButton.setVisibility(View.VISIBLE);
+            fingerImage.setVisibility(View.VISIBLE);
+            passcodeManager.setBiometricEnrollmentShown(this, true);
+            break;
+        case BiometricCheck:
+            hideKeyboard();
+            if (canShowBiometric()) {
+                launchBiometricAuth();
+            } else {
+                setMode(PasscodeMode.Check);
+            }
+            break;
         }
-        entry.setText("");
-        error.setText("");
+        passcodeField.setText("");
         currentMode = newMode;
-        entry.requestFocus();
     }
 
     /**
@@ -200,24 +310,21 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
         logoutEnabled = b;
     }
 
-    @Override
-    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-
-        // Processing the editor action only on key up to avoid sending events like pass code manager unlock twice.
-        if ( actionId ==  EditorInfo.IME_ACTION_GO ||
-                (event != null && event.getAction() == KeyEvent.ACTION_UP)) {
-            String pc = entry.getText().toString();
-            if (pc.length() >= 0 && pc.length() < getMinPasscodeLength()) {
-                error.setText(getMinLengthInstructions(getMinPasscodeLength()));
-                return true; // return true indicating we consumed the action.
-            }
-            return (pc.length() > 0 && onSubmit(pc));
-        } else {
-            return true;
-        }
+    /**
+     * Used for tests to allow biometric when the device is not set up
+     *
+     * @param b True - if biometric checks skipped, False - otherwise.
+     */
+    public void forceBiometric(boolean b) {
+        forceBiometric = b;
     }
 
     protected boolean onSubmit(String enteredPasscode) {
+        boolean showBiometricEnrollment = !passcodeManager.biometricEnabled() &&
+                                          !passcodeManager.biometricEnrollmentShown() &&
+                                          passcodeManager.biometricAllowed() &&
+                                          canShowBiometric();
+
         switch (getMode()) {
         case Create:
             firstPasscode = enteredPasscode;
@@ -227,31 +334,44 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
         case CreateConfirm:
             if (enteredPasscode.equals(firstPasscode)) {
                 passcodeManager.store(this, enteredPasscode);
-                passcodeManager.unlock();
-                done();
+
+                if (showBiometricEnrollment) {
+                    setMode(PasscodeMode.EnableBiometric);
+                } else {
+                    passcodeManager.unlock();
+                    done();
+                }
             } else {
-                error.setText(getPasscodesDontMatchError());
+                setMode(PasscodeMode.Create);
             }
             return true;
 
         case Check:
             if (passcodeManager.check(this, enteredPasscode)) {
-                performUpgradeStep(enteredPasscode);
-                passcodeManager.unlock();
-                done();
+                sendAccessibilityEvent(getString(R.string.sf__accessibility_unlock_announcement));
+                if (!passcodeManager.getPasscodeLengthKnown()) {
+                    passcodeManager.setPasscodeLength(this, enteredPasscode.length());
+                }
+
+                if (showBiometricEnrollment) {
+                    setMode(PasscodeMode.EnableBiometric);
+                } else {
+                    passcodeManager.unlock();
+                    done();
+                }
             } else {
+                logoutButton.setVisibility(View.VISIBLE);
                 int attempts = passcodeManager.addFailedPasscodeAttempt();
-                entry.setText("");
+                passcodeField.setText("");
                 int maxAttempts = getMaxPasscodeAttempts();
                 if (attempts < maxAttempts - 1) {
-                    error.setText(getPasscodeTryAgainError(maxAttempts - attempts));
+                    instr.setText(getString(R.string.sf__passcode_try_again, (maxAttempts - attempts)));
+                    sendAccessibilityEvent(instr.getText().toString());
                 } else if (attempts < maxAttempts) {
-                    error.setText(getPasscodeFinalAttemptError());
+                    instr.setText(getString(R.string.sf__passcode_final));
+                    sendAccessibilityEvent(instr.getText().toString());
                 } else {
-                    passcodeManager.reset(this);
-                    if (logoutEnabled) {
-                        SalesforceSDKManager.getInstance().logout(this);
-                    }
+                    signoutAllUsers();
                 }
             }
             return true;
@@ -264,142 +384,115 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
         return false;
     }
 
-    /*
-     * TODO: Remove this method, along with the one in UpgradeManager, in Mobile SDK 7.0.
-     */
-    private void performUpgradeStep(String passcode) {
-        final String oldKey = passcodeManager.getLegacyEncryptionKey(passcode);
-        final String newKey = SalesforceSDKManager.getEncryptionKey();
-        final SalesforceSDKUpgradeManager upgradeManager = SalesforceSDKUpgradeManager.getInstance();
-        if (upgradeManager.isPasscodeUpgradeRequired()) {
-
-            /*
-             * We need to store the new passcode to ensure the old verification
-             * hash is overwritten with the new verification hash.
-             */
-            passcodeManager.store(this, passcode);
-
-            /*
-             * Checks if SmartStoreUpgradeManager is available and if it is, invokes it using
-             * reflection since it is in a different library. This ensures that the database
-             * upgrade happens if required. If it does not exist, falls back on regular upgrade.
-             */
-            try {
-                final String smartStoreUpgradeClassName = "com.salesforce.androidsdk.smartstore.app.SmartStoreUpgradeManager";
-                final String upgradeMethodName = "upgradeTo6Dot0";
-                final Class<?>[] upgradeMethodArguments = { String.class, String.class };
-                final Object[] upgradeArgumentValues = new Object[] { oldKey, newKey };
-                final Class<?> clazz = Class.forName(smartStoreUpgradeClassName);
-                final Method method = clazz.getMethod(upgradeMethodName, upgradeMethodArguments);
-                final Object newInstance = clazz.newInstance();
-                method.invoke(newInstance, upgradeArgumentValues);
-            } catch (Exception e) {
-                upgradeManager.upgradeTo6Dot0(oldKey, newKey);
-            }
-            upgradeManager.wipeUpgradeSharedPref();
-        }
-    }
-
     protected void done() {
         setResult(RESULT_OK);
         finish();
     }
 
+
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected int getLayoutId() {
         return R.layout.sf__passcode;
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected TextView getTitleView() {
         return (TextView) findViewById(R.id.sf__passcode_title);
     }
 
-    protected TextView getForgotPasscodeView() {
-        return (TextView) findViewById(R.id.sf__passcode_forgot);
-    }
-
-    protected TextView getErrorView() {
-        return (TextView) findViewById(R.id.sf__passcode_error);
-    }
-
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected TextView getInstructionsView() {
         return (TextView) findViewById(R.id.sf__passcode_instructions);
     }
 
-    protected EditText getEntryView() {
-        return (EditText) findViewById(R.id.sf__passcode_text);
-    }
-
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getCreateTitle() {
-    	return String.format(getString(R.string.sf__passcode_create_title),
-                SalesforceSDKManager.getInstance().getAppDisplayString());
+    	return getString(R.string.sf__passcode_create_title);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getEnterTitle() {
-    	return String.format(getString(R.string.sf__passcode_enter_title),
-                SalesforceSDKManager.getInstance().getAppDisplayString());
+    	return getString(R.string.sf__passcode_enter_title);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getConfirmTitle() {
-    	return String.format(getString(R.string.sf__passcode_confirm_title),
-                SalesforceSDKManager.getInstance().getAppDisplayString());
+    	return getString(R.string.sf__passcode_confirm_title);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getEnterInstructions() {
-    	return String.format(getString(R.string.sf__passcode_enter_instructions),
-                SalesforceSDKManager.getInstance().getAppDisplayString());
+    	return getString(R.string.sf__passcode_enter_instructions);
     }
 
-    protected String getForgotPasscodeString() {
-        return getString(R.string.sf__passcode_forgot_string);
-    }
-
-    protected String getLogoutConfirmationString() {
-        return getString(R.string.sf__passcode_logout_confirmation);
-    }
-
-    protected String getLogoutYesString() {
-        return getString(R.string.sf__passcode_logout_yes);
-    }
-
-    protected String getLogoutNoString() {
-        return getString(R.string.sf__passcode_logout_no);
-    }
-
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getCreateInstructions() {
-    	return String.format(getString(R.string.sf__passcode_create_instructions),
-                SalesforceSDKManager.getInstance().getAppDisplayString());
+    	return getString(R.string.sf__passcode_create_instructions);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getChangeInstructions() {
     	return getString(R.string.sf__passcode_change_instructions);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getConfirmInstructions() {
-    	return String.format(getString(R.string.sf__passcode_confirm_instructions),
-                SalesforceSDKManager.getInstance().getAppDisplayString());
+    	return getString(R.string.sf__passcode_confirm_instructions);
     }
 
-    protected String getMinLengthInstructions(int minPasscodeLength) {
-        return getString(R.string.sf__passcode_min_length, minPasscodeLength);
-    }
-
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getPasscodeTryAgainError(int countAttemptsLeft) {
         return getString(R.string.sf__passcode_try_again, countAttemptsLeft);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getPasscodeFinalAttemptError() {
         return getString(R.string.sf__passcode_final);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
     protected String getPasscodesDontMatchError() {
         return getString(R.string.sf__passcodes_dont_match);
     }
 
     /**
-     * @return minimum length of passcode
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
      */
-    protected int getMinPasscodeLength() {
-        return passcodeManager.getMinPasscodeLength();
+    protected Button getLogoutButton() {
+        return findViewById(R.id.sf__passcode_logout_button);
+    }
+
+    /**
+     * @deprecated Will be removed in Mobile SDK 8.0.  Override in XML instead.
+     */
+    protected Button getVerifyButton() {
+        return findViewById(R.id.sf__passcode_verify_button);
     }
 
     /**
@@ -409,75 +502,38 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
         return MAX_PASSCODE_ATTEMPTS;
     }
 
-	@Override
-	public void onClick(View v) {
-		if (v.equals(getForgotPasscodeView())) {
-			logoutAlertDialog.show();
-			isLogoutAlertShowing = true;
-		}
-	}
+    private void signoutAllUsers() {
+        passcodeManager.reset(this);
+        sendAccessibilityEvent(getString(R.string.sf__accessibility_logged_out_announcement));
 
-	/**
-	 * Returns whether the logout alert dialog is showing.
-	 *
-	 * @return True - if the logout dialog is showing, False - otherwise.
-	 */
-	public boolean getIsLogoutDialogShowing() {
-		return isLogoutAlertShowing;
-	}
+        // Used for tests
+        if (!logoutEnabled) {
+            return;
+        }
 
-	/**
-	 * Returns an instance of the logout alert dialog.
-	 *
-	 * @return Instance of the logout alert dialog.
-	 */
-	public AlertDialog getLogoutAlertDialog() {
-		return logoutAlertDialog;
-	}
+        final UserAccountManager userAccMgr = SalesforceSDKManager.getInstance().getUserAccountManager();
+        final List<UserAccount> userAccounts = userAccMgr.getAuthenticatedUsers();
 
-    private AlertDialog buildLogoutDialog() {
-        return new AlertDialog.Builder(this)
-        .setMessage(getLogoutConfirmationString())
-        .setPositiveButton(getLogoutYesString(),
-                new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog,
-                    int which) {
-            	final UserAccountManager userAccMgr = SalesforceSDKManager.getInstance().getUserAccountManager();
-            	final List<UserAccount> userAccounts = userAccMgr.getAuthenticatedUsers();
-
-            	/*
-            	 * If the user forgot his/her passcode, we log all the authenticated
-            	 * users out. All the existing accounts except the last account
-            	 * are removed without dismissing the PasscodeActivity. The last
-            	 * account is removed, after which the PasscodeActivity is dismissed,
-            	 * and the login page is brought up at this point.
-            	 */
-            	if (userAccounts != null) {
-            		int numAccounts = userAccounts.size();
-            		if (numAccounts > 0) {
-                		for (int i = 0; i < numAccounts - 1; i++) {
-                			final UserAccount account = userAccounts.get(i);
-                        	userAccMgr.signoutUser(account, null, false);
-                		}
-            			final UserAccount lastAccount = userAccounts.get(numAccounts - 1);
-                    	userAccMgr.signoutUser(lastAccount, PasscodeActivity.this);
-            		}
-            	} else {
-            		userAccMgr.signoutCurrentUser(PasscodeActivity.this);
-            	}
+        /*
+         * If the user forgot his/her passcode, we log all the authenticated
+         * users out. All the existing accounts except the last account
+         * are removed without dismissing the PasscodeActivity. The last
+         * account is removed, after which the PasscodeActivity is dismissed,
+         * and the login page is brought up at this point.
+         */
+        if (userAccounts != null) {
+            int numAccounts = userAccounts.size();
+            if (numAccounts > 0) {
+                for (int i = 0; i < numAccounts - 1; i++) {
+                    final UserAccount account = userAccounts.get(i);
+                    userAccMgr.signoutUser(account, null, false);
+                }
+                final UserAccount lastAccount = userAccounts.get(numAccounts - 1);
+                userAccMgr.signoutUser(lastAccount, PasscodeActivity.this);
             }
-        }).setNegativeButton(getLogoutNoString(),
-        		new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog,
-                    int which) {
-            	isLogoutAlertShowing = false;
-            }
-        })
-        .create();
+        } else {
+            userAccMgr.signoutCurrentUser(PasscodeActivity.this);
+        }
     }
 
     /**
@@ -485,18 +541,71 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
      * a custom fingerprint auth layout if the app chooses to do so.
      */
     protected void showFingerprintDialog() {
-        if (passcodeManager != null && isFingerprintEnabled() && !SalesforceSDKUpgradeManager.getInstance().isPasscodeUpgradeRequired()) {
-            final FingerprintAuthDialogFragment fingerprintAuthDialog = new FingerprintAuthDialogFragment();
-            fingerprintAuthDialog.setContext(this);
-            fingerprintAuthDialog.show(getFragmentManager(), "fingerprintDialog");
+        final FingerprintAuthDialogFragment fingerprintAuthDialog = new FingerprintAuthDialogFragment();
+        fingerprintAuthDialog.setContext(this);
+        fingerprintAuthDialog.show(getFragmentManager(), "fingerprintDialog");
+    }
+
+    /**
+     * Displays the dialog provided by the OS for biometric authentication
+     * using {@link android.hardware.biometrics.BiometricPrompt}.
+     */
+    @TargetApi(VERSION_CODES.P)
+    protected void showBiometricDialog() {
+
+        /*
+         * TODO: Remove this check once minAPI >= 28.
+         */
+        if (VERSION.SDK_INT >= VERSION_CODES.P) {
+            final BiometricPrompt.Builder bioBuilder = new BiometricPrompt.Builder(this);
+            bioBuilder.setDescription(getString(R.string.sf__fingerprint_description, SalesforceSDKManager.getInstance().provideAppName()));
+            bioBuilder.setTitle(getString(R.string.sf__fingerprint_title));
+            bioBuilder.setNegativeButton(getString(R.string.sf__fingerprint_cancel), getMainExecutor(),
+                    new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    biometricDeclined();
+                }
+            });
+
+            final BiometricPrompt bioPrompt = bioBuilder.build();
+            bioPrompt.authenticate(new CancellationSignal(), getMainExecutor(),
+                    new BiometricPrompt.AuthenticationCallback() {
+
+                @Override
+                public void onAuthenticationError(int errorCode, CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+                    biometricDeclined();
+                }
+
+                @Override
+                public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
+                    super.onAuthenticationHelp(helpCode, helpString);
+                }
+
+                @Override
+                public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                    unlockViaFingerprintScan();
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                }
+            });
         }
     }
 
     @TargetApi(VERSION_CODES.M)
     private boolean isFingerprintEnabled() {
+        // Used for tests
+        if (forceBiometric) {
+            return true;
+        }
 
 	    /*
-         * TODO: Remove this check once minAPI > 23.
+         * TODO: Remove this check once minAPI >= 23.
          */
         if (VERSION.SDK_INT >= VERSION_CODES.M) {
             final FingerprintManager fingerprintManager = (FingerprintManager) this.getSystemService(Context.FINGERPRINT_SERVICE);
@@ -505,7 +614,8 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
             if (checkSelfPermission(Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{ permission.USE_FINGERPRINT}, REQUEST_CODE_ASK_PERMISSIONS);
             } else {
-                return fingerprintManager != null && fingerprintManager.isHardwareDetected() && fingerprintManager.hasEnrolledFingerprints();
+                return fingerprintManager != null && fingerprintManager.isHardwareDetected()
+                        && fingerprintManager.hasEnrolledFingerprints();
             }
         }
         return false;
@@ -514,14 +624,80 @@ public class PasscodeActivity extends Activity implements OnEditorActionListener
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_CODE_ASK_PERMISSIONS && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            showFingerprintDialog();
+            launchBiometricAuth();
             return;
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void unlockViaFingerprintScan() {
+        if (!passcodeManager.biometricEnabled()) {
+            passcodeManager.setBiometricEnabled(this, true);
+        }
         passcodeManager.unlock();
         done();
+    }
+
+    private boolean canShowBiometric() {
+        return passcodeManager.biometricAllowed() && isFingerprintEnabled();
+    }
+
+    private void launchBiometricAuth() {
+        if (passcodeManager != null && canShowBiometric()) {
+            if (VERSION.SDK_INT >= VERSION_CODES.P) {
+                showBiometricDialog();
+            } else if (VERSION.SDK_INT >= VERSION_CODES.M) {
+                showFingerprintDialog();
+            }
+        }
+    }
+
+    private void clearUi() {
+        title.setVisibility(View.GONE);
+        instr.setVisibility(View.GONE);
+        passcodeField.setVisibility(View.GONE);
+        passcodeBox.setVisibility(View.GONE);
+        logoutButton.setVisibility(View.GONE);
+        verifyButton.setVisibility(View.GONE);
+        bioInstrTitle.setVisibility(View.GONE);
+        bioInstr.setVisibility(View.GONE);
+        notNowButton.setVisibility(View.GONE);
+        enableButton.setVisibility(View.GONE);
+        biometricBox.setVisibility(View.GONE);
+        fingerImage.setVisibility(View.GONE);
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (this.passcodeField != null) {
+            imm.hideSoftInputFromWindow(this.passcodeField.getWindowToken(), 0);
+        }
+    }
+
+    private void showKeyboard() {
+        AccessibilityManager am = (AccessibilityManager) this.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        if (am.isEnabled()) {
+            // Check if keyboard is shown based on verify button, which is oriented to the bottom of
+            // the layout.  Checking window instead of screen even works for split screen.
+            int[] location = new int[2];
+            verifyButton.getLocationInWindow(location);
+            if (location[1] == 0) {
+                passcodeField.requestFocus();
+            }
+        } else {
+            passcodeField.requestFocus();
+        }
+    }
+
+    private void sendAccessibilityEvent(String text) {
+        AccessibilityManager am = (AccessibilityManager) this.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        if (am.isEnabled()) {
+            AccessibilityEvent event = AccessibilityEvent.obtain();
+            event.setEventType(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            event.setClassName(getClass().getName());
+            event.setPackageName(this.getPackageName());
+            event.getText().add(text);
+            am.sendAccessibilityEvent(event);
+        }
     }
 }

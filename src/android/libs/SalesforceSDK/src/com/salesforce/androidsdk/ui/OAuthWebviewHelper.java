@@ -28,6 +28,7 @@ package com.salesforce.androidsdk.ui;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -41,7 +42,6 @@ import android.os.Bundle;
 import android.security.KeyChain;
 import android.security.KeyChainAliasCallback;
 import android.security.KeyChainException;
-import android.support.customtabs.CustomTabsIntent;
 import android.text.TextUtils;
 import android.webkit.ClientCertRequest;
 import android.webkit.SslErrorHandler;
@@ -87,6 +87,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import androidx.browser.customtabs.CustomTabsIntent;
 
 /**
  * Helper class to manage a WebView instance that is going through the OAuth login process.
@@ -188,26 +190,6 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
     	webview.loadUrl("about:blank");
     }
 
-    /**
-     * Method called by login activity when it resumes after the passcode activity
-     *
-     * When the server has a mobile policy requiring a passcode, we start the passcode activity after completing the
-     * auth flow (see onAuthFlowComplete).
-     * When the passcode activity completes, the login activity's onActivityResult gets invoked, and it calls this method
-     * to finalize the account creation.
-     */
-    public void onNewPasscode() {
-
-    	/*
-    	 * Re-encryption of existing accounts with the new passcode is taken
-    	 * care of in the 'Confirm Passcode' step in PasscodeActivity.
-    	 */
-        if (accountOptions != null) {
-            final UserAccount addedAccount = addAccount();
-            callback.finish(addedAccount);
-        }
-    }
-
     /** Factory method for the WebViewClient, you can replace this with something else if you need to */
     protected WebViewClient makeWebViewClient() {
     	return new AuthWebViewClient();
@@ -257,7 +239,7 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
             t.show();
         }
         final Intent intent = new Intent(AUTHENTICATION_FAILED_INTENT);
-        if (e != null && e instanceof OAuth2.OAuthFailedException) {
+        if (e instanceof OAuth2.OAuthFailedException) {
             final OAuth2.OAuthFailedException exception = (OAuth2.OAuthFailedException) e;
             int statusCode = exception.getHttpStatusCode();
             intent.putExtra(HTTP_ERROR_RESPONSE_CODE_INTENT, statusCode);
@@ -347,7 +329,14 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
          * ensures that Chrome custom tab is dismissed once the login process is complete.
          */
         customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        customTabsIntent.launchUrl(activity, url);
+        try {
+            customTabsIntent.launchUrl(activity, url);
+        } catch (ActivityNotFoundException e) {
+            SalesforceSDKLogger.w(TAG, "Browser not installed on this device", e);
+            Toast.makeText(getContext(), "Browser not installed on this device",
+                    Toast.LENGTH_LONG).show();
+            callback.finish(null);
+        }
     }
 
     private boolean doesChromeExist() {
@@ -590,40 +579,31 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
                 mgr.getAdminPermsManager().setPrefs(id.customPermissions, account);
             }
 
+            // Save the user account
+            addAccount(account);
+
             // Screen lock required by mobile policy.
             if (id.screenLockTimeout > 0) {
 
                 // Stores the mobile policy for the org.
                 final PasscodeManager passcodeManager = mgr.getPasscodeManager();
-                passcodeManager.storeMobilePolicyForOrg(account, id.screenLockTimeout * 1000 * 60, id.pinLength);
+                passcodeManager.storeMobilePolicyForOrg(account, id.screenLockTimeout * 1000 * 60, id.pinLength, id.biometricUnlockAlowed);
                 passcodeManager.setTimeoutMs(id.screenLockTimeout * 1000 * 60);
-                boolean changeRequired = passcodeManager.setMinPasscodeLength((Activity) getContext(), id.pinLength);
-
-                /*
-                 * Checks if a passcode already exists. If a passcode has NOT
-                 * been created yet, the user is taken through the passcode
-                 * creation flow, at the end of which account data is encrypted.
-                 */
-                if (!passcodeManager.hasStoredPasscode(mgr.getAppContext())) {
-
-                    // This will bring up the create passcode screen - we will create the account in onResume.
-                    passcodeManager.setEnabled(true);
-                    passcodeManager.lockIfNeeded((Activity) getContext(), true);
-                } else if (!changeRequired) {
-
-                    // If a passcode change is required, the lock screen will have already been set in setMinPasscodeLength.
-                    final UserAccount addedAccount = addAccount();
-                    callback.finish(addedAccount);
-                }
+                // NB setPasscodeLength(...)
+                //    If there was a passcode and the length is increased, the passcode manager will remember that a passcode change is required
+                //    The next SalesforceActivity to resume, will cause the locking screen to popup in passcode change mode
+                passcodeManager.setPasscodeLength((Activity) getContext(), id.pinLength);
+                passcodeManager.setBiometricAllowed((Activity) getContext(), id.biometricUnlockAlowed);
             }
 
             // No screen lock required or no mobile policy specified.
             else {
                 final PasscodeManager passcodeManager = mgr.getPasscodeManager();
-                passcodeManager.storeMobilePolicyForOrg(account, 0, PasscodeManager.MIN_PASSCODE_LENGTH);
-                final UserAccount addedAccount = addAccount();
-                callback.finish(addedAccount);
+                passcodeManager.storeMobilePolicyForOrg(account, 0, PasscodeManager.MIN_PASSCODE_LENGTH , true);
             }
+
+            // All done
+            callback.finish(account);
         }
 
         protected void handleException(Exception ex) {
@@ -652,7 +632,7 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
         }
     }
 
-    protected UserAccount addAccount() {
+    protected void addAccount(final UserAccount account) {
         ClientManager clientManager = new ClientManager(getContext(),
                 SalesforceSDKManager.getInstance().getAccountType(),
                 loginOptions, SalesforceSDKManager.getInstance().shouldLogoutWhenTokenRevoked());
@@ -689,16 +669,6 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
     	 */
         final Context appContext = SalesforceSDKManager.getInstance().getAppContext();
         final String pushNotificationId = BootConfig.getBootConfig(appContext).getPushNotificationClientId();
-        final UserAccount account = UserAccountBuilder.getInstance().authToken(accountOptions.authToken).
-                refreshToken(accountOptions.refreshToken).loginServer(loginOptions.getLoginUrl()).
-                idUrl(accountOptions.identityUrl).instanceServer(accountOptions.instanceUrl).
-                orgId(accountOptions.orgId).userId(accountOptions.userId).username(accountOptions.username).
-                accountName(accountName).communityId(accountOptions.communityId).
-                communityUrl(accountOptions.communityUrl).firstName(accountOptions.firstName).
-                lastName(accountOptions.lastName).displayName(accountOptions.displayName).
-                email(accountOptions.email).photoUrl(accountOptions.photoUrl).
-                thumbnailUrl(accountOptions.thumbnailUrl).
-                additionalOauthValues(accountOptions.additionalOauthValues).build();
         if (!TextUtils.isEmpty(pushNotificationId)) {
             PushMessaging.register(appContext, account);
         }
@@ -714,7 +684,6 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
                 }
             });
         }
-        return account;
     }
 
     /**
@@ -880,9 +849,7 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
                 	loadLoginPage();
                 }
             });
-		} catch (KeyChainException e) {
-            SalesforceSDKLogger.e(TAG, "Exception thrown while retrieving X.509 certificate", e);
-		} catch (InterruptedException e) {
+		} catch (KeyChainException | InterruptedException e) {
             SalesforceSDKLogger.e(TAG, "Exception thrown while retrieving X.509 certificate", e);
 		}
 	}
