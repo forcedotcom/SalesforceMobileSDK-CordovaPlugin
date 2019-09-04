@@ -41,11 +41,9 @@
   <platform name="ios">
 
     <!-- Required by the Mobile SDK plugin for WKWebView -->
-    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
-
     <!-- Required by the Mobile SDK plugin for Cocoapods -->
     <dependency id="cordova-plugin-cocoapod-support" />
-
+    
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
       <preference name="deployment-target" value="11.0" />
@@ -94,7 +92,6 @@
 
     <!-- Resource bundles -->
     <resource-file src="src/ios/resources/SalesforceSDKResources.bundle" />
-    <resource-file src="src/ios/resources/Images.xcassets" />
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Mobile SDK frameworks pod specs -->
@@ -152,7 +149,6 @@
     <!-- Fixes the application tag in the Manifest -->
     <edit-config file="app/src/main/AndroidManifest.xml" target="/manifest/application" mode="merge">
       <application android:hardwareAccelerated="true"
-          android:icon="@drawable/sf__icon"
           android:label="@string/app_name"
           android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity"
           android:name="com.salesforce.androidsdk.phonegap.app.HybridApp" />

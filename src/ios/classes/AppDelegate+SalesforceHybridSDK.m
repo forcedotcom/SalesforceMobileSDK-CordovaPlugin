@@ -97,6 +97,14 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.autoresizesSubviews = YES;
     
+    //MBPS_CD Customize - hideNavBar, disable shake event.
+    [[UIApplication sharedApplication] setApplicationSupportsShakeToEdit:NO];
+    SFSDKLoginViewControllerConfig *loginViewConfig =
+    [[SFSDKLoginViewControllerConfig  alloc] init];
+    loginViewConfig.showSettingsIcon = NO;
+    loginViewConfig.showNavbar = NO;
+    [SFUserAccountManager sharedInstance].loginViewControllerConfig = loginViewConfig;
+    
     [self initializeAppViewState];
      __weak __typeof (self) weakSelf = self;
 
