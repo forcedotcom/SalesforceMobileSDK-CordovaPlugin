@@ -35,6 +35,25 @@
 #import <SalesforceSDKCore/SFSDKAuthHelper.h>
 #import <SalesforceHybridSDK/SalesforceHybridSDKManager.h>
 #import <SalesforceHybridSDK/SFSDKHybridLogger.h>
+#import <Cordova/CDVCommandDelegateImpl.h>
+
+@implementation CDVCommandDelegateImpl (SalesforceHybridSDK)
++ (void) load
+{
+    method_exchangeImplementations(class_getInstanceMethod(self, @selector(evalJsHelper2:)), class_getInstanceMethod(self, @selector(sfsdk_swizzled_evalJsHelper2:)));
+}
+
+- (void)sfsdk_swizzled_evalJsHelper2:(NSString*)js
+{
+    // Line separator "LS" (U+2028 - character code 8232) and paragraph separator "PS" (U+2029 - character code 8233) are considered line terminators in JavaScript (so need to be escaped in a string) but not in JSON !
+
+    // As a result, a stringified JSON containing non-escaped LS or PS, given to JavaScript will produce a syntax error.
+
+    js = [js stringByReplacingOccurrencesOfString:@"\u2028" withString:@"\\u2028"];
+    js = [js stringByReplacingOccurrencesOfString:@"\u2029" withString:@"\\u2029"];
+    [self sfsdk_swizzled_evalJsHelper2:js];
+}
+@end
 
 @implementation AppDelegate (SalesforceHybridSDK)
 
