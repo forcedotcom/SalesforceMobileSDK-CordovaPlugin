@@ -98,7 +98,7 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Mobile SDK frameworks pod specs -->
-    <pods-config ios-min-version="8.0.0">
+    <pods-config ios-min-version="11.0">
       <source url="https://cdn.cocoapods.org/"/>
     </pods-config>
     <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
