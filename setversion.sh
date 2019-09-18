@@ -48,7 +48,7 @@ update_plugin_xml ()
     local version=$2
     local isDev=$3
     local newPodSpecVersion="tag=\"v${version}\""
-    gsed -i "s/version.*=.*\"[^\"]*\">/version=\"${version}\">/g" ${file}
+    gsed -i "s/($[ ])version.*=.*\"[^\"]*\">/$1version=\"${version}\">/g" ${file}
 
     if [ $isDev == "yes" ]
     then
