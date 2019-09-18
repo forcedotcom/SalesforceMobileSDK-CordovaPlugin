@@ -108,7 +108,7 @@ public class SalesforceSDKManager {
     /**
      * Current version of this SDK.
      */
-    public static final String SDK_VERSION = "7.3.0.dev";
+    public static final String SDK_VERSION = "8.0.0.dev";
 
     /**
      * Intent action meant for instances of SalesforceSDKManager residing in other processes
@@ -1095,18 +1095,6 @@ public class SalesforceSDKManager {
     }
 
     /**
-     * Encrypts the given data.
-     *
-     * @param data Data to be encrypted.
-     * @return Encrypted data.
-     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link SalesforceSDKManager#encrypt(String, String)} instead
-     * and use {@link SalesforceSDKManager#getEncryptionKey()} to fetch the encryption key to pass in.
-     */
-    public static String encrypt(String data) {
-        return encrypt(data, getEncryptionKey());
-    }
-
-    /**
      * Encrypts the given data with the given key.
      *
      * @param data Data to be encrypted.
@@ -1124,18 +1112,6 @@ public class SalesforceSDKManager {
      */
     public static String getEncryptionKey() {
         return SalesforceKeyGenerator.getEncryptionKey(INTERNAL_ENTROPY);
-    }
-
-    /**
-     * Decrypts the given data.
-     *
-     * @param data Data to be decrypted.
-     * @return Decrypted data.
-     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link SalesforceSDKManager#decrypt(String, String)} instead
-     * and use {@link SalesforceSDKManager#getEncryptionKey()} to fetch the encryption key to pass in.
-     */
-    public static String decrypt(String data) {
-        return decrypt(data, getEncryptionKey());
     }
 
     /**
