@@ -60,24 +60,24 @@ console.log('Moving Salesforce libraries to the correct location');
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceAnalytics'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
-shelljs.cp('-R', path.join(libProjectRoot, 'SmartSync'), appProjectRoot);
+shelljs.cp('-R', path.join(libProjectRoot, 'MobileSync'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceHybrid'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
 var oldSalesforceAnalyticsDep = "api project\(\':libs:SalesforceAnalytics\'\)";
 var oldSalesforceSdkDep = "api project\(\':libs:SalesforceSDK\'\)";
 var oldSmartStoreDep = "api project\(\':libs:SmartStore\'\)";
-var oldSmartSyncDep = "api project\(\':libs:SmartSync\'\)";
+var oldMobileSyncDep = "api project\(\':libs:MobileSync\'\)";
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'), oldSalesforceAnalyticsDep, 'api project\(\':SalesforceAnalytics\'\)');
 replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'api project\(\':SalesforceSDK\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SmartSync', 'build.gradle'), oldSmartStoreDep, 'api project\(\':SmartStore\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldSmartSyncDep, 'api project\(\':SmartSync\'\)');
+replaceTextInFile(path.join(appProjectRoot, 'MobileSync', 'build.gradle'), oldSmartStoreDep, 'api project\(\':SmartStore\'\)');
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldMobileSyncDep, 'api project\(\':MobileSync\'\)');
 
 console.log('Fixing root level Gradle file for the generated app');
 shelljs.echo("include \":SalesforceAnalytics\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
-shelljs.echo("include \":SmartSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+shelljs.echo("include \":MobileSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SalesforceHybrid\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 
 console.log('Moving Gradle wrapper files to application directory');

@@ -14,16 +14,10 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
-    api project(':libs:SalesforceAnalytics')
-    api 'com.squareup.okhttp3:okhttp:3.12.1'
-    api 'com.google.firebase:firebase-messaging:20.0.0'
-    api 'androidx.core:core:1.1.0'
-    api 'androidx.browser:browser:1.0.0'
-    api 'junit:junit:4.12'
+    api project(':libs:SmartStore')
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    implementation 'com.google.android.material:material:1.0.0'
 }
 
 android {
@@ -33,12 +27,12 @@ android {
         targetSdkVersion 29
         minSdkVersion 23
     }
-
+  
   buildTypes {
       debug {
          testCoverageEnabled = true
       }
-   }
+  }
 
   sourceSets {
     main {
@@ -50,15 +44,16 @@ android {
       res.srcDirs = ['res']
       assets.srcDirs = ['assets']
     }
-    androidTest.setRoot('../test/SalesforceSDKTest')
+
+    androidTest.setRoot('../test/MobileSyncTest')
     androidTest {
-      java.srcDirs = ['../test/SalesforceSDKTest/src']
-      resources.srcDirs = ['../test/SalesforceSDKTest/src']
-      res.srcDirs = ['../test/SalesforceSDKTest/res']
+      java.srcDirs = ['../test/MobileSyncTest/src']
+      resources.srcDirs = ['../test/MobileSyncTest/src']
+      res.srcDirs = ['../test/MobileSyncTest/res']
     }
   }
   defaultConfig {
-    testApplicationId "com.salesforce.androidsdk.tests"
+    testApplicationId "com.salesforce.androidsdk.mobilesync.tests"
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
   }
   packagingOptions {
@@ -69,7 +64,7 @@ android {
   }
 
   lintOptions {
-    xmlReport true
+    xmlReport true 
     abortOnError false
   }
 }
@@ -79,7 +74,7 @@ install {
         pom {
             project {
                 packaging 'aar'
-                name 'SalesforceSDK'
+                name 'MobileSync'
                 url 'https://github.com/forcedotcom/SalesforceMobileSDK-Android'
                 licenses {
                     license {
@@ -120,7 +115,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = 'salesforcemobilesdk'
-        name = 'salesforce-sdk'
+        name = 'mobile-sync'
         userOrg = 'forcedotcom'
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/forcedotcom/SalesforceMobileSDK-Android.git'

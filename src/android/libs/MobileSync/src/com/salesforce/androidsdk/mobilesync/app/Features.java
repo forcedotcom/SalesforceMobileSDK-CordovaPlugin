@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-present, salesforce.com, inc.
+ * Copyright (c) 2018-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,33 +24,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.phonegap.app;
-
-import com.salesforce.androidsdk.mobilesync.app.MobileSyncUpgradeManager;
+package com.salesforce.androidsdk.mobilesync.app;
 
 /**
- * This class handles upgrades from one version to another.
- *
- * @author bhariharan
+ * Flags for ftr_ field in user agent
  */
-public class SalesforceHybridUpgradeManager extends MobileSyncUpgradeManager {
+public class Features {
 
-    private static SalesforceHybridUpgradeManager INSTANCE = null;
+    public static final String FEATURE_LAYOUT_SYNC = "LY";
+    public static final String FEATURE_METADATA_SYNC = "MD";
+    public static final String FEATURE_RELATED_RECORDS = "RR";
+    public static final String FEATURE_MOBILE_SYNC = "SY";
 
-    /**
-     * Returns an instance of this class.
-     *
-     * @return Instance of this class.
-     */
-    public static synchronized SalesforceHybridUpgradeManager getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new SalesforceHybridUpgradeManager();
-        }
-        return INSTANCE;
-    }
-
-    @Override
-    public void upgrade() {
-        super.upgrade();
-    }
 }
