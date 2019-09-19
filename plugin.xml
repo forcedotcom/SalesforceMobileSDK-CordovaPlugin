@@ -8,7 +8,7 @@
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
   <license>Apache 2.0</license>
-  <keywords>salesforce,oauth,smartstore,smartsync</keywords>
+  <keywords>salesforce,oauth,smartstore,mobilesync</keywords>
   <repo>https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin</repo>
 
   <js-module src="www/com.salesforce.plugin.oauth.js" name="plugin.oauth"></js-module>
@@ -21,7 +21,7 @@
     <clobbers target="navigator.smartstoreClient" />
   </js-module>
   <js-module src="www/com.salesforce.plugin.sfaccountmanager.js" name="plugin.sfaccountmanager"></js-module>
-  <js-module src="www/com.salesforce.plugin.smartsync.js" name="plugin.smartsync"></js-module>
+  <js-module src="www/com.salesforce.plugin.mobilesync.js" name="plugin.mobilesync"></js-module>
   <js-module src="www/com.salesforce.util.bootstrap.js" name="util.bootstrap"></js-module>
   <js-module src="www/com.salesforce.util.event.js" name="util.event"></js-module>
   <js-module src="www/com.salesforce.util.exec.js" name="util.exec"></js-module>
@@ -71,7 +71,7 @@
       <feature name="com.salesforce.sdkinfo"><param name="ios-package" value="SFSDKInfoPlugin"/></feature>
       <feature name="com.salesforce.sfaccountmanager"><param name="ios-package" value="SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
-      <feature name="com.salesforce.smartsync"><param name="ios-package" value="SFSmartSyncPlugin"/></feature>
+      <feature name="com.salesforce.mobilesync"><param name="ios-package" value="SFMobileSyncPlugin"/></feature>
     </config-file>
 
     <!-- Entitlements -->
@@ -103,7 +103,7 @@
     </pods-config>
     <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
     <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.0.0_sdk" />
-    <pod name="SmartSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
     <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.2.0" />
@@ -183,7 +183,7 @@
       <feature name="com.salesforce.sfaccountmanager"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SFAccountManagerPlugin"/></feature>
       <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SDKInfoPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
-      <feature name="com.salesforce.smartsync"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartSyncPlugin"/></feature>
+      <feature name="com.salesforce.mobilesync"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.MobileSyncPlugin"/></feature>
     </config-file>
 
     <config-file target="res/values/strings.xml" parent="/resources">

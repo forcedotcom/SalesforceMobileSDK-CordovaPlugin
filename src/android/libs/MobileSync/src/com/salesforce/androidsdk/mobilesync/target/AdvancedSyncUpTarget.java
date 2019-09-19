@@ -24,33 +24,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.phonegap.app;
+package com.salesforce.androidsdk.mobilesync.target;
 
-import com.salesforce.androidsdk.mobilesync.app.MobileSyncUpgradeManager;
+import com.salesforce.androidsdk.mobilesync.manager.SyncManager;
+import com.salesforce.androidsdk.mobilesync.util.SyncState;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
- * This class handles upgrades from one version to another.
- *
- * @author bhariharan
+ * Interface for advanced sync up target where records are not simply created/updated/deleted
+ * With advanced sync up target, sync manager simply calls the method: syncUpRecords
  */
-public class SalesforceHybridUpgradeManager extends MobileSyncUpgradeManager {
-
-    private static SalesforceHybridUpgradeManager INSTANCE = null;
+public interface AdvancedSyncUpTarget {
 
     /**
-     * Returns an instance of this class.
-     *
-     * @return Instance of this class.
+     * @return max number of records that can be passed to syncUpRecord at once
      */
-    public static synchronized SalesforceHybridUpgradeManager getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new SalesforceHybridUpgradeManager();
-        }
-        return INSTANCE;
-    }
+    int getMaxBatchSize();
 
-    @Override
-    public void upgrade() {
-        super.upgrade();
-    }
+    /**
+     * Sync up a batch of records
+     *
+     * @param syncManager
+     * @param records
+     * @param fieldlist
+     * @param mergeMode
+     * @param syncSoupName
+     * @throws JSONException
+     * @throws IOException
+     */
+    void syncUpRecords(SyncManager syncManager, List<JSONObject> records, List<String> fieldlist, SyncState.MergeMode mergeMode, String syncSoupName) throws JSONException, IOException;
 }
