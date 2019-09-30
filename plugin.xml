@@ -73,12 +73,12 @@
     </config-file>
 
     <!-- Entitlements -->
-    <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">
-      <string>development</string>
-    </config-file>
-    <config-file parent="aps-environment" target="*/Entitlements-Release.plist">
-      <string>production</string>
-    </config-file>
+<!--    <config-file parent="aps-environment" target="*/Entitlements-Debug.plist">-->
+<!--      <string>development</string>-->
+<!--    </config-file>-->
+<!--    <config-file parent="aps-environment" target="*/Entitlements-Release.plist">-->
+<!--      <string>production</string>-->
+<!--    </config-file>-->
 
     <!-- Header files -->
     <header-file src="src/ios/classes/AppDelegate+SalesforceHybridSDK.h" />
