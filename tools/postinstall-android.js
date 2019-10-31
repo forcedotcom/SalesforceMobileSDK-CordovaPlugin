@@ -103,10 +103,6 @@ if (data.indexOf("SalesforceHybrid") < 0)
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
 
-// Copying AndroidManifest.xml to its correct location. We need to leave the original copy around too because 'cordova prepare' looks for it.
-//console.log('Copying AndroidManifest.xml to its correct location');
-//shelljs.cp('-R', path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml'), path.join(appProjectRoot, 'app'));
-
 // Replacing values in top level build.gradle to avoid conflicts in Gradle builds.
 console.log('Fixing project workspace build.gradle');
 var oldGradleToolsVersion = "com.android.tools.build:gradle:3.3.0";
