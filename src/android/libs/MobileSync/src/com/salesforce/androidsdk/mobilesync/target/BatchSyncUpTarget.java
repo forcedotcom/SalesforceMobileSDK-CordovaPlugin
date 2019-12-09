@@ -26,12 +26,13 @@
  */
 package com.salesforce.androidsdk.mobilesync.target;
 
-import com.salesforce.androidsdk.rest.RestRequest;
-import com.salesforce.androidsdk.rest.RestResponse;
-import com.salesforce.androidsdk.smartstore.store.SmartStore;
 import com.salesforce.androidsdk.mobilesync.manager.SyncManager;
 import com.salesforce.androidsdk.mobilesync.util.Constants;
 import com.salesforce.androidsdk.mobilesync.util.SyncState;
+import com.salesforce.androidsdk.rest.CompositeResponse.CompositeSubResponse;
+import com.salesforce.androidsdk.rest.RestRequest;
+import com.salesforce.androidsdk.rest.RestResponse;
+import com.salesforce.androidsdk.smartstore.store.SmartStore;
 import com.salesforce.androidsdk.util.JSONObjectHelper;
 
 import org.json.JSONException;
@@ -66,19 +67,34 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
      * Construct SyncUpTarget
      */
     public BatchSyncUpTarget(List<String> createFieldlist, List<String> updateFieldlist) {
-        this(createFieldlist, updateFieldlist, MAX_SUB_REQUESTS_COMPOSITE_API);
+        this(createFieldlist, updateFieldlist, null, null, null, MAX_SUB_REQUESTS_COMPOSITE_API);
     }
 
     /**
      * Construct SyncUpTarget with a different maxBatchSize (NB: cannot exceed MAX_SUB_REQUESTS_COMPOSITE_API)
      */
     public BatchSyncUpTarget(List<String> createFieldlist, List<String> updateFieldlist, int maxBatchSize) {
-        super(createFieldlist, updateFieldlist);
+        this(createFieldlist, updateFieldlist, null, null, null, maxBatchSize);
+    }
+
+    /**
+     * Construct SyncUpTarget with given id/modifiedDate/externalId fields
+     */
+    public BatchSyncUpTarget(List<String> createFieldlist, List<String> updateFieldlist, String idFieldName, String modificationDateFieldName, String externalIdFieldName) {
+        this(createFieldlist, updateFieldlist, idFieldName, modificationDateFieldName, externalIdFieldName, MAX_SUB_REQUESTS_COMPOSITE_API);
+    }
+
+    /**
+     * Construct BatchSyncUpTarget with a different maxBatchSize and id/modifiedDate/externalId fields
+     */
+    public BatchSyncUpTarget(List<String> createFieldlist, List<String> updateFieldlist, String idFieldName, String modificationDateFieldName, String externalIdFieldName, int maxBatchSize) {
+        super(createFieldlist, updateFieldlist, idFieldName, modificationDateFieldName, externalIdFieldName);
         this.maxBatchSize = Math.min(maxBatchSize, MAX_SUB_REQUESTS_COMPOSITE_API); // composite api allows up to 25 subrequests
     }
 
     /**
      * Construct SyncUpTarget from json
+     *
      * @param target
      * @throws JSONException
      */
@@ -120,7 +136,7 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
 
             if (id == null) {
                 // create local id - needed for refId
-                id = String.format("local_%ld", record.getLong(SmartStore.SOUP_ENTRY_ID));
+                id = createLocalId(record);
                 record.put(getIdFieldName(), id);
             }
 
@@ -129,10 +145,10 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
         }
 
         // Sending composite request
-        Map<String, JSONObject> refIdToResponses = CompositeRequestHelper.sendCompositeRequest(syncManager, false, refIdToRequests);
+        Map<String, CompositeSubResponse> refIdToResponses = CompositeRequestHelper.sendCompositeRequest(syncManager, false, refIdToRequests);
 
         // Build refId to server id / status code / time stamp maps
-        Map<String, String> refIdToServerId = CompositeRequestHelper.parseIdsFromResponse(refIdToResponses);
+        Map<String, String> refIdToServerId = CompositeRequestHelper.parseIdsFromResponses(refIdToResponses.values());
 
         // Will a re-run be required?
         boolean needReRun = false;
@@ -156,7 +172,7 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
 
     protected RestRequest buildRequestForRecord(String apiVersion,
                                                 JSONObject record,
-                                                List<String> fieldlist) throws IOException, JSONException {
+                                                List<String> fieldlist) throws JSONException {
 
         if (!isDirty(record)) {
             return null; // nothing to do
@@ -182,7 +198,20 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
             if (isCreate) {
                 fieldlist = this.createFieldlist != null ? this.createFieldlist : fieldlist;
                 fields = buildFieldsMap(record, fieldlist, getIdFieldName(), getModificationDateFieldName());
-                return RestRequest.getRequestForCreate(apiVersion, objectType, fields);
+                String externalId = getExternalIdFieldName() != null ? JSONObjectHelper.optString(record, getExternalIdFieldName()) : null;
+
+                // Do upsert if externalId specified
+                if (externalId != null
+                        // the following check is there for the case
+                        // where the the external id field is the id field
+                        // and the empty id field was populated by BatchSyncUpTarget using createLocalId()
+                        && !externalId.equals(createLocalId(record))) {
+                    return RestRequest.getRequestForUpsert(apiVersion, objectType, getExternalIdFieldName(), externalId, fields);
+                }
+                // Do a create otherwise
+                else {
+                    return RestRequest.getRequestForCreate(apiVersion, objectType, fields);
+                }
             }
             else {
                 fieldlist = this.updateFieldlist != null ? this.updateFieldlist : fieldlist;
@@ -193,10 +222,10 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
     }
 
 
-    protected boolean updateRecordInLocalStore(SyncManager syncManager, String soupName, JSONObject record, SyncState.MergeMode mergeMode, Map<String, String> refIdToServerId, JSONObject response) throws JSONException, IOException {
+    protected boolean updateRecordInLocalStore(SyncManager syncManager, String soupName, JSONObject record, SyncState.MergeMode mergeMode, Map<String, String> refIdToServerId, CompositeSubResponse response) throws JSONException, IOException {
 
         boolean needReRun = false;
-        final Integer statusCode = response != null ? response.getInt(CompositeRequestHelper.HTTP_STATUS_CODE) : -1;
+        final Integer statusCode = response != null ? response.httpStatusCode : -1;
 
         // Delete case
         if (isLocallyDeleted(record)) {
@@ -214,8 +243,7 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
         // Create / update case
         else {
             // Success case
-            if (RestResponse.isSuccess(statusCode))
-            {
+            if (RestResponse.isSuccess(statusCode)) {
                 // Plugging server id in id field
                 CompositeRequestHelper.updateReferences(record, getIdFieldName(), refIdToServerId);
 
@@ -239,5 +267,8 @@ public class BatchSyncUpTarget extends SyncUpTarget implements AdvancedSyncUpTar
         return needReRun;
     }
 
-
+    // Create a local id (based on the internal soup entry id)
+    private String createLocalId(JSONObject record) throws JSONException {
+        return "local_" + record.getLong(SmartStore.SOUP_ENTRY_ID);
+    }
 }
