@@ -69,7 +69,7 @@ public class CustomServerUrlEditor extends DialogFragment {
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-		boolean isDarkTheme = SalesforceSDKManager.getInstance().isDarkTheme((Activity) getContext());
+		boolean isDarkTheme = SalesforceSDKManager.getInstance().isDarkTheme();
         rootView = inflater.inflate(R.layout.sf__custom_server_url, container);
 		rootView.getContext().setTheme(isDarkTheme ? R.style.SalesforceSDK_Dialog_Dark : R.style.SalesforceSDK_Dialog);
 		getDialog().setTitle(R.string.sf__server_url_add_title);
@@ -145,12 +145,22 @@ public class CustomServerUrlEditor extends DialogFragment {
 		 */
 		if (editId == R.id.sf__picker_custom_url) {
 			String url = etVal.toString();
-			isInvalidValue = !URLUtil.isHttpsUrl(url) || HttpUrl.parse(url) == null;
-			if (isInvalidValue) {
-				Toast.makeText(context, getString(R.string.sf__invalid_server_url),
-						Toast.LENGTH_SHORT).show();
+			if (!isInvalidValue) {
+				if (!URLUtil.isHttpsUrl(url)) {
+					if (URLUtil.isHttpUrl(url)) {
+						url = url.replace("http://", "https://");
+					} else {
+						url = "https://".concat(url);
+					}
+				}
+				// Check if string is a valid url
+				if (HttpUrl.parse(url) != null) {
+					return url;
+				}
 			}
+			Toast.makeText(context, getString(R.string.sf__invalid_server_url), Toast.LENGTH_SHORT).show();
 		}
+
 		if (isInvalidValue) {
 			et.selectAll();
 			et.requestFocus();

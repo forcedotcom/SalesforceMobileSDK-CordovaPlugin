@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-present, salesforce.com, inc.
+ * Copyright (c) 2019-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,18 +24,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.push;
+package com.salesforce.androidsdk.rest;
 
-import java.util.Map;
+import com.salesforce.androidsdk.util.JSONObjectHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 /**
- * This interface represents a simple push notification received. The
- * implementation of this interface would receive a notification and
- * handle it in some way, such as showing a notification to the user.
- *
- * @author bhariharan
+ * BatchResponse: Class to represent response for a BatchRequest.
  */
-public interface PushNotificationInterface {
+public class BatchResponse {
 
-	void onPushMessageReceived(Map<String, String> data);
+    public static final String HAS_ERRORS = "hasErrors";
+    public static final String RESULTS = "results";
+
+    public final boolean hasErrors;
+    public final List<JSONObject> results;
+
+    public BatchResponse(JSONObject responseJson) throws JSONException {
+        hasErrors = responseJson.getBoolean(HAS_ERRORS);
+        results = JSONObjectHelper.toList(responseJson.getJSONArray(RESULTS));
+    }
 }
