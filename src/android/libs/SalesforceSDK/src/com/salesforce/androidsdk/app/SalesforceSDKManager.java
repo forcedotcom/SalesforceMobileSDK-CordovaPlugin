@@ -28,8 +28,6 @@ package com.salesforce.androidsdk.app;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -42,11 +40,13 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.View;
 import android.webkit.CookieManager;
 
 import com.salesforce.androidsdk.BuildConfig;
@@ -108,16 +108,13 @@ public class SalesforceSDKManager {
     /**
      * Current version of this SDK.
      */
-    public static final String SDK_VERSION = "7.2.0";
+    public static final String SDK_VERSION = "8.1.0";
 
     /**
      * Intent action meant for instances of SalesforceSDKManager residing in other processes
      * to order them to clean up in-memory caches
      */
     private static final String CLEANUP_INTENT_ACTION = "com.salesforce.CLEANUP";
-
-    // Receiver for CLEANUP_INTENT_ACTION broadcast
-    private CleanupReceiver cleanupReceiver;
 
     // Key in broadcast for process id
     private static final String PROCESS_ID_KEY = "processId";
@@ -145,14 +142,13 @@ public class SalesforceSDKManager {
      * Instance of the SalesforceSDKManager to use for this process.
      */
     protected static SalesforceSDKManager INSTANCE;
-    private static final int PUSH_UNREGISTER_TIMEOUT_MILLIS = 30000;
 
     protected Context context;
-    protected LoginOptions loginOptions;
-    protected Class<? extends Activity> mainActivityClass;
-    protected Class<? extends Activity> loginActivityClass = LoginActivity.class;
-    protected Class<? extends PasscodeActivity> passcodeActivityClass = PasscodeActivity.class;
-    protected Class<? extends AccountSwitcherActivity> switcherActivityClass = AccountSwitcherActivity.class;
+    private LoginOptions loginOptions;
+    private Class<? extends Activity> mainActivityClass;
+    private Class<? extends Activity> loginActivityClass = LoginActivity.class;
+    private Class<? extends PasscodeActivity> passcodeActivityClass = PasscodeActivity.class;
+    private Class<? extends AccountSwitcherActivity> switcherActivityClass = AccountSwitcherActivity.class;
     private PasscodeManager passcodeManager;
     private LoginServerManager loginServerManager;
     private boolean isTestRun = false;
@@ -168,6 +164,16 @@ public class SalesforceSDKManager {
     private boolean browserLoginEnabled;
     private String idpAppURIScheme;
     private boolean idpAppLoginFlowActive;
+    private Theme theme =  Theme.SYSTEM_DEFAULT;
+
+    /**
+     * Available Mobile SDK style themes.
+     */
+    public enum Theme {
+        LIGHT,
+        DARK,
+        SYSTEM_DEFAULT
+    }
 
     /**
      * PasscodeManager object lock.
@@ -259,7 +265,7 @@ public class SalesforceSDKManager {
         }
 
         // If your app runs in multiple processes, all the SalesforceSDKManager need to run cleanup during a logout
-        cleanupReceiver = new CleanupReceiver();
+        final CleanupReceiver cleanupReceiver = new CleanupReceiver();
         context.registerReceiver(cleanupReceiver, new IntentFilter(SalesforceSDKManager.CLEANUP_INTENT_ACTION));
     }
 
@@ -718,8 +724,9 @@ public class SalesforceSDKManager {
      *
      * @param frontActivity Front activity.
      * @param account Account.
+     * @param shouldDismissActivity Dismisses current activity if true, does nothing otherwise.
      */
-    private void cleanUp(Activity frontActivity, Account account) {
+    private void cleanUp(Activity frontActivity, Account account, boolean shouldDismissActivity) {
         final UserAccount userAccount = UserAccountManager.getInstance().buildUserAccount(account);
 
         // Clean up in this process
@@ -730,8 +737,8 @@ public class SalesforceSDKManager {
 
         final List<UserAccount> users = getUserAccountManager().getAuthenticatedUsers();
 
-        // Finishes front activity if specified, and if this is the last account.
-        if (frontActivity != null && (users == null || users.size() <= 1)) {
+        // Finishes front activity if specified, if this is the last account.
+        if (shouldDismissActivity && frontActivity != null && (users == null || users.size() <= 1)) {
             frontActivity.finish();
         }
 
@@ -924,7 +931,7 @@ public class SalesforceSDKManager {
     private void removeAccount(ClientManager clientMgr, final boolean showLoginPage,
     		String refreshToken, String loginServer,
     		Account account, Activity frontActivity) {
-    	cleanUp(frontActivity, account);
+    	cleanUp(frontActivity, account, showLoginPage);
 
     	/*
     	 * Removes the existing account, if any. 'account == null' does not
@@ -943,30 +950,14 @@ public class SalesforceSDKManager {
     				for (int i = 0; i < accounts.length - 1; i++) {
     					clientMgr.removeAccounts(accounts);
     				}
-    				clientMgr.removeAccountAsync(accounts[accounts.length - 1],
-    						new AccountManagerCallback<Boolean>() {
-
-    	    			@Override
-    	    			public void run(AccountManagerFuture<Boolean> arg0) {
-    	    				notifyLogoutComplete(showLoginPage);
-    	    			}
-    	    		});
-    			} else {
-    				notifyLogoutComplete(showLoginPage);
+    				clientMgr.removeAccount(accounts[accounts.length - 1]);
     			}
-    		} else {
-    			notifyLogoutComplete(showLoginPage);
     		}
     	} else {
-    		clientMgr.removeAccountAsync(account, new AccountManagerCallback<Boolean>() {
-
-    			@Override
-    			public void run(AccountManagerFuture<Boolean> arg0) {
-    				notifyLogoutComplete(showLoginPage);
-    			}
-    		});
+    	    clientMgr.removeAccount(account);
     	}
-    	isLoggingOut = false;
+        isLoggingOut = false;
+        notifyLogoutComplete(showLoginPage);
 
     	// Revokes the existing refresh token.
         if (shouldLogoutWhenTokenRevoked() && refreshToken != null) {
@@ -1100,18 +1091,6 @@ public class SalesforceSDKManager {
     }
 
     /**
-     * Encrypts the given data.
-     *
-     * @param data Data to be encrypted.
-     * @return Encrypted data.
-     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link SalesforceSDKManager#encrypt(String, String)} instead
-     * and use {@link SalesforceSDKManager#getEncryptionKey()} to fetch the encryption key to pass in.
-     */
-    public static String encrypt(String data) {
-        return encrypt(data, getEncryptionKey());
-    }
-
-    /**
      * Encrypts the given data with the given key.
      *
      * @param data Data to be encrypted.
@@ -1129,18 +1108,6 @@ public class SalesforceSDKManager {
      */
     public static String getEncryptionKey() {
         return SalesforceKeyGenerator.getEncryptionKey(INTERNAL_ENTROPY);
-    }
-
-    /**
-     * Decrypts the given data.
-     *
-     * @param data Data to be decrypted.
-     * @return Decrypted data.
-     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link SalesforceSDKManager#decrypt(String, String)} instead
-     * and use {@link SalesforceSDKManager#getEncryptionKey()} to fetch the encryption key to pass in.
-     */
-    public static String decrypt(String data) {
-        return decrypt(data, getEncryptionKey());
     }
 
     /**
@@ -1440,5 +1407,47 @@ public class SalesforceSDKManager {
             SalesforceSDKLogger.e(TAG, "getBuildConfigValue failed", e);
         }
         return BuildConfig.DEBUG; // we don't want to return a null value; return this value at minimum
+    }
+
+    /**
+     * Indicates whether dark theme should be displayed.  The value is retrieved from the OS, if no value is set.
+     * @see SalesforceSDKManager#setTheme
+     *
+     * @return             True if dark theme should be displayed, otherwise false.
+     */
+    public boolean isDarkTheme() {
+        if (theme == Theme.SYSTEM_DEFAULT) {
+            int currentNightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            return currentNightMode == Configuration.UI_MODE_NIGHT_YES;
+        } else {
+            return theme == Theme.DARK;
+        }
+    }
+
+    /**
+     * Sets the theme for the SDK.  This value only persists as long as the instance of SalesforceSDKManager.
+     * @see Theme
+     *
+     * @param theme     The theme to use.
+     */
+    public synchronized void setTheme(Theme theme) {
+        this.theme = theme;
+    }
+
+    /**
+     * Makes the status and navigation bars visible regardless of style and OS dark theme states.
+     *
+     * @param activity     Activity used to set style attributes.
+     */
+    public void setViewNavigationVisibility(Activity activity) {
+        if (!isDarkTheme() || activity.getClass().getName().equals(getLoginActivityClass().getName())) {
+            // This covers the case where OS dark theme is true, but app has disabled.
+            // TODO: Remove SalesforceSDK_AccessibleNav style when min API becomes 26.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                activity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            } else {
+                activity.setTheme(R.style.SalesforceSDK_AccessibleNav);
+            }
+        }
     }
 }

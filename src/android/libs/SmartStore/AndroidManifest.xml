@@ -2,14 +2,14 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.salesforce.androidsdk.smartstore"
-	android:versionCode="65"
-	android:versionName="7.2.0">
+	android:versionCode="68"
+	android:versionName="8.1.0">
 
 	<application>
 
         <!--  SmartStore Inspector screen -->
         <activity android:name="com.salesforce.androidsdk.smartstore.ui.SmartStoreInspectorActivity"
-			android:theme="@style/SalesforceSDK.ActionBarTheme"
+			android:theme="@style/SalesforceSDK"
 			android:exported="false"/>
 	</application>
 </manifest>

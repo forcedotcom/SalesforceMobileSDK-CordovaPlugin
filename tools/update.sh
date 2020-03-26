@@ -167,8 +167,8 @@ copy_android_sdk()
     cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/
     echo "Copying SmartStore library"
     cp -RL $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/
-    echo "Copying SmartSync library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SmartSync src/android/libs/
+    echo "Copying MobileSync library"
+    cp -RL $ANDROID_SDK_FOLDER/libs/MobileSync src/android/libs/
     echo "Copying SalesforceHybrid library"
     cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceHybrid src/android/libs/
     echo "Copying Gradle wrapper files"

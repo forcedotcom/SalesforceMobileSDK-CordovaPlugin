@@ -74,14 +74,8 @@
      [SalesforceHybridSDKManager sharedManager].idpAppURIScheme = @"sampleidpapp";
      //user friendly display name
      [SalesforceHybridSDKManager sharedManager].appDisplayName = @"SampleAppOne";
-     
-     //Use the following code block to replace the login flow selection dialog
-     [SalesforceHybridSDKManager sharedManager].idpLoginFlowSelectionBlock = ^UIViewController<SFSDKLoginFlowSelectionView> * _Nonnull{
-     IDPLoginNavViewController *controller = [[IDPLoginNavViewController alloc] init];
-     return controller;
-     };
      */
-    
+
     return [self sfsdk_swizzled_init];
 }
 

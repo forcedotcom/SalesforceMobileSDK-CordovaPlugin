@@ -191,20 +191,6 @@ public class PasscodeManager  {
      * @param account UserAccount instance.
      * @param timeout Timeout value, in ms.
      * @param passLen Minimum passcode length.
-     *
-     * @deprecated Will be removed in Mobile SDK 8.0.
-     * Use {@link PasscodeManager#storeMobilePolicyForOrg(UserAccount, int, int, boolean)} instead.
-     */
-    public void storeMobilePolicyForOrg(UserAccount account, int timeout, int passLen) {
-    	storeMobilePolicyForOrg(account, timeout, passLen, true);
-    }
-
-    /**
-     * Stores the mobile policy for the specified account.
-     *
-     * @param account UserAccount instance.
-     * @param timeout Timeout value, in ms.
-     * @param passLen Minimum passcode length.
      * @param bioAllowed If biometric Unlock is Allowed by connected App
      */
     @SuppressLint("ApplySharedPref")
@@ -549,14 +535,6 @@ public class PasscodeManager  {
     }
 
     /**
-     *
-     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link PasscodeManager#getPasscodeLength()}  instead.
-     */
-    public int getMinPasscodeLength() {
-        return passcodeLength;
-    }
-
-    /**
      * The exact length of the passcode if it is known.  It may be unknown on upgrade before first unlock.
      * Use {@link PasscodeManager#getPasscodeLengthKnown()} to check if return is exact length or org minimum.
      *
@@ -604,16 +582,6 @@ public class PasscodeManager  {
 
     /**
      * @param ctx Context.
-     * @param minPasscodeLength The new minimum passcode length to set.
-     *
-     * @deprecated Will be removed in Mobile SDK 8.0. Use {@link PasscodeManager#setPasscodeLength(Context, int)}  instead.
-     */
-    public void setMinPasscodeLength(Context ctx, int minPasscodeLength) {
-        setPasscodeLength(ctx, minPasscodeLength);
-    }
-
-    /**
-     * @param ctx Context.
      * @param passcodeLength The new passcode length to set.
      */
     public void setPasscodeLength(Context ctx, int passcodeLength) {
@@ -621,10 +589,8 @@ public class PasscodeManager  {
             if (hasStoredPasscode(ctx) && passcodeLengthKnown) {
                 this.passcodeChangeRequired = true;
             }
-
             this.passcodeLength = passcodeLength;
     	}
-
         this.passcodeLengthKnown = true;
         storeMobilePolicy(ctx);
     }
@@ -642,7 +608,12 @@ public class PasscodeManager  {
     }
 
     /**
-     * Called when biometric unlock requirement for the org changes.
+     * Called when the biometric unlock requirement for the org changes.
+     *
+     * This API is intended for internal Salesforce only.  Setting this value in an app overrides the server's connected app policy and is not recommended.
+     * Although setting {@code allowed} to false prevents users from being able to enroll in biometric unlock, the proper
+     * way to prevent user enrollment is through the connected app.
+     * @see <a href="https://developer.salesforce.com/docs/atlas.en-us.mobile_sdk.meta/mobile_sdk/android_passcodes.htm">Using Passcodes</a>
      */
     public void setBiometricAllowed(Context ctx, boolean allowed) {
         if (this.biometricAllowed) {
@@ -662,7 +633,17 @@ public class PasscodeManager  {
     }
 
     /**
-     * Sets biometric enabled.
+     * Enables biometric input.
+     *
+     * This API is intended to let the end user toggle the use of biometric entry.  Setting this property to false does not prevent
+     * the biometric enrollment screen from being shown to the user, nor does it prevent the user from enabling the
+     * feature.
+     *
+     * To prevent users from enrolling in biometric, ask an administrator in the Salesforce org to configure the
+     * connected app. For details, see <a href ="https://developer.salesforce.com/docs/atlas.en-us.mobile_sdk.meta/mobile_sdk/android_passcodes.htm">Using Passcodes</a>
+     * in the <i>Mobile SDK Development Guide</i>.
+     *
+     * If you absolutely must disable biometric input at the app level see {@link PasscodeManager#setBiometricAllowed(Context, boolean)}.
      */
     public void setBiometricEnabled(Context ctx, boolean enabled) {
         biometricEnabled = enabled && biometricAllowed();
