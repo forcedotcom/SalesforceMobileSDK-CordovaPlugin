@@ -4,8 +4,8 @@
 
     <style name="SalesforceSDK">
         <item name="android:actionBarStyle">@style/SalesforceSDKActionBar</item>
-        <item name="android:colorPrimary">@color/sf__primary_color</item>
-        <item name="android:colorPrimaryDark">@color/sf__primary_color</item>
+        <item name="android:colorPrimary">@color/sf__background</item>
+        <item name="android:colorPrimaryDark">@color/sf__layout_background</item>
         <item name="sfColorSecondary">@color/sf__secondary_color</item>
         <item name="sfLayoutBackground">@color/sf__layout_background</item>
         <item name="android:colorBackground">@color/sf__background</item>
@@ -26,8 +26,8 @@
 
     <style name="SalesforceSDK_Dark">
         <item name="android:actionBarStyle">@style/SalesforceSDKActionBar_Dark</item>
-        <item name="android:colorPrimary">@color/sf__primary_color</item>
-        <item name="android:colorPrimaryDark">@color/sf__primary_color</item>
+        <item name="android:colorPrimary">@color/sf__layout_background</item>
+        <item name="android:colorPrimaryDark">@color/sf__layout_background</item>
         <item name="sfColorSecondary">@color/sf__secondary_color_dark</item>
         <item name="sfLayoutBackground">@color/sf__layout_background_dark</item>
         <item name="android:colorBackground">@color/sf__background_dark</item>
