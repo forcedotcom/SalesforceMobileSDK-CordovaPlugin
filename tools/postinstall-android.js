@@ -106,7 +106,7 @@ if (data.indexOf("SalesforceHybrid") < 0)
 // Replacing values in top level build.gradle to avoid conflicts in Gradle builds.
 console.log('Fixing project workspace build.gradle');
 var oldGradleToolsVersion = "com.android.tools.build:gradle:3.3.0";
-var newGradleToolsVersion = "com.android.tools.build:gradle:3.5.1";
+var newGradleToolsVersion = "com.android.tools.build:gradle:4.0.0";
 
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultBuildToolsVersion=.*/, '');
