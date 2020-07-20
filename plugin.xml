@@ -102,15 +102,15 @@
     <pods-config ios-min-version="12.2" use-frameworks="true">
       <source url="https://cdn.cocoapods.org/"/>
     </pods-config>
-    <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+    <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v8.2.0" />
     <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.1.1_sdk" />
-    <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.2.0" />
+    <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.2.0" />
     <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
     <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.4.0" />
-    <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+    <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.2.0" />
+    <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.2.0" />
+    <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.2.0" />
     <!--
 
       Replace 'dev' in the 'branch' tag above with the current release version tag while releasing.
