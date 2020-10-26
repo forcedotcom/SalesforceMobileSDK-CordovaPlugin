@@ -164,6 +164,9 @@
 
     <config-file target="res/xml/config.xml" parent="/*">
 
+      <!-- To enable Android X -->
+      <preference name="AndroidXEnabled" value="true" />
+
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
       <allow-navigation href="https://*.force.com" />
