@@ -48,7 +48,7 @@
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="12.2" />
+      <preference name="deployment-target" value="13.0" />
       <preference name="WKWebViewOnly" value="true" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
@@ -99,7 +99,7 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Mobile SDK frameworks pod specs -->
-    <pods-config ios-min-version="12.2" use-frameworks="true">
+    <pods-config ios-min-version="13.0" use-frameworks="true">
       <source url="https://cdn.cocoapods.org/"/>
     </pods-config>
     <pod name="SalesforceHybridSDK" git="https://github.com/wmathurin/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
