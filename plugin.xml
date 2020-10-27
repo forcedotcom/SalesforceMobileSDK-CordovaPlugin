@@ -34,9 +34,6 @@
     <engine name="cordova-android" version="9.0.0" />
   </engines>
 
-  <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
-  <dependency id="cordova-plugin-whitelist" version="1.2.0" />
-
   <!-- ios -->
   <platform name="ios">
 
@@ -100,6 +97,7 @@
       <source url="https://cdn.cocoapods.org/"/>
     </pods-config>
     <pod name="SalesforceHybridSDK" git="https://github.com/wmathurin/SalesforceMobileSDK-iOS-Hybrid" branch="upgrade" />
+    <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="rel/6.1.1" />
     <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
