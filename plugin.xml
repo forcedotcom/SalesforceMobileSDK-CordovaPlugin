@@ -30,7 +30,7 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-ios" version="5.1.1" />
+    <engine name="cordova-ios" version="6.1.1" />
     <engine name="cordova-android" version="9.0.0" />
   </engines>
 
@@ -40,11 +40,8 @@
   <!-- ios -->
   <platform name="ios">
 
-    <!-- Required by the Mobile SDK plugin for WKWebView -->
-    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
-
     <!-- Required by the Mobile SDK plugin for Cocoapods -->
-    <dependency id="cordova-plugin-cocoapod-support" />
+    <dependency id="cordova-plugin-cocoapod-supportx" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
@@ -102,8 +99,8 @@
     <pods-config ios-min-version="13.0" use-frameworks="true">
       <source url="https://cdn.cocoapods.org/"/>
     </pods-config>
-    <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
-    <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.1.1_sdk" />
+    <pod name="SalesforceHybridSDK" git="https://github.com/wmathurin/SalesforceMobileSDK-iOS-Hybrid" branch="upgrade" />
+    <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="rel/6.1.1" />
     <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
     <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
