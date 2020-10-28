@@ -30,21 +30,12 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-ios" version="5.1.1" />
+    <engine name="cordova-ios" version="6.1.1" />
     <engine name="cordova-android" version="9.0.0" />
   </engines>
 
-  <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
-  <dependency id="cordova-plugin-whitelist" version="1.2.0" />
-
   <!-- ios -->
   <platform name="ios">
-
-    <!-- Required by the Mobile SDK plugin for WKWebView -->
-    <dependency id="cordova-plugin-wkwebview-engine" url="https://github.com/apache/cordova-plugin-wkwebview-engine" commit="1.1.4" />
-
-    <!-- Required by the Mobile SDK plugin for Cocoapods -->
-    <dependency id="cordova-plugin-cocoapod-support" />
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
@@ -99,28 +90,21 @@
     <resource-file src="src/ios/resources/SalesforceSDKAssets.xcassets" />
 
     <!-- Mobile SDK frameworks pod specs -->
-    <pods-config ios-min-version="13.0" use-frameworks="true">
-      <source url="https://cdn.cocoapods.org/"/>
-    </pods-config>
-    <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
-    <pod name="Cordova" git="https://github.com/forcedotcom/cordova-ios" branch="cordova_5.1.1_sdk" />
-    <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
-    <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.4.0" />
-    <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-    <!--
-
-      Replace 'dev' in the 'branch' tag above with the current release version tag while releasing.
-
-      For example,
-        branch="dev"
-      would become
-        tag="v8.1.0"
-
-    -->
+    <podspec>
+         <config>
+             <source url="https://cdn.cocoapods.org"/>
+         </config>
+         <pods use-frameworks="true">
+           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
+           <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.4.0" />
+           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+         </pods>
+    </podspec>
 
     <!-- System frameworks -->
     <framework src="libxml2.tbd" />
