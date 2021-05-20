@@ -74,6 +74,7 @@ replaceTextInFile(path.join(appProjectRoot, 'MobileSync', 'build.gradle'), oldSm
 replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldMobileSyncDep, 'api project\(\':MobileSync\'\)');
 
 console.log('Fixing root level Gradle file for the generated app');
+replaceTextInFile(path.join(appProjectRoot, 'settings.gradle'), "include \":CordovaLib\"", "");
 shelljs.echo("include \":SalesforceAnalytics\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
@@ -95,24 +96,23 @@ if (data.indexOf("SalesforceHybrid") < 0)
     var oldAndroidDepTree = "android {";
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    var oldGradleToolsVersion = "com.android.tools.build:gradle:3.3.0";
-    var newGradleToolsVersion = "com.android.tools.build:gradle:3.5.1";
+    var oldGradleToolsVersion = "com.android.tools.build:gradle:4.0.0";
+    var newGradleToolsVersion = "com.android.tools.build:gradle:4.2.1";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
-    replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'mavenCentral()', 'google()');
     var newLibDep = "api project(':SalesforceHybrid')";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
 
 // Replacing values in top level build.gradle to avoid conflicts in Gradle builds.
 console.log('Fixing project workspace build.gradle');
-var oldGradleToolsVersion = "com.android.tools.build:gradle:3.3.0";
-var newGradleToolsVersion = "com.android.tools.build:gradle:4.0.0";
+var oldGradleToolsVersion = "com.android.tools.build:gradle:4.0.0";
+var newGradleToolsVersion = "com.android.tools.build:gradle:4.2.1";
 
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultBuildToolsVersion=.*/, '');
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultMinSdkVersion=.*/, 'defaultMinSdkVersion=23');
-replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultTargetSdkVersion=.*/, 'defaultTargetSdkVersion=29');
-replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultCompileSdkVersion=.*/, 'defaultCompileSdkVersion=29');
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultTargetSdkVersion=.*/, 'defaultTargetSdkVersion=30');
+replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultCompileSdkVersion=.*/, 'defaultCompileSdkVersion=30');
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 
