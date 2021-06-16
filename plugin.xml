@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="8.1.0">
+        version="9.1.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -30,23 +30,16 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-android" version=">=8.1.0" />
-    <engine name="cordova-ios" version="5.1.1" />
+    <engine name="cordova-ios" version="6.1.1" />
+    <engine name="cordova-android" version="9.0.0" />
   </engines>
-
-  <!-- Specific versions of dependencies required by the Mobile SDK plugin -->
-  <dependency id="cordova-plugin-whitelist" version="1.2.0" />
 
   <!-- ios -->
   <platform name="ios">
 
-    <!-- Required by the Mobile SDK plugin for WKWebView -->
-    <!-- Required by the Mobile SDK plugin for Cocoapods -->
-    <dependency id="cordova-plugin-cocoapod-support" />
-    
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="12.2" />
+      <preference name="deployment-target" value="13.0" />
       <preference name="WKWebViewOnly" value="true" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
@@ -146,7 +139,8 @@
           android:label="@string/app_name"
           android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
           android:theme="@android:style/Theme.Black.NoTitleBar"
-          android:launchMode="singleTop" />
+          android:launchMode="singleTop" 
+          android:allowBackup="false" />
     </edit-config>
 
     <!-- Fixes the application tag in the Manifest -->
@@ -158,6 +152,9 @@
     </edit-config>
 
     <config-file target="res/xml/config.xml" parent="/*">
+
+      <!-- To enable Android X -->
+      <preference name="AndroidXEnabled" value="true" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />

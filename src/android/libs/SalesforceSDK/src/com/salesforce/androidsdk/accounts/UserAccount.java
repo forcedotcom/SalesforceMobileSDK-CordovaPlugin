@@ -28,6 +28,7 @@ package com.salesforce.androidsdk.accounts;
 
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -73,6 +74,13 @@ public class UserAccount {
 	public static final String LAST_NAME = "last_name";
     public static final String PHOTO_URL = "photoUrl";
     public static final String THUMBNAIL_URL = "thumbnailUrl";
+	public static final String LIGHTNING_DOMAIN = "lightningDomain";
+	public static final String LIGHTNING_SID = "lightningSid";
+	public static final String VF_DOMAIN = "vfDomain";
+	public static final String VF_SID = "vfSid";
+	public static final String CONTENT_DOMAIN = "contentDomain";
+	public static final String CONTENT_SID = "contentSid";
+	public static final String CSRF_TOKEN = "csrfToken";
 
 	private static final String TAG = "UserAccount";
 	private static final String FORWARD_SLASH = "/";
@@ -99,6 +107,13 @@ public class UserAccount {
 	private String email;
     private String photoUrl;
     private String thumbnailUrl;
+	private String lightningDomain;
+	private String lightningSid;
+	private String vfDomain;
+	private String vfSid;
+	private String contentDomain;
+	private String contentSid;
+	private String csrfToken;
     private Map<String, String> additionalOauthValues;
 
 	/**
@@ -122,13 +137,21 @@ public class UserAccount {
 	 * @param photoUrl Photo URL.
 	 * @param thumbnailUrl Thumbnail URL.
 	 * @param additionalOauthValues Additional OAuth values.
+	 * @param lightningDomain Lightning domain.
+	 * @param lightningSid Lightning SID.
+	 * @param vfDomain VF domain.
+	 * @param vfSid VF SID.
+	 * @param contentDomain Content domain.
+	 * @param contentSid Content SID.
 	 */
 	UserAccount(String authToken, String refreshToken,
 					   String loginServer, String idUrl, String instanceServer,
 					   String orgId, String userId, String username, String accountName,
 					   String communityId, String communityUrl, String firstName, String lastName,
                        String displayName, String email, String photoUrl,
-					   String thumbnailUrl, Map<String, String> additionalOauthValues) {
+					   String thumbnailUrl, Map<String, String> additionalOauthValues,
+					   String lightningDomain, String lightningSid, String vfDomain, String vfSid,
+					   String  contentDomain, String contentSid, String csrfToken) {
 		this.authToken = authToken;
 		this.refreshToken = refreshToken;
 		this.loginServer = loginServer;
@@ -147,6 +170,13 @@ public class UserAccount {
 		this.photoUrl = photoUrl;
 		this.thumbnailUrl = thumbnailUrl;
 		this.additionalOauthValues = additionalOauthValues;
+		this.lightningDomain = lightningDomain;
+		this.lightningSid = lightningSid;
+		this.vfDomain = vfDomain;
+		this.vfSid = vfSid;
+		this.contentDomain = contentDomain;
+		this.contentSid = contentSid;
+		this.csrfToken = csrfToken;
 		SalesforceSDKManager.getInstance().registerUsedAppFeature(Features.FEATURE_USER_AUTH);
 	}
 
@@ -177,6 +207,13 @@ public class UserAccount {
 			email = object.optString(EMAIL, null);
             photoUrl = object.optString(PHOTO_URL, null);
 			thumbnailUrl = object.optString(THUMBNAIL_URL, null);
+			lightningDomain = object.optString(LIGHTNING_DOMAIN, null);
+			lightningSid = object.optString(LIGHTNING_SID, null);
+			vfDomain = object.optString(VF_DOMAIN, null);
+			vfSid = object.optString(VF_SID, null);
+			contentDomain = object.optString(CONTENT_DOMAIN, null);
+			contentSid = object.optString(CONTENT_SID, null);
+			csrfToken = object.optString(CSRF_TOKEN, null);
             additionalOauthValues = MapUtil.addJSONObjectToMap(object,
                     SalesforceSDKManager.getInstance().getAdditionalOauthKeys(), additionalOauthValues);
 		}
@@ -206,6 +243,13 @@ public class UserAccount {
 			email = bundle.getString(EMAIL);
             photoUrl = bundle.getString(PHOTO_URL);
             thumbnailUrl = bundle.getString(THUMBNAIL_URL);
+			lightningDomain = bundle.getString(LIGHTNING_DOMAIN);
+			lightningSid = bundle.getString(LIGHTNING_SID);
+			vfDomain = bundle.getString(VF_DOMAIN);
+			vfSid = bundle.getString(VF_SID);
+			contentDomain = bundle.getString(CONTENT_DOMAIN);
+			contentSid = bundle.getString(CONTENT_SID);
+			csrfToken = bundle.getString(CSRF_TOKEN);
             additionalOauthValues = MapUtil.addBundleToMap(bundle,
 					SalesforceSDKManager.getInstance().getAdditionalOauthKeys(), additionalOauthValues);
 		}
@@ -364,6 +408,69 @@ public class UserAccount {
         return thumbnailUrl;
     }
 
+	/**
+	 * Returns the Lightning domain for this user.
+	 *
+	 * @return Lightning domain.
+	 */
+	public String getLightningDomain() {
+		return lightningDomain;
+	}
+
+	/**
+	 * Returns the Lightning SID for this user.
+	 *
+	 * @return Lightning SID.
+	 */
+	public String getLightningSid() {
+		return lightningSid;
+	}
+
+	/**
+	 * Returns the VF domain for this user.
+	 *
+	 * @return VF domain.
+	 */
+	public String getVFDomain() {
+		return vfDomain;
+	}
+
+	/**
+	 * Returns the VF SID for this user.
+	 *
+	 * @return VF SID.
+	 */
+	public String getVFSid() {
+		return vfSid;
+	}
+
+	/**
+	 * Returns the content domain for this user.
+	 *
+	 * @return Content domain.
+	 */
+	public String getContentDomain() {
+		return contentDomain;
+	}
+
+	/**
+	 * Returns the content SID for this user.
+	 *
+	 * @return Content SID.
+	 */
+	public String getContentSid() {
+		return contentSid;
+	}
+
+	/**
+	 * Returns the CSRF token for this user.
+	 *
+	 * @return CSRF token.
+	 */
+	public String getCSRFToken() {
+		return csrfToken;
+	}
+
     /**
      * Returns the additional OAuth values for this user.
      *
@@ -380,6 +487,9 @@ public class UserAccount {
      */
     public Bitmap getProfilePhoto() {
         final File file = getProfilePhotoFile();
+        if (file == null) {
+            return null;
+        }
         final BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
         bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
         return BitmapFactory.decodeFile(file.getAbsolutePath(), bitmapOptions);
@@ -389,24 +499,30 @@ public class UserAccount {
      * Fetches this user's profile photo from the server and stores it in the cache.
      */
     public void downloadProfilePhoto() {
-        if (photoUrl == null) {
+        final File file = getProfilePhotoFile();
+        if (photoUrl == null || file == null) {
             return;
         }
-        final File file = getProfilePhotoFile();
         final Uri srcUri = Uri.parse(photoUrl);
         final Uri destUri = Uri.fromFile(file);
         if (srcUri == null || destUri == null) {
         	return;
 		}
-        final DownloadManager.Request downloadReq = new DownloadManager.Request(srcUri);
-        downloadReq.setDestinationUri(destUri);
-        downloadReq.addRequestHeader(AUTHORIZATION, BEARER + authToken);
-        downloadReq.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
-        downloadReq.setVisibleInDownloadsUi(false);
-        final DownloadManager downloadManager = (DownloadManager) SalesforceSDKManager.getInstance().getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
-        if (downloadManager != null) {
-            downloadManager.enqueue(downloadReq);
-        }
+
+        // Checks if DownloadManager is enabled on the device, to ensure it doesn't crash.
+        final PackageManager pm = SalesforceSDKManager.getInstance().getAppContext().getPackageManager();
+        int state = pm.getApplicationEnabledSetting("com.android.providers.downloads");
+        if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+			final DownloadManager.Request downloadReq = new DownloadManager.Request(srcUri);
+			downloadReq.setDestinationUri(destUri);
+			downloadReq.addRequestHeader(AUTHORIZATION, BEARER + authToken);
+			downloadReq.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
+			downloadReq.setVisibleInDownloadsUi(false);
+			final DownloadManager downloadManager = (DownloadManager) SalesforceSDKManager.getInstance().getAppContext().getSystemService(Context.DOWNLOAD_SERVICE);
+			if (downloadManager != null) {
+				downloadManager.enqueue(downloadReq);
+			}
+		}
     }
 
 	/**
@@ -565,7 +681,7 @@ public class UserAccount {
 
     @Override
     public boolean equals(Object object) {
-        if (object == null || !(object instanceof UserAccount)) {
+        if (!(object instanceof UserAccount)) {
             return false;
         }
         final UserAccount userAccount = (UserAccount) object;
@@ -573,11 +689,8 @@ public class UserAccount {
         		|| userAccount.getOrgId() == null) {
         	return false;
         }
-        if (userAccount.getUserId().equals(userId) && userAccount.getOrgId().equals(orgId)) {
-        	return true;
-        }
-        return false;
-    }
+		return (userAccount.getUserId().equals(userId) && userAccount.getOrgId().equals(orgId));
+	}
 
     @Override
     public int hashCode() {
@@ -610,6 +723,13 @@ public class UserAccount {
 			object.put(EMAIL, email);
             object.put(PHOTO_URL, photoUrl);
             object.put(THUMBNAIL_URL, thumbnailUrl);
+            object.put(LIGHTNING_DOMAIN, lightningDomain);
+            object.put(LIGHTNING_SID, lightningSid);
+            object.put(VF_DOMAIN, vfDomain);
+            object.put(VF_SID, vfSid);
+            object.put(CONTENT_DOMAIN, contentDomain);
+            object.put(CONTENT_SID, contentSid);
+            object.put(CSRF_TOKEN, csrfToken);
             object = MapUtil.addMapToJSONObject(additionalOauthValues,
                     SalesforceSDKManager.getInstance().getAdditionalOauthKeys(), object);
     	} catch (JSONException e) {
@@ -642,6 +762,13 @@ public class UserAccount {
 		object.putString(EMAIL, email);
         object.putString(PHOTO_URL, photoUrl);
         object.putString(THUMBNAIL_URL, thumbnailUrl);
+		object.putString(LIGHTNING_DOMAIN, lightningDomain);
+		object.putString(LIGHTNING_SID, lightningSid);
+		object.putString(VF_DOMAIN, vfDomain);
+		object.putString(VF_SID, vfSid);
+		object.putString(CONTENT_DOMAIN, contentDomain);
+		object.putString(CONTENT_SID, contentSid);
+		object.putString(CSRF_TOKEN, csrfToken);
         object = MapUtil.addMapToBundle(additionalOauthValues,
                 SalesforceSDKManager.getInstance().getAdditionalOauthKeys(), object);
     	return object;
@@ -649,7 +776,7 @@ public class UserAccount {
 
     private File getProfilePhotoFile() {
         final String filename = PROFILE_PHOTO_PATH_PREFIX + getUserLevelFilenameSuffix() + JPG;
-        return (new File(SalesforceSDKManager.getInstance().getAppContext().getExternalCacheDir(),
-                filename));
+        File baseDir = SalesforceSDKManager.getInstance().getAppContext().getExternalCacheDir();
+        return baseDir != null ? new File(baseDir, filename) : null;
     }
 }

@@ -41,16 +41,6 @@ parse_opts ()
         OPT_OS="all"
     fi
 
-    valid_branch_regex='^[a-zA-Z0-9_][a-zA-Z0-9_]*(/[a-zA-Z0-9_][a-zA-Z0-9_]*)?$'
-    if [[ "${OPT_BRANCH}" =~ $valid_branch_regex ]]
-    then
-   	    # No action
-    	:
-   	else
-    	echo "${OPT_BRANCH} is not a valid branch name.  Should be in the format <[remote/]branch name>"
-      	exit 2
-	fi
-
     valid_ios_regex='^i[oO][sS]$'
     valid_android_regex='^[aA]ndroid$'
     valid_all_regex='^all$'
@@ -72,52 +62,35 @@ get_root_folder ()
     echo "${parent_folder}"
 }
 
-update_branch ()
-{
-    trimmed_branch_name=`echo "${OPT_BRANCH}" | sed 's/\///g'`
-    if [ "${trimmed_branch_name}" == "${OPT_BRANCH}" ]
-    then
-        # Not a remote branch, so update the local one.
-        echo "Updating ${OPT_BRANCH} from origin."
-        git merge origin/${OPT_BRANCH}
-    fi
-    git submodule init
-    git submodule sync
-    git submodule update --init --recursive
-}
-
 update_repo ()
 {
     local repo_dir=$1
     local git_repo_url=$2
+    local git_branch=${OPT_BRANCH}
 
     if [ ! -d "$repo_dir" ]
     then
-        echo "Cloning $git_repo_url into $repo_dir"
-        git clone ${git_repo_url} ${repo_dir}
-        cd ${repo_dir}
+        echo "Cloning $git_repo_url at $git_branch into $repo_dir"
+        git clone --branch $git_branch --single-branch --depth 1 $git_repo_url $repo_dir
     else
-        echo "Found repo at $repo_dir.  Fetching the latest"
-        cd ${repo_dir}
-        git fetch origin
+        echo "Found repo at $repo_dir.  Remove and run update.sh again."
+        exit 2
     fi
-
-    echo "Checking out the ${OPT_BRANCH} branch."
-    git checkout ${OPT_BRANCH}
-    update_branch
-    cd ${ROOT_FOLDER}
 }
 
 ROOT_FOLDER=$(get_root_folder)
 ANDROID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Android.git"
 ANDROID_SDK_FOLDER="SalesforceMobileSDK-Android"
-IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid.git"
-IOS_SDK_FOLDER="SalesforceMobileSDK-iOS-Hybrid"
+IOS_HYBRID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid.git"
+IOS_HYBRID_SDK_FOLDER="SalesforceMobileSDK-iOS-Hybrid"
+IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git"
+IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
 SHARED_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Shared.git"
 SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 
 update_ios_repo ()
 {   
+    update_repo "${IOS_HYBRID_SDK_FOLDER}" "${IOS_HYBRID_SDK_REPO_PATH}"
     update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
     cd ${ROOT_FOLDER}
 }
@@ -146,16 +119,16 @@ copy_ios_sdk()
 {
     echo "*** iOS ***"
     echo "Copying AppDelegate+SalesforceHybridSDK"    
-    cp $IOS_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  src/ios/classes
-    cp $IOS_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
-    cp $IOS_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  src/ios/classes
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
     echo "Copying Images.xcassets"
-    cp -RL $IOS_SDK_FOLDER/external/SalesforceMobileSDK-iOS/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
+    cp -RL $IOS_SDK_FOLDER/shared/resources/Images.xcassets src/ios/resources/Images.xcassets
     echo "Copying SalesforceSDKAssets.xcassets"
-    cp -RL $IOS_SDK_FOLDER/external/SalesforceMobileSDK-iOS/shared/resources/SalesforceSDKAssets.xcassets src/ios/resources/SalesforceSDKAssets.xcassets
+    cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKAssets.xcassets src/ios/resources/SalesforceSDKAssets.xcassets
     echo "Copying SalesforceSDKResources.bundle"
-    cp -RL $IOS_SDK_FOLDER/external/SalesforceMobileSDK-iOS/shared/resources/SalesforceSDKResources.bundle src/ios/resources/
+    cp -RL $IOS_SDK_FOLDER/shared/resources/SalesforceSDKResources.bundle src/ios/resources/
 }
 
 copy_android_sdk()
@@ -248,5 +221,6 @@ cp $SHARED_SDK_FOLDER/gen/plugins/com.salesforce/*.js www/
 echo "*** Cleanup ***"
 cd ${ROOT_FOLDER}
 rm -rf $ANDROID_SDK_FOLDER
+rm -rf $IOS_HYBRID_SDK_FOLDER
 rm -rf $IOS_SDK_FOLDER
 rm -rf $SHARED_SDK_FOLDER

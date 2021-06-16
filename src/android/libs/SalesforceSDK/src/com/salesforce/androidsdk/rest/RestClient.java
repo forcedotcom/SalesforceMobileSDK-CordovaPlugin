@@ -67,13 +67,13 @@ public class RestClient {
 	private static final String COMMUNITY_URL = "communityUrl";
 	private static final String TAG = "RestClient";
 
-	private static Map<String, OAuthRefreshInterceptor> OAUTH_REFRESH_INTERCEPTORS = new HashMap<>();
-	private static Map<String, OkHttpClient.Builder> OK_CLIENT_BUILDERS = new HashMap<>();
-    private static Map<String, OkHttpClient> OK_CLIENTS = new HashMap<>();
+	private static final Map<String, OAuthRefreshInterceptor> OAUTH_REFRESH_INTERCEPTORS = new HashMap<>();
+	private static final Map<String, OkHttpClient.Builder> OK_CLIENT_BUILDERS = new HashMap<>();
+    private static final Map<String, OkHttpClient> OK_CLIENTS = new HashMap<>();
 
-	private ClientInfo clientInfo;
-    private HttpAccess httpAccessor;
-	private AuthTokenProvider authTokenProvider;
+	private final ClientInfo clientInfo;
+    private final HttpAccess httpAccessor;
+	private final AuthTokenProvider authTokenProvider;
     private OAuthRefreshInterceptor oAuthRefreshInterceptor;
 	private OkHttpClient.Builder okHttpClientBuilder;
 	private OkHttpClient okHttpClient;
@@ -320,7 +320,6 @@ public class RestClient {
         final Request.Builder builder =  new Request.Builder()
                 .url(HttpUrl.get(oAuthRefreshInterceptor.clientInfo.resolveUrl(restRequest)))
                 .method(restRequest.getMethod().toString(), restRequest.getRequestBody());
-        oAuthRefreshInterceptor.setShouldRefreshOn403(restRequest.getShouldRefreshOn403());
 
         // Adding additional headers
         final Map<String, String> additionalHttpHeaders = restRequest.getAdditionalHttpHeaders();
@@ -410,6 +409,13 @@ public class RestClient {
 		public final String email;
 		public final String photoUrl;
 		public final String thumbnailUrl;
+		public final String lightningDomain;
+		public final String lightningSid;
+		public final String vfDomain;
+		public final String vfSid;
+		public final String contentDomain;
+		public final String contentSid;
+		public final String csrfToken;
 		public final Map<String, String> additionalOauthValues;
 
 		/**
@@ -431,12 +437,21 @@ public class RestClient {
          * @param photoUrl Photo URL.
          * @param thumbnailUrl Thumbnail URL.
          * @param additionalOauthValues Additional OAuth values.
+		 * @param lightningDomain Lightning domain.
+		 * @param lightningSid Lightning SID.
+		 * @param vfDomain VF domain.
+		 * @param vfSid VF SID.
+		 * @param contentDomain Content domain.
+		 * @param contentSid Content SID.
+		 * @param csrfToken CSRF token.
 		 */
 		public ClientInfo(URI instanceUrl, URI loginUrl,
 				URI identityUrl, String accountName, String username,
 				String userId, String orgId, String communityId, String communityUrl,
 				String firstName, String lastName, String displayName, String email,
-				String photoUrl, String thumbnailUrl, Map<String, String> additionalOauthValues) {
+				String photoUrl, String thumbnailUrl, Map<String, String> additionalOauthValues,
+				String lightningDomain, String lightningSid, String vfDomain, String vfSid,
+				String contentDomain, String contentSid, String csrfToken) {
 			this.instanceUrl = instanceUrl;
 			this.loginUrl = loginUrl;
 			this.identityUrl = identityUrl;
@@ -453,6 +468,13 @@ public class RestClient {
 			this.photoUrl = photoUrl;
 			this.thumbnailUrl = thumbnailUrl;
             this.additionalOauthValues = additionalOauthValues;
+            this.lightningDomain = lightningDomain;
+            this.lightningSid = lightningSid;
+            this.vfDomain = vfDomain;
+            this.vfSid = vfSid;
+            this.contentDomain = contentDomain;
+            this.contentSid = contentSid;
+            this.csrfToken = csrfToken;
 		}
 
         /**
@@ -481,7 +503,14 @@ public class RestClient {
               .append("     email: ").append(email).append("\n")
               .append("     photoUrl: ").append(photoUrl).append("\n")
               .append("     thumbnailUrl: ").append(thumbnailUrl).append("\n")
-              .append("     additionalOauthValues: ").append(additionalOauthValues).append("\n")
+			  .append("     lightningDomain: ").append(lightningDomain).append("\n")
+			  .append("     lightningSid: ").append(lightningSid).append("\n")
+			  .append("     vfDomain: ").append(vfDomain).append("\n")
+			  .append("     vfSid: ").append(vfSid).append("\n")
+			  .append("     contentDomain: ").append(contentDomain).append("\n")
+			  .append("     contentSid: ").append(contentSid).append("\n")
+			  .append("     csrfToken: ").append(csrfToken).append("\n")
+			  .append("     additionalOauthValues: ").append(additionalOauthValues).append("\n")
 			  .append("  }\n");
 			return sb.toString();
 		}
@@ -593,7 +622,9 @@ public class RestClient {
         public UnauthenticatedClientInfo() {
             super(null, null, null, null, null,
                     null, null, null, null, null,
-                    null, null, null, null, null, null);
+                    null, null, null, null, null,
+					null, null, null, null,
+					null, null, null, null);
         }
 
         @Override
@@ -627,7 +658,6 @@ public class RestClient {
         private final AuthTokenProvider authTokenProvider;
         private String authToken;
         private ClientInfo clientInfo;
-        private boolean shouldRefreshOn403 = true;
 
         /**
          * Constructs a SalesforceHttpInterceptor with the given clientInfo, authToken and authTokenProvider.
@@ -653,49 +683,40 @@ public class RestClient {
             request = buildAuthenticatedRequest(request);
             Response response = chain.proceed(request);
 			int responseCode = response.code();
-			boolean refreshRequired = shouldRefreshOn403 ? (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED
-                    || responseCode == HttpURLConnection.HTTP_FORBIDDEN) : (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED);
 
 			/*
-			 * Standard access token expiry returns 401 as the error code. However, some APIs
-			 * return 403 as the error code when an instance split or migration occurs.
+			 * Standard access token expiry returns 401 as the error code.
 			 */
-            if (refreshRequired) {
-                refreshAccessToken();
-                if (getAuthToken() != null) {
-                    request = buildAuthenticatedRequest(request);
-					HttpUrl currentInstanceUrl = HttpUrl.get(clientInfo.getInstanceUrl());
-					if (currentInstanceUrl != null && currentInstanceUrl.host() != null) {
+            if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+				final URI curInstanceUrl = clientInfo.getInstanceUrl();
+				if (curInstanceUrl != null) {
+					final HttpUrl currentInstanceUrl = HttpUrl.get(curInstanceUrl);
+					if (currentInstanceUrl != null) {
 
-						// This happens during instance migration. hosts could change
-						// In that case, the new host should replace the old host in the request object
-						if (!currentInstanceUrl.host().equals(request.url().host())) {
-							request = adjustHostInRequest(request, currentInstanceUrl.host());
+						// Checks if the host of the request is the same as instance URL.
+						boolean isHostInstanceUrl = currentInstanceUrl.host().equals(request.url().host());
+						refreshAccessToken();
+						if (getAuthToken() != null) {
+							request = buildAuthenticatedRequest(request);
+
+							/*
+							 * During instance migration, the instance URL could change. Hence, the host
+							 * needs to be adjusted to replace the old instance URL with the new instance
+							 * URL before replaying this request. However, this adjustment should be applied
+							 * only if the host of the request was the old instance URL. This avoids
+							 * accidental manipulation of the host for requests where the caller has
+							 * passed in their own fully formed host URL that is not instance URL.
+							 */
+							if (isHostInstanceUrl && !currentInstanceUrl.host().equals(request.url().host())) {
+								request = adjustHostInRequest(request, currentInstanceUrl.host());
+							}
+							response.close();
+							response = chain.proceed(request);
 						}
 					}
-                    response.close();
-                    response = chain.proceed(request);
-                }
+				}
             }
             return response;
-        }
-
-        /**
-         * Returns whether the SDK should attempt to refresh tokens if the service returns HTTP 403.
-         *
-         * @return True - if the SDK should refresh on HTTP 403, False - otherwise.
-         */
-        public boolean getShouldRefreshOn403() {
-            return shouldRefreshOn403;
-        }
-
-        /**
-         * Sets whether the SDK should attempt to refresh tokens if the service returns HTTP 403.
-         *
-         * @param shouldRefreshOn403 True - if the SDK should refresh on HTTP 403, False - otherwise.
-         */
-        public synchronized void setShouldRefreshOn403(boolean shouldRefreshOn403) {
-            this.shouldRefreshOn403 = shouldRefreshOn403;
         }
 
 		/**
@@ -801,7 +822,10 @@ public class RestClient {
                                 clientInfo.userId, clientInfo.orgId, clientInfo.communityId,
                                 clientInfo.communityUrl, clientInfo.firstName, clientInfo.lastName,
                                 clientInfo.displayName, clientInfo.email, clientInfo.photoUrl,
-                                clientInfo.thumbnailUrl, clientInfo.additionalOauthValues);
+                                clientInfo.thumbnailUrl, clientInfo.additionalOauthValues,
+								clientInfo.lightningDomain, clientInfo.lightningSid,
+								clientInfo.vfDomain, clientInfo.vfSid,
+								clientInfo.contentDomain, clientInfo.contentSid, clientInfo.csrfToken);
                     } catch (URISyntaxException ex) {
                         SalesforceSDKLogger.w(TAG, "Invalid server URL", ex);
                     }

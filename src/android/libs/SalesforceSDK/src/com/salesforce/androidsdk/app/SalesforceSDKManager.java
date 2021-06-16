@@ -108,7 +108,7 @@ public class SalesforceSDKManager {
     /**
      * Current version of this SDK.
      */
-    public static final String SDK_VERSION = "8.1.0";
+    public static final String SDK_VERSION = "9.1.0";
 
     /**
      * Intent action meant for instances of SalesforceSDKManager residing in other processes
@@ -145,7 +145,7 @@ public class SalesforceSDKManager {
 
     protected Context context;
     private LoginOptions loginOptions;
-    private Class<? extends Activity> mainActivityClass;
+    private final Class<? extends Activity> mainActivityClass;
     private Class<? extends Activity> loginActivityClass = LoginActivity.class;
     private Class<? extends PasscodeActivity> passcodeActivityClass = PasscodeActivity.class;
     private Class<? extends AccountSwitcherActivity> switcherActivityClass = AccountSwitcherActivity.class;
@@ -157,8 +157,8 @@ public class SalesforceSDKManager {
     private AdminPermsManager adminPermsManager;
     private PushNotificationInterface pushNotificationInterface;
     private Class<? extends PushService> pushServiceType = PushService.class;
-    private String uid; // device id
-    private SortedSet<String> features;
+    private final String uid; // device id
+    private final SortedSet<String> features;
     private List<String> additionalOauthKeys;
     private String loginBrand;
     private boolean browserLoginEnabled;
@@ -178,7 +178,7 @@ public class SalesforceSDKManager {
     /**
      * PasscodeManager object lock.
      */
-    private Object passcodeManagerLock = new Object();
+    private final Object passcodeManagerLock = new Object();
 
     /**
      * Dev support
@@ -777,7 +777,7 @@ public class SalesforceSDKManager {
     protected void startLoginPage() {
 
         // Clears cookies.
-    	removeAllCookies();
+        CookieManager.getInstance().removeAllCookies(null);
 
         // Restarts the application.
         final Intent i = new Intent(context, getMainActivityClass());
@@ -792,7 +792,7 @@ public class SalesforceSDKManager {
     public void startSwitcherActivityIfRequired() {
 
         // Clears cookies.
-    	removeAllCookies();
+        CookieManager.getInstance().removeAllCookies(null);
 
         /*
          * If the number of accounts remaining is 0, shows the login page.
@@ -1007,11 +1007,12 @@ public class SalesforceSDKManager {
      * @return The user agent string to use for all requests.
      */
     public String getUserAgent(String qualifier) {
-        String appName = provideAppName();
-        String appTypeWithQualifier = getAppType() + qualifier;
-        return String.format("SalesforceMobileSDK/%s android mobile/%s (%s) %s/%s %s uid_%s ftr_%s",
+        final String appName = provideAppName();
+        final String appTypeWithQualifier = getAppType() + qualifier;
+        return String.format("SalesforceMobileSDK/%s android mobile/%s (%s) %s/%s %s uid_%s ftr_%s SecurityPatch/%s",
                 SDK_VERSION, Build.VERSION.RELEASE, Build.MODEL, appName, getAppVersion(),
-                appTypeWithQualifier, uid, TextUtils.join(".", features));
+                appTypeWithQualifier, uid, TextUtils.join(".", features),
+                Build.VERSION.SECURITY_PATCH);
     }
 
     /**
@@ -1102,6 +1103,16 @@ public class SalesforceSDKManager {
     }
 
     /**
+     * Returns the legacy encryption key. This should be called only as a means to migrate to the new key.
+     *
+     * @return Legacy encryption key.
+     * @deprecated Will be removed in Mobile SDK 10.0.
+     */
+    public static String getLegacyEncryptionKey() {
+        return SalesforceKeyGenerator.getLegacyEncryptionKey(INTERNAL_ENTROPY);
+    }
+
+    /**
      * Returns the encryption key being used.
      *
      * @return Encryption key.
@@ -1188,18 +1199,26 @@ public class SalesforceSDKManager {
         return new ClientManager(getAppContext(), getAccountType(), getLoginOptions(jwt, url), true);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 10.0.
+     */
 	public void removeAllCookies() {
 		CookieManager.getInstance().removeAllCookies(null);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 10.0.
+     */
 	public void removeSessionCookies() {
         CookieManager.getInstance().removeSessionCookies(null);
     }
 
+    /**
+     * @deprecated Will be removed in Mobile SDK 10.0.
+     */
 	public void syncCookies() {
         CookieManager.getInstance().flush();
     }
-
 
     /**
      * Show dev support dialog
@@ -1363,7 +1382,7 @@ public class SalesforceSDKManager {
         public void onReceive(Context context, Intent intent) {
             if (intent != null
                     && SalesforceSDKManager.CLEANUP_INTENT_ACTION.equals(intent.getAction())
-                    && !intent.getStringExtra(PROCESS_ID_KEY).equals(PROCESS_ID)) {
+                    && !PROCESS_ID.equals(intent.getStringExtra(PROCESS_ID_KEY))) {
                 UserAccount userAccount = null;
                 if (intent.hasExtra(USER_ACCOUNT)) {
                     userAccount = new UserAccount(intent.getBundleExtra(USER_ACCOUNT));
@@ -1400,7 +1419,7 @@ public class SalesforceSDKManager {
      */
     private Object getBuildConfigValue(Context context, String fieldName) {
         try {
-            Class<?> clazz = Class.forName(context.getPackageName() + ".BuildConfig");
+            Class<?> clazz = Class.forName(context.getClass().getPackage().getName() + ".BuildConfig");
             Field field = clazz.getField(fieldName);
             return field.get(null);
         } catch (Exception e) {

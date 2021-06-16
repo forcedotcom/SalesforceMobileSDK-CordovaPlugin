@@ -44,12 +44,15 @@ import android.security.KeyChainAliasCallback;
 import android.security.KeyChainException;
 import android.text.TextUtils;
 import android.webkit.ClientCertRequest;
+import android.webkit.CookieManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.salesforce.androidsdk.R;
 import com.salesforce.androidsdk.accounts.UserAccount;
@@ -87,8 +90,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import androidx.browser.customtabs.CustomTabsIntent;
 
 /**
  * Helper class to manage a WebView instance that is going through the OAuth login process.
@@ -134,18 +135,43 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
     }
 
     /**
-     * Construct a new OAuthWebviewHelper and perform the initial configuration of the Webview.
+     * Constructs a new OAuthWebviewHelper and perform the initial configuration of the web view.
+     *
+     * @param activity Activity that's using this.
+     * @param callback Callback to be triggered.
+     * @param options Login options.
+     * @param webview Webview instance.
+     * @param savedInstanceState Bundle of saved instance.
      */
 	public OAuthWebviewHelper(Activity activity, OAuthWebviewHelperEvents callback,
 			LoginOptions options, WebView webview, Bundle savedInstanceState) {
+        this(activity, callback, options, webview, savedInstanceState, true);
+	}
+
+    /**
+     * Constructs a new OAuthWebviewHelper and perform the initial configuration of the web view.
+     *
+     * @param activity Activity that's using this.
+     * @param callback Callback to be triggered.
+     * @param options Login options.
+     * @param webview Webview instance.
+     * @param savedInstanceState Bundle of saved instance.
+     * @param shouldReloadPage True - if page should be reloaded on relaunch, False - otherwise.
+     */
+    public OAuthWebviewHelper(Activity activity, OAuthWebviewHelperEvents callback, LoginOptions options,
+                              WebView webview, Bundle savedInstanceState, boolean shouldReloadPage) {
         assert options != null && callback != null && webview != null && activity != null;
         this.activity = activity;
         this.callback = callback;
         this.loginOptions = options;
         this.webview = webview;
+        this.shouldReloadPage = shouldReloadPage;
         final WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webSettings.setUserAgentString(SalesforceSDKManager.getInstance().getUserAgent());
+        String origUserAgent = webSettings.getUserAgentString();
+        origUserAgent = (origUserAgent == null) ? "" : origUserAgent;
+        final String msdkUserAgent = SalesforceSDKManager.getInstance().getUserAgent();
+        webSettings.setUserAgentString(String.format("%s %s", msdkUserAgent, origUserAgent));
         webview.setWebViewClient(makeWebViewClient());
         webview.setWebChromeClient(makeWebChromeClient());
 
@@ -160,15 +186,16 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
         } else {
             clearCookies();
         }
-	}
+    }
 
     private final OAuthWebviewHelperEvents callback;
     protected final LoginOptions loginOptions;
     private final WebView webview;
     private AccountOptions accountOptions;
-    private Activity activity;
+    private final Activity activity;
     private PrivateKey key;
     private X509Certificate[] certChain;
+    private final boolean shouldReloadPage;
 
     public void saveState(Bundle outState) {
         webview.saveState(outState);
@@ -182,8 +209,20 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
         return webview;
     }
 
+    /**
+     * Returns whether the login page should be reloaded when the app is backgrounded and
+     * foregrounded. By default, this is set to 'true' in the SDK, in order to support various
+     * supported OAuth flows. Subclasses may override this for cases where they need to
+     * display the page as-is, such as TBID or social login pages where a code is typed in.
+     *
+     * @return True - if the page should be reloaded, False - otherwise.
+     */
+    protected boolean shouldReloadPage() {
+        return shouldReloadPage;
+    }
+
     public void clearCookies() {
-    	SalesforceSDKManager.getInstance().removeAllCookies();
+        CookieManager.getInstance().removeAllCookies(null);
     }
 
     public void clearView() {
@@ -213,31 +252,9 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
      * @param e Exception.
      */
     protected void onAuthFlowError(String error, String errorDesc, Exception e) {
-        SalesforceSDKLogger.w(TAG, error + ": " + errorDesc, e);
+        SalesforceSDKLogger.e(TAG, error + ": " + errorDesc, e);
 
-        // look for deny. kick them back to login, so clear cookies and repoint browser
-        if ("access_denied".equals(error)
-                && "end-user denied authorization".equals(errorDesc)) {
-            webview.post(new Runnable() {
-
-                @Override
-                public void run() {
-                    clearCookies();
-                    loadLoginPage();
-                }
-            });
-        } else {
-            Toast t = Toast.makeText(webview.getContext(), error + " : " + errorDesc,
-                    Toast.LENGTH_LONG);
-            webview.postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-                    callback.finish(null);
-                }
-            }, t.getDuration());
-            t.show();
-        }
+        // Broadcast a notification that the auth flow failed.
         final Intent intent = new Intent(AUTHENTICATION_FAILED_INTENT);
         if (e instanceof OAuth2.OAuthFailedException) {
             final OAuth2.OAuthFailedException exception = (OAuth2.OAuthFailedException) e;
@@ -252,6 +269,19 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
             }
         }
         SalesforceSDKManager.getInstance().getAppContext().sendBroadcast(intent);
+
+        // Displays the error in a Toast and reloads the login page after clearing cookies.
+        final Toast t = Toast.makeText(webview.getContext(), error + " : " + errorDesc,
+                Toast.LENGTH_LONG);
+        webview.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                clearCookies();
+                loadLoginPage();
+            }
+        }, t.getDuration());
+        t.show();
     }
 
     protected void showError(Exception exception) {
@@ -328,7 +358,9 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
          * Prevents Chrome custom tab from staying in the activity history stack. This flag
          * ensures that Chrome custom tab is dismissed once the login process is complete.
          */
-        customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        if (shouldReloadPage) {
+            customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        }
         try {
             customTabsIntent.launchUrl(activity, url);
         } catch (ActivityNotFoundException e) {
@@ -558,7 +590,9 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
             accountOptions = new AccountOptions(id.username, tr.refreshToken,
                     tr.authToken, tr.idUrl, tr.instanceUrl, tr.orgId, tr.userId,
                     tr.communityId, tr.communityUrl, id.firstName, id.lastName,
-                    id.displayName, id.email, id.pictureUrl, id.thumbnailUrl, tr.additionalOauthValues);
+                    id.displayName, id.email, id.pictureUrl, id.thumbnailUrl, tr.additionalOauthValues,
+                    tr.lightningDomain, tr.lightningSid, tr.vfDomain, tr.vfSid, tr.contentDomain,
+                    tr.contentSid, tr.csrfToken);
 
             // Sets additional admin prefs, if they exist.
             final UserAccount account = UserAccountBuilder.getInstance().authToken(accountOptions.authToken).
@@ -570,7 +604,11 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
                     firstName(accountOptions.firstName).lastName(accountOptions.lastName).
                     displayName(accountOptions.displayName).email(accountOptions.email).
                     photoUrl(accountOptions.photoUrl).thumbnailUrl(accountOptions.thumbnailUrl).
-                    additionalOauthValues(accountOptions.additionalOauthValues).build();
+                    lightningDomain(accountOptions.lightningDomain).lightningSid(accountOptions.lightningSid).
+                    vfDomain(accountOptions.vfDomain).vfSid(accountOptions.vfSid).
+                    contentDomain(accountOptions.contentDomain).contentSid(accountOptions.contentSid).
+                    csrfToken(accountOptions.csrfToken).additionalOauthValues(accountOptions.additionalOauthValues).
+                    build();
             account.downloadProfilePhoto();
             if (id.customAttributes != null) {
                 mgr.getAdminSettingsManager().setPrefs(id.customAttributes, account);
@@ -587,13 +625,13 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
 
                 // Stores the mobile policy for the org.
                 final PasscodeManager passcodeManager = mgr.getPasscodeManager();
-                passcodeManager.storeMobilePolicyForOrg(account, id.screenLockTimeout * 1000 * 60, id.pinLength, id.biometricUnlockAlowed);
+                passcodeManager.storeMobilePolicyForOrg(account, id.screenLockTimeout * 1000 * 60, id.pinLength, id.biometricUnlockAllowed);
                 passcodeManager.setTimeoutMs(id.screenLockTimeout * 1000 * 60);
                 // NB setPasscodeLength(...)
                 //    If there was a passcode and the length is increased, the passcode manager will remember that a passcode change is required
                 //    The next SalesforceActivity to resume, will cause the locking screen to popup in passcode change mode
                 passcodeManager.setPasscodeLength((Activity) getContext(), id.pinLength);
-                passcodeManager.setBiometricAllowed((Activity) getContext(), id.biometricUnlockAlowed);
+                passcodeManager.setBiometricAllowed((Activity) getContext(), id.biometricUnlockAllowed);
             }
 
             // No screen lock required or no mobile policy specified.
@@ -660,7 +698,14 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
                 accountOptions.email,
                 accountOptions.photoUrl,
                 accountOptions.thumbnailUrl,
-                accountOptions.additionalOauthValues);
+                accountOptions.additionalOauthValues,
+                accountOptions.lightningDomain,
+                accountOptions.lightningSid,
+                accountOptions.vfDomain,
+                accountOptions.vfSid,
+                accountOptions.contentDomain,
+                accountOptions.contentSid,
+                accountOptions.csrfToken);
 
     	/*
     	 * Registers for push notifications, if push notification client ID is present.
@@ -741,6 +786,13 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
         private static final String EMAIL = "email";
         private static final String PHOTO_URL = "photoUrl";
         private static final String THUMBNAIL_URL = "thumbnailUrl";
+        private static final String LIGHTNING_DOMAIN = "lightning_domain";
+        private static final String LIGHTNING_SID = "lightning_sid";
+        private static final String VF_DOMAIN = "visualforce_domain";
+        private static final String VF_SID = "visualforce_sid";
+        private static final String CONTENT_DOMAIN = "content_domain";
+        private static final String CONTENT_SID = "content_sid";
+        private static final String CSRF_TOKEN = "csrf_token";
 
         public final String username;
         public final String refreshToken;
@@ -758,13 +810,22 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
         public final String photoUrl;
         public final String thumbnailUrl;
         public final Map<String, String> additionalOauthValues;
+        public final String lightningDomain;
+        public final String lightningSid;
+        public final String vfDomain;
+        public final String vfSid;
+        public final String contentDomain;
+        public final String contentSid;
+        public final String csrfToken;
         private Bundle bundle;
 
         public AccountOptions(String username, String refreshToken,
                 String authToken, String identityUrl, String instanceUrl,
                 String orgId, String userId, String communityId, String communityUrl,
                 String firstName, String lastName, String displayName, String email,
-                String photoUrl, String thumbnailUrl, Map<String, String> additionalOauthValues) {
+                String photoUrl, String thumbnailUrl, Map<String, String> additionalOauthValues,
+                String lightningDomain, String lightningSid, String vfDomain, String vfSid,
+                String contentDomain, String contentSid, String csrfToken) {
             super();
             this.username = username;
             this.refreshToken = refreshToken;
@@ -782,6 +843,13 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
             this.photoUrl = photoUrl;
             this.thumbnailUrl = thumbnailUrl;
             this.additionalOauthValues = additionalOauthValues;
+            this.lightningDomain = lightningDomain;
+            this.lightningSid = lightningSid;
+            this.vfDomain = vfDomain;
+            this.vfSid = vfSid;
+            this.contentDomain = contentDomain;
+            this.contentSid = contentSid;
+            this.csrfToken = csrfToken;
             bundle = new Bundle();
             bundle.putString(USERNAME, username);
             bundle.putString(REFRESH_TOKEN, refreshToken);
@@ -798,6 +866,13 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
             bundle.putString(EMAIL, email);
             bundle.putString(PHOTO_URL, photoUrl);
             bundle.putString(THUMBNAIL_URL, thumbnailUrl);
+            bundle.putString(LIGHTNING_DOMAIN, lightningDomain);
+            bundle.putString(LIGHTNING_SID, lightningSid);
+            bundle.putString(VF_DOMAIN, vfDomain);
+            bundle.putString(VF_SID, vfSid);
+            bundle.putString(CONTENT_DOMAIN, contentDomain);
+            bundle.putString(CONTENT_SID, contentSid);
+            bundle.putString(CSRF_TOKEN, csrfToken);
             bundle = MapUtil.addMapToBundle(additionalOauthValues,
                     SalesforceSDKManager.getInstance().getAdditionalOauthKeys(), bundle);
         }
@@ -826,7 +901,14 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
                     options.getString(EMAIL),
                     options.getString(PHOTO_URL),
                     options.getString(THUMBNAIL_URL),
-                    getAdditionalOauthValues(options)
+                    getAdditionalOauthValues(options),
+                    options.getString(LIGHTNING_DOMAIN),
+                    options.getString(LIGHTNING_SID),
+                    options.getString(VF_DOMAIN),
+                    options.getString(VF_SID),
+                    options.getString(CONTENT_DOMAIN),
+                    options.getString(CONTENT_SID),
+                    options.getString(CSRF_TOKEN)
                     );
         }
 

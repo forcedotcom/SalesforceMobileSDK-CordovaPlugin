@@ -26,10 +26,12 @@
  */
 package com.salesforce.androidsdk.rest;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import com.salesforce.androidsdk.rest.BatchRequest.BatchRequestBuilder;
 import com.salesforce.androidsdk.rest.CompositeRequest.CompositeRequestBuilder;
+import com.salesforce.androidsdk.rest.files.ConnectUriBuilder;
 import com.salesforce.androidsdk.util.JSONObjectHelper;
 
 import org.json.JSONArray;
@@ -77,6 +79,7 @@ import okhttp3.RequestBody;
  * <li> composite</li>
  * <li> batch</li>
  * <li> tree</li>
+ * <li> notifications</li>
  * </ul>
  * 
  * It also has constructors to build any arbitrary request.
@@ -112,14 +115,25 @@ public class RestRequest {
     public static final String TYPE = "type";
     public static final String ATTRIBUTES = "attributes";
     public static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+    public static final String SFORCE_QUERY_OPTIONS = "Sforce-Query-Options";
+    public static final String BATCH_SIZE_OPTION = "batchSize";
+    public static final int MIN_BATCH_SIZE = 200;
+    public static final int MAX_BATCH_SIZE = 2000;
+    public static final int DEFAULT_BATCH_SIZE = 2000;
 
     /**
      * HTTP date format
      */
     public static final DateFormat HTTP_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-    static {
+
+	static {
         HTTP_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
+
+	/**
+	 * Salesforce timestamp format.
+	 */
+	public static final DateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US);
 
     /**
 	 * Enumeration for all HTTP methods.
@@ -155,7 +169,8 @@ public class RestRequest {
         OBJECT_LAYOUT(SERVICES_DATA + "%s/ui-api/layout/%s"),
 		COMPOSITE(SERVICES_DATA + "%s/composite"),
         BATCH(SERVICES_DATA + "%s/composite/batch"),
-        SOBJECT_TREE(SERVICES_DATA + "%s/composite/tree/%s");
+        SOBJECT_TREE(SERVICES_DATA + "%s/composite/tree/%s"),
+        NOTIFICATIONS(SERVICES_DATA + "%s/connect/notifications/%s");
 
 		private final String pathTemplate;
 
@@ -174,7 +189,6 @@ public class RestRequest {
 	private final RequestBody requestBody;
 	private final Map<String, String> additionalHttpHeaders;
 	private final JSONObject requestBodyAsJson; // needed for composite and batch requests
-    private boolean shouldRefreshOn403 = true;
 
     /**
      * Generic constructor for arbitrary requests without a body.
@@ -194,7 +208,7 @@ public class RestRequest {
      * @param additionalHttpHeaders Additional headers.
      *
      */
-    public RestRequest(RestMethod method, String path,  Map<String, String> additionalHttpHeaders) {
+    public RestRequest(RestMethod method, String path, Map<String, String> additionalHttpHeaders) {
         this(method, path, (RequestBody) null, additionalHttpHeaders);
     }
 
@@ -248,7 +262,7 @@ public class RestRequest {
      *
      * Note: Use this constructor if requestBody is not null and you want to build a batch or composite request.
      */
-    public RestRequest(RestMethod method, String path, JSONObject requestBodyAsJson,  Map<String, String> additionalHttpHeaders) {
+    public RestRequest(RestMethod method, String path, JSONObject requestBodyAsJson, Map<String, String> additionalHttpHeaders) {
         this(method, RestEndpoint.INSTANCE, path, requestBodyAsJson, additionalHttpHeaders);
     }
 
@@ -329,24 +343,6 @@ public class RestRequest {
 	public Map<String, String> getAdditionalHttpHeaders() {
 		return additionalHttpHeaders;
 	}
-
-    /**
-     * Returns whether the SDK should attempt to refresh tokens if the service returns HTTP 403.
-     *
-     * @return True - if the SDK should refresh on HTTP 403, False - otherwise.
-     */
-	public boolean getShouldRefreshOn403() {
-	    return shouldRefreshOn403;
-    }
-
-    /**
-     * Sets whether the SDK should attempt to refresh tokens if the service returns HTTP 403.
-     *
-     * @param shouldRefreshOn403 True - if the SDK should refresh on HTTP 403, False - otherwise.
-     */
-	public synchronized void setShouldRefreshOn403(boolean shouldRefreshOn403) {
-        this.shouldRefreshOn403 = shouldRefreshOn403;
-    }
 
 	/**
 	 * Request to get information about the user making the request.
@@ -437,7 +433,7 @@ public class RestRequest {
 	 * @throws UnsupportedEncodingException
      * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_sobject_retrieve.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_sobject_retrieve.htm</a>
 	 */
-	public static RestRequest getRequestForRetrieve(String apiVersion, String objectType, String objectId, List<String> fieldList) throws UnsupportedEncodingException  {
+	public static RestRequest getRequestForRetrieve(String apiVersion, String objectType, String objectId, List<String> fieldList) throws UnsupportedEncodingException {
 		StringBuilder path = new StringBuilder(RestAction.RETRIEVE.getPath(apiVersion, objectType, objectId));
 		if (fieldList != null && fieldList.size() > 0) { 
 			path.append("?fields=");
@@ -518,7 +514,7 @@ public class RestRequest {
      * @return              RestRequest object that requests a record deletion.
      * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_sobject_retrieve.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_sobject_retrieve.htm</a>
 	 */
-	public static RestRequest getRequestForDelete(String apiVersion, String objectType, String objectId)  {
+	public static RestRequest getRequestForDelete(String apiVersion, String objectType, String objectId) {
         return new RestRequest(RestMethod.DELETE, RestAction.DELETE.getPath(apiVersion, objectType, objectId));
 	}
 
@@ -531,7 +527,7 @@ public class RestRequest {
 	 * @throws UnsupportedEncodingException
      * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_search.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_search.htm</a>
 	 */
-	public static RestRequest getRequestForSearch(String apiVersion, String q) throws UnsupportedEncodingException  {
+	public static RestRequest getRequestForSearch(String apiVersion, String q) throws UnsupportedEncodingException {
 		StringBuilder path = new StringBuilder(RestAction.SEARCH.getPath(apiVersion));
 		path.append("?q=");
 		path.append(URLEncoder.encode(q, UTF_8));
@@ -541,17 +537,37 @@ public class RestRequest {
 	/**
 	 * Request to execute the specified SOQL query.
 	 *
-     * @param apiVersion    Salesforce API version.
-     * @param q             SOQL query string.
-     * @return              RestRequest object that requests a SOQL query.
+	 * @param apiVersion    Salesforce API version.
+	 * @param q             SOQL query string.
+	 * @return              RestRequest object that requests a SOQL query.
 	 * @throws UnsupportedEncodingException
-     * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_query.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_query.htm</a>
+	 * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_query.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_query.htm</a>
 	 */
-	public static RestRequest getRequestForQuery(String apiVersion, String q) throws UnsupportedEncodingException  {
+	public static RestRequest getRequestForQuery(String apiVersion, String q) throws UnsupportedEncodingException {
+		return getRequestForQuery(apiVersion, q, DEFAULT_BATCH_SIZE);
+	}
+
+	/**
+	 * Request to execute the specified SOQL query.
+	 *
+	 * @param apiVersion    Salesforce API version.
+	 * @param q             SOQL query string.
+	 * @param batchSize     Batch size: number between 200 and 2000 (default).
+	 * @return              RestRequest object that requests a SOQL query.
+	 * @throws UnsupportedEncodingException
+	 * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_query.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_query.htm</a>
+	 */
+	public static RestRequest getRequestForQuery(String apiVersion, String q, int batchSize) throws UnsupportedEncodingException {
 		StringBuilder path = new StringBuilder(RestAction.QUERY.getPath(apiVersion));
 		path.append("?q=");
 		path.append(URLEncoder.encode(q, UTF_8));
-		return new RestRequest(RestMethod.GET, path.toString());
+		batchSize = Math.max(Math.min(batchSize, MAX_BATCH_SIZE), MIN_BATCH_SIZE);
+		Map<String, String> headers = null;
+		if (batchSize != DEFAULT_BATCH_SIZE) {
+			headers = new HashMap<>();
+			headers.put(SFORCE_QUERY_OPTIONS, BATCH_SIZE_OPTION + "=" + batchSize);
+		}
+		return new RestRequest(RestMethod.GET, path.toString(), headers);
 	}
 
 	/**
@@ -561,7 +577,7 @@ public class RestRequest {
      * @return              RestRequest object that requests the search scope and order for the given API version.
 	 * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_search_scope_order.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_search_scope_order.htm</a>
 	 */
-	public static RestRequest getRequestForSearchScopeAndOrder(String apiVersion)  {
+	public static RestRequest getRequestForSearchScopeAndOrder(String apiVersion) {
         return new RestRequest(RestMethod.GET, new StringBuilder(RestAction.SEARCH_SCOPE_AND_ORDER.getPath(apiVersion)).toString());
 	}	
 	
@@ -574,7 +590,7 @@ public class RestRequest {
 	 * @throws UnsupportedEncodingException
      * @see <a href="http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_search_layouts.htm">http://www.salesforce.com/us/developer/docs/api_rest/Content/resources_search_layouts.htm</a>
 	 */
-	public static RestRequest getRequestForSearchResultLayout(String apiVersion, List<String> objectList) throws UnsupportedEncodingException  {
+	public static RestRequest getRequestForSearchResultLayout(String apiVersion, List<String> objectList) throws UnsupportedEncodingException {
 		StringBuilder path = new StringBuilder(RestAction.SEARCH_RESULT_LAYOUT.getPath(apiVersion));
 		path.append("?q=");
 		path.append(URLEncoder.encode(toCsv(objectList).toString(), UTF_8));
@@ -585,17 +601,41 @@ public class RestRequest {
 	 * Request to get object layout data.
 	 *
 	 * @param apiVersion Salesforce API version.
-	 * @param objectType Object type.
-     * @param layoutType Layout type. Could be "Compact" or "Full".
-	 * @return RestRequest object that requests the object layout for the given object and layout types.
+	 * @param objectAPIName Object API name.
+	 * @param formFactor Form factor. Could be "Large", "Medium" or "Small". Default value is "Large".
+	 * @param layoutType Layout type. Could be "Compact" or "Full". Default value is "Full".
+	 * @param mode Mode. Could be "Create", "Edit" or "View". Default value is "View".
+	 * @param recordTypeId Record type ID. Default will be used if not supplied.
+	 * @return RestRequest object that requests the object layout for the given parameters.
 	 * @see <a href="https://developer.salesforce.com/docs/atlas.en-us.uiapi.meta/uiapi/ui_api_resources_record_layout.htm">https://developer.salesforce.com/docs/atlas.en-us.uiapi.meta/uiapi/ui_api_resources_record_layout.htm</a>
 	 */
-	public static RestRequest getRequestForObjectLayout(String apiVersion, String objectType, String layoutType)  {
-		final StringBuilder path = new StringBuilder(RestAction.OBJECT_LAYOUT.getPath(apiVersion, objectType));
+	public static RestRequest getRequestForObjectLayout(String apiVersion, String objectAPIName,
+														String formFactor, String layoutType,
+														String mode, String recordTypeId) {
+		final StringBuilder path = new StringBuilder(RestAction.OBJECT_LAYOUT.getPath(apiVersion, objectAPIName));
+		path.append("?");
+		if (!TextUtils.isEmpty(formFactor)) {
+			path.append("formFactor=");
+			path.append(formFactor);
+			path.append("&");
+		}
 		if (!TextUtils.isEmpty(layoutType)) {
-            path.append("?layoutType=");
-            path.append(layoutType);
-        }
+			path.append("layoutType=");
+			path.append(layoutType);
+			path.append("&");
+		}
+		if (!TextUtils.isEmpty(mode)) {
+			path.append("mode=");
+			path.append(mode);
+			path.append("&");
+		}
+		if (!TextUtils.isEmpty(recordTypeId)) {
+			path.append("recordTypeId=");
+			path.append(recordTypeId);
+		}
+		if (path.charAt(path.length() - 1) == '?' || path.charAt(path.length() - 1) == '&') {
+			path.deleteCharAt(path.length() - 1);
+		}
 		return new RestRequest(RestMethod.GET, path.toString());
 	}
 
@@ -669,6 +709,103 @@ public class RestRequest {
         }
         RequestBody body = RequestBody.create(MEDIA_TYPE_JSON, JSONObjectHelper.makeJSONObject(RECORDS, jsonTrees).toString());
         return new RestRequest(RestMethod.POST, RestAction.SOBJECT_TREE.getPath(apiVersion, objectType), body);
+    }
+
+    /**
+     * Request to get status of notifications for the user.
+     *
+     * @param apiVersion   Salesforce API version.
+     */
+    public static RestRequest getRequestForNotificationsStatus(String apiVersion) {
+        return new RestRequest(RestMethod.GET, RestAction.NOTIFICATIONS.getPath(apiVersion, "status"));
+    }
+
+    /**
+     * Request to get a notification.
+     *
+     * @param apiVersion      Salesforce API version.
+     * @param notificationId  ID of notification.
+     */
+    public static RestRequest getRequestForNotification(String apiVersion, String notificationId) {
+        return new RestRequest(RestMethod.GET, RestAction.NOTIFICATIONS.getPath(apiVersion, notificationId));
+    }
+
+    /**
+     * Request for updating a notification.
+     *
+     * @param apiVersion      Salesforce API version.
+     * @param notificationId  ID of notification.
+     * @param read            Marks notification as read (true) or unread (false). If null, field won't be updated.
+     *                        Required if `seen` not provided.
+     * @param seen            Marks notification as seen (true) or unseen (false). If null, field won't be updated.
+     *                        Required if `read` not provided.
+     */
+    public static RestRequest getRequestForNotificationUpdate(String apiVersion, String notificationId, Boolean read, Boolean seen) {
+        final Map<String, Object> parameters = new HashMap<>();
+        if (read != null) {
+            parameters.put("read", read);
+        }
+        if (seen != null) {
+            parameters.put("seen", seen);
+        }
+        final String path = RestAction.NOTIFICATIONS.getPath(apiVersion, notificationId);
+        return new RestRequest(RestMethod.PATCH, path, new JSONObject(parameters));
+    }
+
+    /**
+     * Request for getting notifications.
+     *
+     * @param apiVersion   Salesforce API version.
+     * @param size         Number of notifications to get.
+     * @param before       Get notifications occurring before the provided date. Shouldn't be used with `after`.
+     * @param after        Get notifications occurring after the provided date. Shouldn't be used with `before`.
+     */
+    public static RestRequest getRequestForNotifications(String apiVersion, Integer size, Date before, Date after) {
+        final Map<String, String> parameters = new HashMap<>();
+        if (size != null) {
+            parameters.put("size", size.toString());
+        }
+        if (before != null) {
+            parameters.put("before", ISO8601_DATE_FORMAT.format(before));
+        }
+        if (after != null) {
+            parameters.put("after", ISO8601_DATE_FORMAT.format(after));
+        }
+
+        final ConnectUriBuilder builder = new ConnectUriBuilder(Uri.parse(RestAction.NOTIFICATIONS.getPath(apiVersion, "")).buildUpon());
+        for (final Map.Entry<String, String> parameter : parameters.entrySet()) {
+            builder.appendQueryParam(parameter.getKey(), parameter.getValue());
+        }
+        return new RestRequest(RestMethod.GET, builder.toString());
+    }
+
+    /**
+     * Request for updating notifications.
+     *
+     * @param apiVersion       Salesforce API version.
+     * @param notificationIds  IDs of notifications to get. Shouldn't be used with `before`.
+     * @param before           Get notifications before the provided date. Shouldn't be used with `notificationIds`.
+     * @param read             Marks notifications as read (true) or unread (false). If null, field won't be updated.
+     *                         Required if `seen` not provided.
+     * @param seen             Marks notifications as seen (true) or unseen (false). If null, field won't be updated.
+     *                         Required if `read` not provided.
+     */
+    public static RestRequest getRequestForNotificationsUpdate(String apiVersion, List<String> notificationIds, Date before, Boolean read, Boolean seen) {
+        final Map<String, Object> parameters = new HashMap<>();
+        if (notificationIds != null) {
+            parameters.put("notificationIds", notificationIds);
+        }
+        if (before != null) {
+            parameters.put("before", ISO8601_DATE_FORMAT.format(before));
+        }
+        if (read != null) {
+            parameters.put("read", read);
+        }
+        if (seen != null) {
+            parameters.put("seen", seen);
+        }
+        final String path = RestAction.NOTIFICATIONS.getPath(apiVersion, "");
+        return new RestRequest(RestMethod.PATCH, path, new JSONObject(parameters));
     }
 
     /**

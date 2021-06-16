@@ -46,8 +46,8 @@ import java.util.Map;
  */
 class PushNotificationDecryptor {
 
-    private static String CONTENT_KEY = "content";
-    private static PushNotificationDecryptor INSTANCE = new PushNotificationDecryptor();
+    private static final String CONTENT_KEY = "content";
+    private static final PushNotificationDecryptor INSTANCE = new PushNotificationDecryptor();
 
     /**
      * Returns a singleton instance of this class.
@@ -60,7 +60,7 @@ class PushNotificationDecryptor {
 
     void onPushMessageReceived(RemoteMessage message) {
         final Map<String, String> data = processNotificationPayload(message.getData());
-        if (data != null && SalesforceSDKManager.hasInstance()) {
+        if (SalesforceSDKManager.hasInstance()) {
             final PushNotificationInterface pnInterface = SalesforceSDKManager.getInstance().getPushNotificationReceiver();
             if (pnInterface != null) {
                 pnInterface.onPushMessageReceived(data);
