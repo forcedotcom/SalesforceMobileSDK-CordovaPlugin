@@ -98,7 +98,7 @@
     <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.1.0" />
     <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
     <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.2.0" />
-    <pod name="SalesforceSDKCore" git="https://github.com/MBPSCD/SalesforceMobileSDK-iOS" branch="Dev_8.1" />
+    <pod name="SalesforceSDKCore" git="https://github.com/MBPSCD/SalesforceMobileSDK-iOS" branch="MR-8793" />
     <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.1.0" />
     <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v8.1.0" />
     <!--
