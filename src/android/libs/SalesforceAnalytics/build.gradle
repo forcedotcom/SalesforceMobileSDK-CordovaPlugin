@@ -65,8 +65,10 @@ android {
 
 ext {
     PUBLISH_GROUP_ID = 'com.salesforce.mobilesdk'
-    PUBLISH_VERSION = '9.1.1'
+    PUBLISH_VERSION = '9.2.0'
     PUBLISH_ARTIFACT_ID = 'SalesforceAnalytics'
 }
 
-apply from: "${rootProject.projectDir}/publish/publish-module.gradle"
+if (rootProject.name == 'SalesforceMobileSDK-Android') {
+    apply from: "${rootProject.projectDir}/publish/publish-module.gradle"
+}
