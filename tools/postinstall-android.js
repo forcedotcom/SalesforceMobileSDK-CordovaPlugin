@@ -97,7 +97,7 @@ if (data.indexOf("SalesforceHybrid") < 0)
     var newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
     var oldGradleToolsVersion = "com.android.tools.build:gradle:4.0.0";
-    var newGradleToolsVersion = "com.android.tools.build:gradle:4.2.1";
+    var newGradleToolsVersion = "com.android.tools.build:gradle:7.0.2";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
     var newLibDep = "api project(':SalesforceHybrid')";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
@@ -106,7 +106,7 @@ if (data.indexOf("SalesforceHybrid") < 0)
 // Replacing values in top level build.gradle to avoid conflicts in Gradle builds.
 console.log('Fixing project workspace build.gradle');
 var oldGradleToolsVersion = "com.android.tools.build:gradle:4.0.0";
-var newGradleToolsVersion = "com.android.tools.build:gradle:4.2.1";
+var newGradleToolsVersion = "com.android.tools.build:gradle:7.0.2";
 
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
 replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultBuildToolsVersion=.*/, '');
