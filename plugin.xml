@@ -39,7 +39,7 @@
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="13.0" />
+      <preference name="deployment-target" value="14.0" />
       <preference name="WKWebViewOnly" value="true" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
