@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-ios" version="6.2.0" />
-    <engine name="cordova-android" version="10.1.0" />
+    <engine name="cordova-android" version="10.1.1" />
   </engines>
 
   <!-- ios -->
@@ -137,7 +137,8 @@
           android:theme="@style/Theme.AppCompat.NoActionBar"
           android:windowSoftInputMode="adjustResize"
           android:launchMode="singleTop" 
-          android:allowBackup="false" />
+          android:allowBackup="false"
+          android:exported="true"/>
     </edit-config>
 
     <!-- Fixes the application tag in the Manifest -->
@@ -153,6 +154,10 @@
 
       <!-- To enable Android X -->
       <preference name="AndroidXEnabled" value="true" />
+
+      <!- To specify min and target SDK versions -->
+      <preference name="android-minSdkVersion" value="24" />
+      <preference name="android-targetSdkVersion" value="32" />      
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
