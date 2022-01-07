@@ -104,15 +104,9 @@ if (data.indexOf("SalesforceHybrid") < 0)
 }
 
 // Replacing values in top level build.gradle to avoid conflicts in Gradle builds.
-console.log('Fixing project workspace build.gradle');
-var oldGradleToolsVersion = "com.android.tools.build:gradle:4.0.0";
-var newGradleToolsVersion = "com.android.tools.build:gradle:7.0.4";
-
-replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), oldGradleToolsVersion, newGradleToolsVersion);
-replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultBuildToolsVersion=.*/, '');
-replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultMinSdkVersion=.*/, 'defaultMinSdkVersion=24');
-replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultTargetSdkVersion=.*/, 'defaultTargetSdkVersion=32');
-replaceTextInFile(path.join(appProjectRoot, 'build.gradle'), /defaultCompileSdkVersion=.*/, 'defaultCompileSdkVersion=32');
+console.log('Fixing project gradle config'); 
+replaceTextInFile(path.join(appProjectRoot, 'cdv-gradle-config.json'), /\"MIN_SDK_VERSION\":.*,/, '"MIN_SDK_VERSION": 24,');
+replaceTextInFile(path.join(appProjectRoot, 'cdv-gradle-config.json'), /\"SDK_VERSION\":.*,/, '"SDK_VERSION": 32,');
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
 

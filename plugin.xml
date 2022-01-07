@@ -137,7 +137,8 @@
           android:theme="@style/Theme.AppCompat.NoActionBar"
           android:windowSoftInputMode="adjustResize"
           android:launchMode="singleTop" 
-          android:allowBackup="false" />
+          android:allowBackup="false"
+          android:exported="true"/>
     </edit-config>
 
     <!-- Fixes the application tag in the Manifest -->
