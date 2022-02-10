@@ -98,10 +98,6 @@ if (data.indexOf("SalesforceHybrid") < 0)
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
     var newLibDep = "api project(':SalesforceHybrid')";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
-
-    console.log('Fixing cdv-gradle-config.json');
-    replaceTextInFile(path.join(appProjectRoot, 'cdv-gradle-config.json'), /\"GRADLE_VERSION\":.*,/, '"GRADLE_VERSION": 7.2.0,');
-    replaceTextInFile(path.join(appProjectRoot, 'cdv-gradle-config.json'), /\"AGP_VERSION\":.*,/, '"AGP_VERSION": 7.1.0,');
 }
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
