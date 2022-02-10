@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="9.2.1">
+        version="10.0.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-ios" version="6.2.0" />
-    <engine name="cordova-android" version="10.1.0" />
+    <engine name="cordova-android" version="10.1.1" />
   </engines>
 
   <!-- ios -->
@@ -39,7 +39,7 @@
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="13.0" />
+      <preference name="deployment-target" value="14.0" />
       <preference name="WKWebViewOnly" value="true" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
@@ -95,14 +95,14 @@
              <source url="https://cdn.cocoapods.org"/>
          </config>
          <pods use-frameworks="true">
-           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v9.2.1" />
-           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v9.2.1" />
-           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v9.2.1" />
+           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
-           <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.4.3" />
-           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v9.2.1" />
-           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v9.2.1" />
-           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v9.2.1" />
+           <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.5.0" />
+           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <!-- Needed until cordova-ios 6.2.0 gets posted to cocoapod.org -->
            <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="6.2.0" />
          </pods>
@@ -137,7 +137,8 @@
           android:theme="@style/Theme.AppCompat.NoActionBar"
           android:windowSoftInputMode="adjustResize"
           android:launchMode="singleTop" 
-          android:allowBackup="false" />
+          android:allowBackup="false"
+          android:exported="true"/>
     </edit-config>
 
     <!-- Fixes the application tag in the Manifest -->
@@ -153,6 +154,14 @@
 
       <!-- To enable Android X -->
       <preference name="AndroidXEnabled" value="true" />
+
+      <!- To specify min and target SDK versions -->
+      <preference name="android-minSdkVersion" value="24" />
+      <preference name="android-targetSdkVersion" value="32" />      
+
+      <!- To specify gradle and gradle plugin versions -->
+      <preference name="GradleVersion" value="7.2.0" />
+      <preference name="AndroidGradlePluginVersion" value="7.1.0" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
