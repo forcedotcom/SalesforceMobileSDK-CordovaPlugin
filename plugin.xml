@@ -161,7 +161,7 @@
 
       <!- To specify gradle and gradle plugin versions -->
       <preference name="GradleVersion" value="7.2.0" />
-      <preference name="AndroidGradlePluginVersion" value="7.1.0" />
+      <preference name="AndroidGradlePluginVersion" value="7.1.1" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
