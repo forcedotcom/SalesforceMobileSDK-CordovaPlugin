@@ -6,14 +6,9 @@ The **Salesforce Mobile SDK Cordova Plugin** npm package allows users to interfa
 
 If you're new to mobile development or the force.com platform, you may want to start at the [Mobile SDK landing page](http://wiki.developerforce.com/page/Mobile_SDK). This page offers a variety of resources to help you determine the best technology path for creating your app, as well as many guides and blog posts detailing how to work with Mobile SDK.
 
-## Starting from scratch
+## Using the Plugin
 
-If you are starting from scratch, we recommend you use our [**forcehybrid**]((https://npmjs.org/package/forcehybrid) command-line utility.
-
-## Adding the plugin to your existing Cordova procject
-
-If you already have a Cordova project, you can add the plugin to it by doing:
-       cordova plugin add salesforcemobilesdk-cordovaplugin
+We recommend you use our [**forcehybrid**]((https://npmjs.org/package/forcehybrid) command-line utility to generate your application instead of adding the plugin to a Cordova project directly since there are a few additional steps required for the project to work.
 
 
 ## More information
