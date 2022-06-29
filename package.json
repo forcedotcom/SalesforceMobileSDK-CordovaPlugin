@@ -1,5 +1,5 @@
 {
-    "name": "SalesforceMobileSDK-CordovaPlugin",
+    "name": "salesforce-mobilesdk-cordova-plugin",
     "version": "10.1.0",
     "description": "Cordova Plugin for Salesforce Mobile SDK",
     "keywords": [ "mobilesdk", "android", "ios", "cordova", "salesforce", "mobile", "sdk" ],
@@ -9,7 +9,7 @@
         { "type": "Salesforce.com Mobile SDK License", "url": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/blob/master/LICENSE.md" }
     ],
     "cordova": {
-        "id": "salesforcemobilesdk-cordovaplugin",
+        "id": "salesforce-mobilesdk-cordova-plugin",
         "platforms": [
             "android",
             "ios"
