@@ -1,7 +1,7 @@
 {
     "name": "SalesforceMobileSDK-CordovaPlugin",
     "version": "10.2.0",
-    "description": "Corova Plugin for Salesforce Mobile SDK",
+    "description": "Cordova Plugin for Salesforce Mobile SDK",
     "keywords": [ "mobilesdk", "android", "ios", "cordova", "salesforce", "mobile", "sdk" ],
     "homepage": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin",
     "bugs": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/issues",
