@@ -80,6 +80,9 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
     // Web app loaded?
     private boolean webAppLoaded = false;
 
+    // Base url:http(s)://localhost by default
+    private String baseUrl;
+
     public SalesforceDroidGapActivity() {
         super();
         delegate = new SalesforceActivityDelegate(this);
@@ -92,6 +95,9 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         init();
+
+        // Init base url
+        initBaseUrl();
 
         // Get bootconfig
         bootconfig = BootConfig.getBootConfig(this);
@@ -580,4 +586,27 @@ public class SalesforceDroidGapActivity extends CordovaActivity implements Sales
             return null;
         }
     }
+
+    /**
+     * Init base url from scheme and hostname preferences 
+    **/
+    private initBaseUrl() {
+        String scheme = preferences.getString("scheme", "http");
+        String hostname = preferences.getString("hostname", "localhost");
+        baseUrl = scheme + "://" + hostname; 
+    }
+
+   /**
+    * Customize loadUrl method
+    * Replace asset base url by http(s)://localhost to comply with new cordova android assets load mechanism
+   **/
+  @Override
+  public void loadUrl(String url) {
+    String rightUrl = url;
+    String oldBaseUrl = "file:///android_asset/www";
+    if (url.startsWith(oldBaseUrl)) {
+        rightUrl = url.replaceFirst(oldBaseUrl, baseUrl);
+    }
+    super.loadUrl(rightUrl);
+  }
 }
