@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="10.1.1">
+        version="10.2.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-ios" version="6.2.0" />
-    <engine name="cordova-android" version="10.1.1" />
+    <engine name="cordova-android" version="11.0.0" />
   </engines>
 
   <!-- ios -->
@@ -95,14 +95,14 @@
              <source url="https://cdn.cocoapods.org"/>
          </config>
          <pods use-frameworks="true">
-           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v10.1.1" />
-           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v10.1.1" />
-           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v10.1.1" />
+           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
-           <pod name="SQLCipher/fts" git="https://github.com/sqlcipher/sqlcipher" tag="v4.5.1" />
-           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v10.1.1" />
-           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v10.1.1" />
-           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v10.1.1" />
+           <pod name="SQLCipher" git="https://github.com/sqlcipher/sqlcipher" tag="v4.5.2" />
+           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <!-- Needed until cordova-ios 6.2.0 gets posted to cocoapod.org -->
            <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="6.2.0" />
          </pods>
@@ -134,7 +134,7 @@
       <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
           android:label="@string/app_name"
           android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
-          android:theme="@style/Theme.AppCompat.NoActionBar"
+          android:theme="@style/SalesforceSDK_SplashScreen"
           android:windowSoftInputMode="adjustResize"
           android:launchMode="singleTop" 
           android:allowBackup="false"
@@ -154,6 +154,9 @@
 
       <!-- To enable Android X -->
       <preference name="AndroidXEnabled" value="true" />
+
+      <!-- Required for hybrid local apps -->
+      <preference name="AndroidInsecureFileModeEnabled" value="true" />
 
       <!- To specify min and target SDK versions -->
       <preference name="android-minSdkVersion" value="24" />
