@@ -191,7 +191,7 @@
 
       <!-- Kotlin in Plugin -->
       <preference name="GradlePluginKotlinEnabled" value="true" />
-      <preference name="GradlePluginKotlinVersion" value="1.6.0" />
+      <preference name="GradlePluginKotlinVersion" value="1.7.21" />
     </config-file>
 
     <config-file target="res/values/strings.xml" parent="/resources">
