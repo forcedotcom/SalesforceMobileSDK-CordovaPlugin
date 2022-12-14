@@ -129,9 +129,6 @@
   <!-- android -->
   <platform name="android">
 
-    <!-- Add Kotlin -->
-    <framework src="org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0" />
-
     <!-- Fixes the activity tag in the Manifest -->
     <edit-config file="app/src/main/AndroidManifest.xml" target="/manifest/application/activity" mode="merge">
       <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
@@ -191,6 +188,10 @@
       <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SDKInfoPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
       <feature name="com.salesforce.mobilesync"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.MobileSyncPlugin"/></feature>
+
+      <!-- Kotlin in Plugin -->
+      <preference name="GradlePluginKotlinEnabled" value="true" />
+      <preference name="GradlePluginKotlinVersion" value="1.6.0" />
     </config-file>
 
     <config-file target="res/values/strings.xml" parent="/resources">
