@@ -129,6 +129,9 @@
   <!-- android -->
   <platform name="android">
 
+    <!-- Add Kotlin -->
+    <framework src="org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0" />
+
     <!-- Fixes the activity tag in the Manifest -->
     <edit-config file="app/src/main/AndroidManifest.xml" target="/manifest/application/activity" mode="merge">
       <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
@@ -160,11 +163,11 @@
 
       <!- To specify min and target SDK versions -->
       <preference name="android-minSdkVersion" value="24" />
-      <preference name="android-targetSdkVersion" value="32" />      
+      <preference name="android-targetSdkVersion" value="33" />
 
       <!- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="7.2.0" />
-      <preference name="AndroidGradlePluginVersion" value="7.1.1" />
+      <preference name="GradleVersion" value="7.4.0" />
+      <preference name="AndroidGradlePluginVersion" value="7.3.1" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
