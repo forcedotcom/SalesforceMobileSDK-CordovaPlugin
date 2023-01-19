@@ -27,4 +27,4 @@ We recommend you use our [**forcehybrid**]((https://npmjs.org/package/forcehybri
 
 - See [our developerforce site](http://wiki.developerforce.com/page/Mobile_SDK) for more information about how you can leverage Salesforce Mobile SDK with the force.com platform.
 
-- If you would like to make suggestions, have questions, or encounter any issues, we'd love to hear from you.  Post any feedback you have on [Salesforce StackExchange](https://salesforce.stackexchange.com/questions/tagged/mobilesdk).
+- If you would like to make suggestions, have questions, or encounter any issues, we'd love to hear from you. Post any feedback you have on the [Mobile SDK Trailblazer Community](https://trailhead.salesforce.com/en/trailblazer-community/groups/0F94S000000kH0HSAU?tab=discussion&sort=LAST_MODIFIED_DATE_DESC).
