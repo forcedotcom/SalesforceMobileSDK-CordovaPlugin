@@ -158,11 +158,11 @@
       <!-- Required for hybrid local apps -->
       <preference name="AndroidInsecureFileModeEnabled" value="true" />
 
-      <!- To specify min and target SDK versions -->
+      <!-- To specify min and target SDK versions -->
       <preference name="android-minSdkVersion" value="24" />
       <preference name="android-targetSdkVersion" value="33" />
 
-      <!- To specify gradle and gradle plugin versions -->
+      <!-- To specify gradle and gradle plugin versions -->
       <preference name="GradleVersion" value="7.4.0" />
       <preference name="AndroidGradlePluginVersion" value="7.3.1" />
 

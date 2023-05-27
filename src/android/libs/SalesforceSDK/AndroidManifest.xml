@@ -47,7 +47,7 @@
             android:theme="@style/SalesforceSDK"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="adjustNothing"
             android:exported="true" />
 
         <!-- Screen Lock Activity-->
@@ -77,11 +77,11 @@
             android:screenOrientation="portrait"
             android:exported="false" />
 
-        <!-- IDP webview activity -->
-        <activity android:name="com.salesforce.androidsdk.auth.idp.IDPCodeGeneratorActivity"
+        <!-- IDP auth code activity -->
+        <activity android:name="com.salesforce.androidsdk.auth.idp.IDPAuthCodeActivity"
             android:excludeFromRecents="true"
             android:theme="@style/SalesforceSDK"
-            android:exported="false"
+            android:exported="true"
             android:screenOrientation="portrait" />
 
         <!--  Dev info activity -->
@@ -89,15 +89,26 @@
             android:theme="@style/SalesforceSDK"
             android:exported="false" />
 
-        <!-- Receiver for IDP initiated login flow -->
-        <receiver android:name="com.salesforce.androidsdk.auth.idp.IDPInititatedLoginReceiver"
+        <!-- Receiver in SP app for IDP-SP login flows -->
+        <receiver android:name="com.salesforce.androidsdk.auth.idp.SPReceiver"
             android:exported="true"
             tools:ignore="ExportedReceiver">
             <intent-filter>
-                <action android:name="com.salesforce.IDP_LOGIN_REQUEST" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.salesforce.androidsdk.IDP_TO_SP_REQUEST" />
+                <action android:name="com.salesforce.androidsdk.IDP_TO_SP_RESPONSE" />
             </intent-filter>
         </receiver>
+
+        <!-- Receiver in IDP app for IDP-SP login flows -->
+        <receiver android:name="com.salesforce.androidsdk.auth.idp.IDPReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.salesforce.androidsdk.SP_TO_IDP_REQUEST" />
+                <action android:name="com.salesforce.androidsdk.SP_TO_IDP_RESPONSE" />
+            </intent-filter>
+        </receiver>
+
 
         <service android:name="com.salesforce.androidsdk.push.SFDCFcmListenerService"
             android:exported="false">
@@ -105,16 +116,5 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <receiver android:name="com.salesforce.androidsdk.push.PushService$SFDCRegistrationRetryAlarmReceiver"
-            android:exported="false" />
-
-        <service android:name="com.salesforce.androidsdk.push.PushService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="false" />
-
-        <service android:name="com.salesforce.androidsdk.analytics.AnalyticsPublisherService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="false" />
     </application>
 </manifest>

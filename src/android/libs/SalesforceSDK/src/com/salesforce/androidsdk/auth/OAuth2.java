@@ -42,7 +42,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -91,6 +90,9 @@ public class OAuth2 {
     private static final String JSON = "json";
     private static final String MOBILE_POLICY = "mobile_policy";
     private static final String SCREEN_LOCK_TIMEOUT = "screen_lock";
+    private static final String BIOMETRIC_AUTHENTICATION = "ENABLE_BIOMETRIC_AUTHENTICATION";
+    private static final String BIOMETRIC_AUTHENTICATION_TIMEOUT = "BIOMETRIC_AUTHENTICATION_TIMEOUT";
+    private static final int BIOMETRIC_AUTHENTICATION_DEFAULT_TIMEOUT = 15;
     private static final String REFRESH_TOKEN = "refresh_token";
     private static final String HYBRID_REFRESH = "hybrid_refresh";
     private static final String RESPONSE_TYPE = "response_type";
@@ -106,7 +108,7 @@ public class OAuth2 {
     private static final String PHOTOS = "photos";
     private static final String PICTURE = "picture";
     private static final String THUMBNAIL = "thumbnail";
-    private static final String AUTHORIZATION_CODE = "authorization_code";
+    private static final String AUTHORIZATION_CODE = "hybrid_auth_code";
     private static final String CODE = "code";
     private static final String CODE_CHALLENGE = "code_challenge";
     private static final String CODE_VERIFIER = "code_verifier";
@@ -137,7 +139,6 @@ public class OAuth2 {
     private static final String CONTENT_DOMAIN = "content_domain";
     private static final String CONTENT_SID = "content_sid";
     private static final String CSRF_TOKEN = "csrf_token";
-
     private static final String EMPTY_STRING = "";
     private static final String FORWARD_SLASH = "/";
     private static final String SINGLE_SPACE = " ";
@@ -147,30 +148,41 @@ public class OAuth2 {
      * Builds the URL to the authorization web page for this login server.
      * You need not provide the 'refresh_token' scope, as it is provided automatically.
      *
+     * @param useWebServerAuthentication True to use web server flow, False to use user agent flow
      * @param loginServer Base protocol and server to use (e.g. https://login.salesforce.com).
      * @param clientId OAuth client ID.
      * @param callbackUrl OAuth callback URL or redirect URL.
      * @param scopes A list of OAuth scopes to request (e.g. {"visualforce", "api"}). If null,
      *               the default OAuth scope is provided.
      * @param displayType OAuth display type. If null, the default of 'touch' is used.
+     * @param codeChallenge Code challenge to use when using web server flow
      * @param addlParams Any additional parameters that may be added to the request.
      * @return A URL to start the OAuth flow in a web browser/view.
      *
      * @see <a href="https://help.salesforce.com/apex/HTViewHelpDoc?language=en&id=remoteaccess_oauth_scopes.htm">RemoteAccess OAuth Scopes</a>
      */
-    public static URI getAuthorizationUrl(URI loginServer, String clientId, String callbackUrl,
-                                          String[] scopes, String displayType,
-                                          Map<String,String> addlParams) {
+    public static URI getAuthorizationUrl(
+            boolean useWebServerAuthentication,
+            URI loginServer,
+            String clientId,
+            String callbackUrl,
+            String[] scopes,
+            String displayType,
+            String codeChallenge,
+            Map<String,String> addlParams) {
         final StringBuilder sb = new StringBuilder(loginServer.toString());
         sb.append(OAUTH_AUTH_PATH).append(getBrandedLoginPath());
         sb.append(OAUTH_DISPLAY_PARAM).append(displayType == null ? TOUCH : displayType);
-        sb.append(AND).append(RESPONSE_TYPE).append(EQUAL).append(HYBRID_TOKEN);
+        sb.append(AND).append(RESPONSE_TYPE).append(EQUAL).append(useWebServerAuthentication ? CODE : HYBRID_TOKEN);
         sb.append(AND).append(CLIENT_ID).append(EQUAL).append(Uri.encode(clientId));
         if (scopes != null && scopes.length > 0) {
             sb.append(AND).append(SCOPE).append(EQUAL).append(Uri.encode(computeScopeParameter(scopes)));
         }
         sb.append(AND).append(REDIRECT_URI).append(EQUAL).append(callbackUrl);
         sb.append(AND).append(DEVICE_ID).append(EQUAL).append(SalesforceSDKManager.getInstance().getDeviceId());
+        if (useWebServerAuthentication) {
+            sb.append(AND).append(CODE_CHALLENGE).append(EQUAL).append(Uri.encode(codeChallenge));
+        }
         if (addlParams != null && addlParams.size() > 0) {
             for (final Map.Entry<String,String> entry : addlParams.entrySet()) {
                 final String value = entry.getValue() == null ? EMPTY_STRING : entry.getValue();
@@ -196,92 +208,33 @@ public class OAuth2 {
     }
 
     /**
-     * Builds the URL to the authorization web page for this login server.
-     * You need not provide the 'refresh_token' scope, as it is provided automatically.
+     * Returns a 'frontdoor'ed URL
+     * Front door will authenticate client navigating to that URL using given access token
      *
-     * @param loginServer Base protocol and server to use (e.g. https://login.salesforce.com).
-     * @param clientId OAuth client ID.
-     * @param callbackUrl OAuth callback URL or redirect URL.
-     * @param scopes A list of OAuth scopes to request (e.g. {"visualforce", "api"}). If null,
-     *               the default OAuth scope is provided.
-     * @param displayType OAuth display type. If null, the default of 'touch' is used.
-     * @param accessToken Access token.
-     * @param instanceURL Instance URL.
-     * @param addlParams Any additional parameters that may be added to the request.
-     * @return A URL to start the OAuth flow in a web browser/view.
+     * @param url the URL to "frontdoor"
+     * @param accessToken access token to use as sid
+     * @param instanceURL instance url for the sid
+     * @param addlParams additional paramaters
      *
-     * @see <a href="https://help.salesforce.com/apex/HTViewHelpDoc?language=en&id=remoteaccess_oauth_scopes.htm">RemoteAccess OAuth Scopes</a>
+     * @return 'frontdoor'ed URL (or the original url if access token or instance url are null)
      */
-    public static URI getAuthorizationUrl(URI loginServer, String clientId, String callbackUrl,
-                                          String[] scopes, String displayType, String accessToken,
-                                          String instanceURL, Map<String, String> addlParams) {
+    public static URI getFrontdoorUrl(URI url,
+                                      String accessToken,
+                                      String instanceURL,
+                                      Map<String, String> addlParams) {
         if (accessToken == null || instanceURL == null) {
-            return getAuthorizationUrl(loginServer, clientId, callbackUrl, scopes,
-                    displayType, addlParams);
+            return url;
         }
         final StringBuilder sb = new StringBuilder(instanceURL);
         sb.append(FRONTDOOR);
         sb.append(SID).append(EQUAL).append(accessToken);
-        sb.append(AND).append(RETURL).append(EQUAL).append(Uri.encode(getAuthorizationUrl(loginServer,
-                clientId, callbackUrl, scopes, displayType, null).toString()));
+        sb.append(AND).append(RETURL).append(EQUAL).append(Uri.encode(url.toString()));
         if (addlParams != null && addlParams.size() > 0) {
             for (final Map.Entry<String,String> entry : addlParams.entrySet()) {
                 final String value = entry.getValue() == null ? EMPTY_STRING : entry.getValue();
                 sb.append(AND).append(entry.getKey()).append(EQUAL).append(Uri.encode(value));
             }
         }
-        return URI.create(sb.toString());
-    }
-
-    /**
-     * Returns an IDP 'frontdoor' URL configured with the SP's configuration.
-     *
-     * @param instanceUrl IDP's instance URL.
-     * @param accessToken IDP's access token.
-     * @param loginUrl SP's login URL.
-     * @param displayType IDP's display type.
-     * @param clientId SP's client ID.
-     * @param callbackUrl SP's callback URL.
-     * @param scopes SP's scopes.
-     * @param codeChallenge SP's code challenge.
-     * @return A 'frontdoor' URL that the IDP can load in a WebView.
-     */
-    public static URI getIDPFrontdoorUrl(String instanceUrl, String accessToken, String loginUrl,
-                                            String displayType, String clientId, String callbackUrl,
-                                            String[] scopes, String codeChallenge) {
-        final StringBuilder sb = new StringBuilder(instanceUrl);
-        sb.append(FRONTDOOR);
-        sb.append(SID).append(EQUAL).append(accessToken);
-        sb.append(AND).append(RETURL).append(EQUAL).append(Uri.encode(getIDPApprovalUrl(loginUrl,
-                displayType, clientId, callbackUrl, scopes, codeChallenge).toString()));
-        return URI.create(sb.toString());
-    }
-
-    /**
-     * Returns an approval URL configured with the SP's configuration.
-     *
-     * @param loginUrl SP's login URL.
-     * @param displayType IDP's display type.
-     * @param clientId SP's client ID.
-     * @param callbackUrl SP's callback URL.
-     * @param scopes SP's scopes.
-     * @param codeChallenge SP's code challenge.
-     * @return An approval URL that the IDP can use to construct its 'frontdoor' URL.
-     */
-    public static URI getIDPApprovalUrl(String loginUrl, String displayType,
-                                           String clientId, String callbackUrl,
-                                           String[] scopes, String codeChallenge) {
-        final StringBuilder sb = new StringBuilder(loginUrl);
-        sb.append(OAUTH_AUTH_PATH).append(getBrandedLoginPath());
-        sb.append(OAUTH_DISPLAY_PARAM).append(displayType == null ? TOUCH : displayType);
-        sb.append(AND).append(RESPONSE_TYPE).append(EQUAL).append(CODE);
-        sb.append(AND).append(CLIENT_ID).append(EQUAL).append(Uri.encode(clientId));
-        if (scopes != null && scopes.length > 0) {
-            sb.append(AND).append(SCOPE).append(EQUAL).append(Uri.encode(computeScopeParameter(scopes)));
-        }
-        sb.append(AND).append(REDIRECT_URI).append(EQUAL).append(callbackUrl);
-        sb.append(AND).append(DEVICE_ID).append(EQUAL).append(SalesforceSDKManager.getInstance().getDeviceId());
-        sb.append(AND).append(CODE_CHALLENGE).append(EQUAL).append(Uri.encode(codeChallenge));
         return URI.create(sb.toString());
     }
 
@@ -300,23 +253,22 @@ public class OAuth2 {
     }
 
     /**
-     * Returns a full set of credentials for the SP app based on the code generated
-     * from the IDP app.
+     * Exchange code for credentials.
      *
      * @param httpAccessor HTTPAccess instance.
      * @param loginServer Login server.
      * @param clientId Client ID.
      * @param code Code returned from the IDP.
-     * @param codeVerifier Code verifier used by the SP to generate 'code_challenge'.
+     * @param codeVerifier Code verifier used to generate 'code_challenge'.
      * @param callbackUrl Callback URL.
      * @return Full set of credentials.
      *
      * @throws OAuthFailedException See {@link OAuthFailedException}.
      * @throws IOException See {@link IOException}.
      */
-    public static TokenEndpointResponse getSPCredentials(HttpAccess httpAccessor, URI loginServer,
-                                                         String clientId, String code, String codeVerifier,
-                                                         String callbackUrl)
+    public static TokenEndpointResponse exchangeCode(HttpAccess httpAccessor, URI loginServer,
+                                                     String clientId, String code, String codeVerifier,
+                                                     String callbackUrl)
             throws OAuthFailedException, IOException {
         final FormBody.Builder builder = new FormBody.Builder();
         builder.add(GRANT_TYPE, AUTHORIZATION_CODE);
@@ -527,10 +479,10 @@ public class OAuth2 {
         public String displayName;
         public String pictureUrl;
         public String thumbnailUrl;
-        public boolean mobilePolicy;
-        @Deprecated public int pinLength = -1;
+        public boolean screenLock;
         public int screenLockTimeout = -1;
-        public boolean biometricUnlockAllowed = true;
+        public boolean biometricAuth;
+        public int biometricAuthTimeout = -1;
         public JSONObject customAttributes;
         public JSONObject customPermissions;
 
@@ -554,10 +506,29 @@ public class OAuth2 {
                 }
                 customAttributes = parsedResponse.optJSONObject(CUSTOM_ATTRIBUTES);
                 customPermissions = parsedResponse.optJSONObject(CUSTOM_PERMISSIONS);
+
+                if (customAttributes != null && customAttributes.has(BIOMETRIC_AUTHENTICATION)) {
+                    biometricAuth = true;
+                    if (customAttributes.has(BIOMETRIC_AUTHENTICATION_TIMEOUT)) {
+                        biometricAuthTimeout = customAttributes.getInt(BIOMETRIC_AUTHENTICATION_TIMEOUT);
+                    }
+
+                    if (biometricAuthTimeout < 1) {
+                        // Set to the lowest session timeout value (15 minutes) if not specified.
+                        biometricAuthTimeout = BIOMETRIC_AUTHENTICATION_DEFAULT_TIMEOUT;
+                    }
+                }
+
+
                 if (parsedResponse.has(MOBILE_POLICY)) {
                     JSONObject mobilePolicyObject = parsedResponse.getJSONObject(MOBILE_POLICY);
-                    mobilePolicy = mobilePolicyObject.has(SCREEN_LOCK_TIMEOUT);
+                    screenLock = mobilePolicyObject.has(SCREEN_LOCK_TIMEOUT);
                     screenLockTimeout = mobilePolicyObject.getInt(SCREEN_LOCK_TIMEOUT);
+
+                    if (screenLock && biometricAuth) {
+                        SalesforceSDKLogger.w(TAG, "Ignoring ScreenLock because BiometricAuthentication is enabled.");
+                        screenLock = false;
+                    }
                 }
             } catch (Exception e) {
                 SalesforceSDKLogger.w(TAG, "Could not parse identity response", e);

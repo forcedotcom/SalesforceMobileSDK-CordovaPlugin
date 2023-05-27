@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-present, salesforce.com, inc.
+ * Copyright (c) 2023-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,18 +24,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.push;
-
-import java.util.Map;
+package com.salesforce.androidsdk.security.interfaces
 
 /**
- * This interface represents a simple push notification received. The
- * implementation of this interface would receive a notification and
- * handle it in some way, such as showing a notification to the user.
- *
- * @author bhariharan
+ * Manages if the app should be locked.
  */
-public interface PushNotificationInterface {
+// @Suppress is necessary due to a Kotlin bug:  https://youtrack.jetbrains.com/issue/KT-31420
+@Suppress("INAPPLICABLE_JVM_NAME")
+interface ScreenLockManager {
 
-	void onPushMessageReceived(Map<String, String> data);
+    /**
+     * If the app has a user that requires mobile policy.
+     */
+    @get:JvmName("isEnabled")
+    val enabled: Boolean
+
+    /**
+     * Locks the app immediately.
+     */
+    fun lock()
 }

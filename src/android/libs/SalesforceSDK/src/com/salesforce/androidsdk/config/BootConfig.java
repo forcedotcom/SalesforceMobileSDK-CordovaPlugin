@@ -59,6 +59,7 @@ public class BootConfig {
 	private static final String REMOTE_ACCESS_CONSUMER_KEY = "remoteAccessConsumerKey";
 	private static final String OAUTH_REDIRECT_URI = "oauthRedirectURI";
 	private static final String OAUTH_SCOPES = "oauthScopes";
+
 	private static final String IS_LOCAL = "isLocal";
 	private static final String START_PAGE = "startPage";
 	private static final String ERROR_PAGE = "errorPage";
@@ -81,7 +82,6 @@ public class BootConfig {
 	private boolean shouldAuthenticate;
 	private boolean attemptOfflineLoad;
 	private String unauthenticatedStartPage;
-
 	private static BootConfig INSTANCE = null;
 
 	/**
@@ -110,11 +110,11 @@ public class BootConfig {
 	 * @return A BootConfig representing the hybrid boot config object.
 	 */
 	static BootConfig getHybridBootConfig(Context ctx, String assetFilePath) {
-		BootConfig hybridBootConfg = new BootConfig();
-		hybridBootConfg.configIsHybrid = true;
+		BootConfig hybridBootConfig = new BootConfig();
+		hybridBootConfig.configIsHybrid = true;
 		JSONObject bootConfigJsonObj = readFromJSON(ctx, assetFilePath);
-		hybridBootConfg.parseBootConfig(bootConfigJsonObj);
-		return hybridBootConfg;
+		hybridBootConfig.parseBootConfig(bootConfigJsonObj);
+		return hybridBootConfig;
 	}
 
 	/**
