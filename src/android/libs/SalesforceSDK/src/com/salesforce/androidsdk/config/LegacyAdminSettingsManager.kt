@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-present, salesforce.com, inc.
+ * Copyright (c) 2023-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,22 +24,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.push
+package com.salesforce.androidsdk.config
 
 /**
- * This interface represents the App's push notification implementation.
+ * This class represents custom settings for a connected app set by the org admin
+ * for applications using Mobile SDK 10.2 or older
  *
- * The simplest way to satisfy this interface is to add your google-services.json
- * to the root of your project and implement [onPushMessageReceived].  Other, optional,
- * functions are available of for more complex implementations.
+ * Before Mobile SDK 11.0, custom attributes were stored in org level shared prefs
+ * Starting with Mobile SDK 11.0, custom attributes are stored in user level shared prefs
+ *
+ * This class is used to migrate custom attributes from the org level to the user level shared prefs
  */
-interface PushNotificationInterface {
-
-    /**
-     * The implementation of this method would receive a notification and
-     * handle it in some way, such as showing a notification to the user.
-     *
-     * @param data the notification payload.
-     */
-    fun onPushMessageReceived(data: Map<String?, String?>?)
+internal class LegacyAdminSettingsManager : AdminSettingsManager() {
+    override fun isOrgLevel(): Boolean {
+        return true
+    }
 }

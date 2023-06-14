@@ -58,7 +58,6 @@ import android.widget.Toast;
 
 import androidx.browser.customtabs.CustomTabsIntent;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.salesforce.androidsdk.R;
 import com.salesforce.androidsdk.accounts.UserAccount;
 import com.salesforce.androidsdk.accounts.UserAccountBuilder;
@@ -70,6 +69,7 @@ import com.salesforce.androidsdk.auth.HttpAccess;
 import com.salesforce.androidsdk.auth.OAuth2;
 import com.salesforce.androidsdk.auth.OAuth2.IdServiceResponse;
 import com.salesforce.androidsdk.auth.OAuth2.TokenEndpointResponse;
+import com.salesforce.androidsdk.config.BootConfig;
 import com.salesforce.androidsdk.config.LoginServerManager;
 import com.salesforce.androidsdk.config.RuntimeConfig;
 import com.salesforce.androidsdk.push.PushMessaging;
@@ -98,6 +98,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Helper class to manage a WebView instance that is going through the OAuth login process.
@@ -333,9 +336,10 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
     private void doLoadPage() {
         try {
             boolean isBrowserLoginEnabled = SalesforceSDKManager.getInstance().isBrowserLoginEnabled();
-            boolean useWebServerFlowAuthentication = isBrowserLoginEnabled || SalesforceSDKManager.getInstance().shouldUseWebServerAuthentication();
+            boolean useWebServerAuthentication = isBrowserLoginEnabled || SalesforceSDKManager.getInstance().shouldUseWebServerAuthentication();
+            boolean useHybridAuthentication = SalesforceSDKManager.getInstance().shouldUseHybridAuthentication();
 
-            URI uri = getAuthorizationUrl(useWebServerFlowAuthentication);
+            URI uri = getAuthorizationUrl(useWebServerAuthentication, useHybridAuthentication);
             callback.loadingLoginPage(loginOptions.getLoginUrl());
             if (SalesforceSDKManager.getInstance().isBrowserLoginEnabled()) {
                 if(!SalesforceSDKManager.getInstance().isShareBrowserSessionEnabled()){
@@ -424,13 +428,13 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
     	return loginOptions.getOauthClientId();
     }
 
-    protected URI getAuthorizationUrl(boolean useWebServerAuthentication) throws URISyntaxException {
+    protected URI getAuthorizationUrl(boolean useWebServerAuthentication, boolean useHybridAuthentication) throws URISyntaxException {
         boolean jwtFlow = !TextUtils.isEmpty(loginOptions.getJwt());
         Map<String, String> addlParams = jwtFlow ? null : loginOptions.getAdditionalParameters();
         // NB code verifier / code challenge are only used when useWebServerAuthentication is true
         codeVerifier = SalesforceKeyGenerator.getRandom128ByteKey();
         String codeChallenge = SalesforceKeyGenerator.getSHA256Hash(codeVerifier);
-        URI authorizationUrl = OAuth2.getAuthorizationUrl(useWebServerAuthentication, new URI(loginOptions.getLoginUrl()), getOAuthClientId(), loginOptions.getOauthCallbackUrl(), loginOptions.getOauthScopes(), getAuthorizationDisplayType(), codeChallenge, addlParams);
+        URI authorizationUrl = OAuth2.getAuthorizationUrl(useWebServerAuthentication, useHybridAuthentication, new URI(loginOptions.getLoginUrl()), getOAuthClientId(), loginOptions.getOauthCallbackUrl(), loginOptions.getOauthScopes(), getAuthorizationDisplayType(), codeChallenge, addlParams);
 
         if (jwtFlow) {
             return OAuth2.getFrontdoorUrl(authorizationUrl,
@@ -644,6 +648,12 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
         protected volatile Exception backgroundException;
         protected volatile IdServiceResponse id = null;
 
+        /**
+         * Indicates if authentication is blocked for the current user due to
+         * the block Salesforce integration user option.
+         */
+        protected volatile boolean shouldBlockSalesforceIntegrationUser = false;
+
         public BaseFinishAuthFlowTask() {
         }
 
@@ -666,6 +676,20 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
             final SalesforceSDKManager mgr = SalesforceSDKManager.getInstance();
 
             // Failure cases.
+            if (shouldBlockSalesforceIntegrationUser) {
+                /*
+                 * Salesforce integration users are prohibited from successfully
+                 * completing authentication. This alleviates the Restricted
+                 * Product Approval requirement on Salesforce Integration add-on
+                 * SKUs and conforms to Legal and Product Strategy requirements.
+                 */
+                SalesforceSDKLogger.w(TAG, "Salesforce integration users are prohibited from successfully authenticating.");
+                onAuthFlowError( // Issue the generic authentication error.
+                        getContext().getString(R.string.sf__generic_authentication_error_title),
+                        getContext().getString(R.string.sf__generic_authentication_error), backgroundException);
+                callback.finish(null);
+                return;
+            }
             if (backgroundException != null) {
                 SalesforceSDKLogger.w(TAG, "Exception thrown while retrieving token response", backgroundException);
                 onAuthFlowError(getContext().getString(R.string.sf__generic_authentication_error_title),
@@ -788,10 +812,36 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
             try {
                 id = OAuth2.callIdentityService(
                     HttpAccess.DEFAULT, tr.idUrlWithInstance, tr.authToken);
-            } catch(Exception e) {
+
+                // Request the authenticated user's information to determine if it is a Salesforce integration user.  This is a synchronous network request, so it must be performed here in the background stage.
+                shouldBlockSalesforceIntegrationUser = SalesforceSDKManager.getInstance().shouldBlockSalesforceIntegrationUser() && fetchIsSalesforceIntegrationUser(tr);
+            } catch (Exception e) {
                 backgroundException = e;
             }
             return tr;
+        }
+
+        /**
+         * Requests the user's information from the network and returns the
+         * user's integration user state.
+         *
+         * @param tokenEndpointResponse The user's authentication token endpoint
+         *                              response
+         * @return Boolean true indicates the user is a Salesforce integration
+         * user. False indicates otherwise.
+         * @throws Exception Any exception that prevents returning the result
+         */
+        private boolean fetchIsSalesforceIntegrationUser(
+                TokenEndpointResponse tokenEndpointResponse
+        ) throws Exception {
+            final String url = getLoginUrl() + "/services/oauth2/userinfo";
+            final Request.Builder builder = new Request.Builder().url(url).get();
+            OAuth2.addAuthorizationHeader(builder, tokenEndpointResponse.authToken);
+            final Request request = builder.build();
+            final Response response = HttpAccess.DEFAULT.getOkHttpClient().newCall(request).execute();
+            final String responseString = response.body() == null ? null : response.body().string();
+
+            return responseString != null && new JSONObject(responseString).getBoolean("is_salesforce_integration_user");
         }
     }
 
@@ -859,12 +909,15 @@ public class OAuthWebviewHelper implements KeyChainAliasCallback {
                 accountOptions.csrfToken);
 
     	/*
-    	 * Registers for push notifications, if possible.
+    	 * Registers for push notifications, if push notification client ID is present.
     	 * This step needs to happen after the account has been added by client
     	 * manager, so that the push service has all the account info it needs.
     	 */
         final Context appContext = SalesforceSDKManager.getInstance().getAppContext();
-        PushMessaging.register(appContext, account);
+        final String pushNotificationId = BootConfig.getBootConfig(appContext).getPushNotificationClientId();
+        if (!TextUtils.isEmpty(pushNotificationId)) {
+            PushMessaging.register(appContext, account);
+        }
 
         callback.onAccountAuthenticatorResult(extras);
         if (SalesforceSDKManager.getInstance().getIsTestRun()) {
