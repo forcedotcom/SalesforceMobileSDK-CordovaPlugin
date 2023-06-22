@@ -1,12 +1,23 @@
 {
     "name": "salesforce-mobilesdk-cordova-plugin",
-    "version": "10.2.0",
+    "version": "11.0.0",
     "description": "Cordova Plugin for Salesforce Mobile SDK",
-    "keywords": [ "mobilesdk", "android", "ios", "cordova", "salesforce", "mobile", "sdk" ],
+    "keywords": [
+        "mobilesdk",
+        "android",
+        "ios",
+        "cordova",
+        "salesforce",
+        "mobile",
+        "sdk"
+    ],
     "homepage": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin",
     "bugs": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/issues",
-    "licenses" : [
-        { "type": "Salesforce.com Mobile SDK License", "url": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/blob/master/LICENSE.md" }
+    "licenses": [
+        {
+            "type": "Salesforce.com Mobile SDK License",
+            "url": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/blob/master/LICENSE.md"
+        }
     ],
     "cordova": {
         "id": "salesforce-mobilesdk-cordova-plugin",
@@ -16,11 +27,17 @@
         ]
     },
     "repository": {
-        "type" : "git",
-        "url" : "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin.git"
+        "type": "git",
+        "url": "https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin.git"
     },
-    "author": { "name": "Bharath Hariharan", "email": "bhariharan@salesforce.com" },
+    "author": {
+        "name": "Bharath Hariharan",
+        "email": "bhariharan@salesforce.com"
+    },
     "contributors": [
-        { "name": "Wolfgang Mathurin", "email": "wmathurin@salesforce.com" }
+        {
+            "name": "Wolfgang Mathurin",
+            "email": "wmathurin@salesforce.com"
+        }
     ]
 }
