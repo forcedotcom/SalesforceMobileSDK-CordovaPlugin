@@ -64,14 +64,14 @@ shelljs.cp('-R', path.join(libProjectRoot, 'MobileSync'), appProjectRoot);
 shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceHybrid'), appProjectRoot);
 
 console.log('Fixing Gradle dependency paths in Salesforce libraries');
-var oldSalesforceAnalyticsDep = "api project\(\':libs:SalesforceAnalytics\'\)";
-var oldSalesforceSdkDep = "api project\(\':libs:SalesforceSDK\'\)";
-var oldSmartStoreDep = "api project\(\':libs:SmartStore\'\)";
-var oldMobileSyncDep = "api project\(\':libs:MobileSync\'\)";
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle'), oldSalesforceAnalyticsDep, 'api project\(\':SalesforceAnalytics\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle'), oldSalesforceSdkDep, 'api project\(\':SalesforceSDK\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'MobileSync', 'build.gradle'), oldSmartStoreDep, 'api project\(\':SmartStore\'\)');
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle'), oldMobileSyncDep, 'api project\(\':MobileSync\'\)');
+var oldSalesforceAnalyticsDep = "api(project\(\":libs:SalesforceAnalytics\"\))";
+var oldSalesforceSdkDep = "api(project\(\":libs:SalesforceSDK\"\))";
+var oldSmartStoreDep = "api(project\(\":libs:SmartStore\"\))";
+var oldMobileSyncDep = "api(project\(\":libs:MobileSync\"\))";
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle.kts'), oldSalesforceAnalyticsDep, 'api(project\(\":SalesforceAnalytics\"\))');
+replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle.kts'), oldSalesforceSdkDep, 'api(project\(\":SalesforceSDK\"\))');
+replaceTextInFile(path.join(appProjectRoot, 'MobileSync', 'build.gradle.kts'), oldSmartStoreDep, 'api(project\(\":SmartStore\"\))');
+replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle.kts'), oldMobileSyncDep, 'api(project\(\":MobileSync\"\))');
 
 console.log('Fixing root level Gradle file for the generated app');
 replaceTextInFile(path.join(appProjectRoot, 'settings.gradle'), "include \":CordovaLib\"", "");

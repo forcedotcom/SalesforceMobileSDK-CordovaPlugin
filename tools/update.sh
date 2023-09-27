@@ -66,7 +66,7 @@ update_repo ()
 {
     local repo_dir=$1
     local git_repo_url=$2
-    local git_branch=${OPT_BRANCH}
+    local git_branch="${OPT_BRANCH}"
 
     if [ ! -d "$repo_dir" ]
     then
@@ -79,9 +79,9 @@ update_repo ()
 }
 
 ROOT_FOLDER=$(get_root_folder)
-ANDROID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Android.git"
+ANDROID_SDK_REPO_PATH="https://github.com/wmathurin/SalesforceMobileSDK-Android.git"
 ANDROID_SDK_FOLDER="SalesforceMobileSDK-Android"
-IOS_HYBRID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid.git"
+IOS_HYBRID_SDK_REPO_PATH="https://github.com/wmathurin/SalesforceMobileSDK-iOS-Hybrid.git"
 IOS_HYBRID_SDK_FOLDER="SalesforceMobileSDK-iOS-Hybrid"
 IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git"
 IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
@@ -119,8 +119,7 @@ copy_ios_sdk()
 {
     echo "*** iOS ***"
     echo "Copying AppDelegate+SalesforceHybridSDK"    
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  src/ios/classes
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.m  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
     echo "Copying Images.xcassets"
