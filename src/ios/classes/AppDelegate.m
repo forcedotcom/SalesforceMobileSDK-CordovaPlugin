@@ -23,7 +23,6 @@
  */
 
 #import <objc/runtime.h>
-#import "AppDelegate+SalesforceHybridSDK.h"
 #import "UIApplication+SalesforceHybridSDK.h"
 #import "InitialViewController.h"
 #import <SalesforceHybridSDK/SFLocalhostSubstitutionCache.h>
