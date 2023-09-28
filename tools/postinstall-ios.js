@@ -1,33 +1,24 @@
-console.log("Running SalesforceMobileSDK plugin ios post-install script");
+console.log('Running SalesforceMobileSDK plugin ios post-install script');
 
-//--------------------------------------
-// Useful functions
-//--------------------------------------
-var path = require('path');
-var shelljs;
-
-
-try {
-    shelljs = require('shelljs');
-    var version = require('shelljs/package.json').version
-    if (version !== '0.8.5') {
-        console.log('The version 0.8.5 of the node package shelljs is required to use this script. Run \'npm install shelljs@0.8.5\' before running this script.');
-        process.exit(1);
-    }
-
-} catch(e) {
-    console.log('The node package shelljs is required to use this script. Run \'npm install shelljs@0.8.5\' before running this script.');
-    process.exit(1);
-}
+const fs = require('fs');
+const path = require('path');
 
 //--------------------------------------
 // Doing actual post installation work
 //--------------------------------------
-var pluginRoot = path.join('plugins', 'com.salesforce');
-var classesRoot = path.join('plugins', 'com.salesforce', 'src', 'ios', 'classes');
-var appProjectRoot = path.join('platforms', 'ios');
+const classesRoot = path.join('plugins', 'com.salesforce', 'src', 'ios', 'classes');
+const appProjectRoot = path.join('platforms', 'ios');
+const appName = path.parse(fs.readdirSync(appProjectRoot).filter(f=>f.endsWith('.xcworkspace'))[0]).name
 
 console.log('Moving AppDelegate.m to the correct location');
-shelljs.cp('-f', path.join(classesRoot, 'AppDelegate.m'), appProjectRoot);
+fs.copyFile(path.join(classesRoot, 'AppDelegate.m'),
+	    path.join(appProjectRoot, appName, 'AppDelegate.m'),
+	    err => {
+		if (err) {
+		    console.error(`Error copying file: ${err}`)
+		    process.exit(1);
+		}
+	    }
+	   );
 
-console.log("Done running SalesforceMobileSDK plugin ios post-install script");
+console.log('Done running SalesforceMobileSDK plugin ios post-install script');
