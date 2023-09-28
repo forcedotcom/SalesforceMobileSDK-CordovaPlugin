@@ -123,6 +123,9 @@
     <framework src="UIKit.framework" weak="true" />
     <framework src="AssetsLibrary.framework" weak="true" />
     <framework src="ImageIO.framework" weak="true" />
+
+    <!-- Post install script -->    
+    <hook type="after_plugin_install" src="tools/postinstall-ios.js" />
   </platform>
 
   <!-- android -->
@@ -198,6 +201,7 @@
       <string name="app_package">$PACKAGE_NAME</string>
     </config-file>
 
+    <!-- Post install script -->
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
 </plugin>

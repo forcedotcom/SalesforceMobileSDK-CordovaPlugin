@@ -22,6 +22,7 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import "AppDelegate.h"
 #import <objc/runtime.h>
 #import "UIApplication+SalesforceHybridSDK.h"
 #import "InitialViewController.h"
@@ -34,6 +35,7 @@
 #import <SalesforceSDKCore/SFSDKAuthHelper.h>
 #import <SalesforceHybridSDK/SalesforceHybridSDKManager.h>
 #import <SalesforceHybridSDK/SFSDKHybridLogger.h>
+#import <SalesforceHybridSDK/SFHybridViewController.h>
 
 @implementation AppDelegate
 
