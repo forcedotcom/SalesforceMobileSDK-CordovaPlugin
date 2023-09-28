@@ -6,20 +6,23 @@ console.log("Running SalesforceMobileSDK plugin android post-install script");
 const fs = require('fs');
 const exec = require('child_process').exec;
 const path = require('path');
-const shelljs;
+const shelljs = loadShellJs();
 
 
-try {
-    shelljs = require('shelljs');
-    const version = require('shelljs/package.json').version
-    if (version !== '0.8.5') {
-        console.log('The version 0.8.5 of the node package shelljs is required to use this script. Run \'npm install shelljs@0.8.5\' before running this script.');
-        process.exit(1);
+function loadShellJs() {
+    try {
+	const shelljs = require('shelljs');
+	const version = require('shelljs/package.json').version
+	if (version !== '0.8.5') {
+            console.log('The version 0.8.5 of the node package shelljs is required to use this script. Run \'npm install shelljs@0.8.5\' before running this script.');
+            process.exit(1);
+	}
+	return shelljs;
+
+    } catch(e) {
+	console.log('The node package shelljs is required to use this script. Run \'npm install shelljs@0.8.5\' before running this script.');
+	process.exit(1);
     }
-
-} catch(e) {
-    console.log('The node package shelljs is required to use this script. Run \'npm install shelljs@0.8.5\' before running this script.');
-    process.exit(1);
 }
 
 const getAndroidSDKToolPath = function() {
