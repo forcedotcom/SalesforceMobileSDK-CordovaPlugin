@@ -17,7 +17,7 @@ console.log('Pointing to AppDelegate.m defined in plugin');
 const appProjectRoot = path.join('platforms', 'ios');
 const appName = path.parse(fs.readdirSync(appProjectRoot).filter(f=>f.endsWith('.xcworkspace'))[0]).name;
 const projectFile = path.join(appProjectRoot, `${appName}.xcodeproj`, 'project.pbxproj');
-//replaceTextInFile(projectFile, 'path = AppDelegate.m;', 'name = AppDelegate.m; path = com.salesforce/AppDelegate.m;');
+replaceTextInFile(projectFile, 'path = AppDelegate.m;', 'name = AppDelegate.m; path = Plugins/com.salesforce/AppDelegate.m;');
 
 console.log('Done running SalesforceMobileSDK plugin ios post-install script');
 
