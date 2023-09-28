@@ -75,6 +75,7 @@
     </config-file>
 
     <!-- Header files -->
+    <header-file src="src/ios/classes/UIApplication+SalesforceHybridSDK.h" />
     <header-file src="src/ios/classes/InitialViewController.h" />
 
     <!-- Source files -->
