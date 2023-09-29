@@ -165,8 +165,9 @@
       <preference name="android-targetSdkVersion" value="33" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="7.4.0" />
-      <preference name="AndroidGradlePluginVersion" value="7.3.1" />
+      <preference name="GradleVersion" value="7.4.2" />
+      <preference name="GradlePluginKotlinEnabled" value="true" />
+      <preference name="GradlePluginKotlinVersion" value="1.7.21" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
