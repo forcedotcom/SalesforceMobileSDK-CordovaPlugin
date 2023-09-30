@@ -66,7 +66,7 @@ update_repo ()
 {
     local repo_dir=$1
     local git_repo_url=$2
-    local git_branch=${OPT_BRANCH}
+    local git_branch="${OPT_BRANCH}"
 
     if [ ! -d "$repo_dir" ]
     then
@@ -118,9 +118,9 @@ create_android_dirs()
 copy_ios_sdk()
 {
     echo "*** iOS ***"
-    echo "Copying AppDelegate+SalesforceHybridSDK"    
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  src/ios/classes
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
+    echo "Copying AppDelegate, UIApplication+SalesforceHybridSDK and InitialViewController"    
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.m  src/ios/classes
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes    
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
     echo "Copying Images.xcassets"
