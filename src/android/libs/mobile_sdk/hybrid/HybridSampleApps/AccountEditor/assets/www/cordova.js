@@ -1,0 +1,1 @@
+../../../../../external/cordova/cordova.js

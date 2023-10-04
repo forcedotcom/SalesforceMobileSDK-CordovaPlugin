@@ -1,5 +1,6 @@
 .DS_Store
 .metadata/
+.idea/
 bin/
 coverage.em
 coverage/
