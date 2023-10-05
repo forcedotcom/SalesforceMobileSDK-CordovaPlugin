@@ -49,7 +49,7 @@ function replaceTextInFile(fileName, textInFile, replacementText) {
     const result = lines.map(function (line) {
         return line.replace(textInFile, replacementText);
     }).join('\n');
-    fs.writeFileSync(fileName, result, 'utf8'); 
+    fs.writeFileSync(fileName, result, 'utf8');
 }
 
 
@@ -66,29 +66,12 @@ const libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 
 const appProjectRoot = path.join('platforms', 'android');
 
 console.log('Moving Salesforce libraries to the correct location');
-shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceAnalytics'), appProjectRoot);
-shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceSDK'), appProjectRoot);
-shelljs.cp('-R', path.join(libProjectRoot, 'SmartStore'), appProjectRoot);
-shelljs.cp('-R', path.join(libProjectRoot, 'MobileSync'), appProjectRoot);
-shelljs.cp('-R', path.join(libProjectRoot, 'SalesforceHybrid'), appProjectRoot);
-
-console.log('Fixing Gradle dependency paths in Salesforce libraries');
-const oldSalesforceAnalyticsDep = "api(project\(\":libs:SalesforceAnalytics\"\))";
-const oldSalesforceSdkDep = "api(project\(\":libs:SalesforceSDK\"\))";
-const oldSmartStoreDep = "api(project\(\":libs:SmartStore\"\))";
-const oldMobileSyncDep = "api(project\(\":libs:MobileSync\"\))";
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceSDK', 'build.gradle.kts'), oldSalesforceAnalyticsDep, 'api(project\(\":SalesforceAnalytics\"\))');
-replaceTextInFile(path.join(appProjectRoot, 'SmartStore', 'build.gradle.kts'), oldSalesforceSdkDep, 'api(project\(\":SalesforceSDK\"\))');
-replaceTextInFile(path.join(appProjectRoot, 'MobileSync', 'build.gradle.kts'), oldSmartStoreDep, 'api(project\(\":SmartStore\"\))');
-replaceTextInFile(path.join(appProjectRoot, 'SalesforceHybrid', 'build.gradle.kts'), oldMobileSyncDep, 'api(project\(\":MobileSync\"\))');
+shelljs.cp('-R', path.join(libProjectRoot, 'mobile_sdk'), appProjectRoot);
 
 console.log('Fixing root level Gradle file for the generated app');
 replaceTextInFile(path.join(appProjectRoot, 'settings.gradle'), "include \":CordovaLib\"", "");
-shelljs.echo("include \":SalesforceAnalytics\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
-shelljs.echo("include \":SalesforceSDK\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
-shelljs.echo("include \":SmartStore\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
-shelljs.echo("include \":MobileSync\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
-shelljs.echo("include \":SalesforceHybrid\"\n").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+
+shelljs.echo("includeBuild(new File(\"mobile_sdk\"))").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 
 console.log('Moving Gradle wrapper files to application directory');
 shelljs.cp('-R', path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
@@ -105,7 +88,7 @@ if (data.indexOf("SalesforceHybrid") < 0)
     const oldAndroidDepTree = "android {";
     const newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    const newLibDep = "api project(':SalesforceHybrid')";
+    const newLibDep = "api 'com.salesforce.mobilesdk:SalesforceHybrid'";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
 

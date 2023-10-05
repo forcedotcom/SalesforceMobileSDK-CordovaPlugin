@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -x  # turn trace on 
+#set -x  # turn trace on
 set -e   # stop at first error
 
 OPT_BRANCH=""
@@ -89,7 +89,7 @@ SHARED_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Shared.
 SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 
 update_ios_repo ()
-{   
+{
     update_repo "${IOS_HYBRID_SDK_FOLDER}" "${IOS_HYBRID_SDK_REPO_PATH}"
     update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
     cd ${ROOT_FOLDER}
@@ -118,9 +118,9 @@ create_android_dirs()
 copy_ios_sdk()
 {
     echo "*** iOS ***"
-    echo "Copying AppDelegate, UIApplication+SalesforceHybridSDK and InitialViewController"    
+    echo "Copying AppDelegate, UIApplication+SalesforceHybridSDK and InitialViewController"
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.m  src/ios/classes
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes    
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
     echo "Copying Images.xcassets"
@@ -134,16 +134,9 @@ copy_ios_sdk()
 copy_android_sdk()
 {
     echo "*** Android ***"
-    echo "Copying SalesforceAnalytics library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceAnalytics src/android/libs/
-    echo "Copying SalesforceSDK library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/
-    echo "Copying SmartStore library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/
-    echo "Copying MobileSync library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/MobileSync src/android/libs/
-    echo "Copying SalesforceHybrid library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceHybrid src/android/libs/
+    echo "Copying SalesforceMobileSDK-Android workspace"
+    mkdir -p src/android/libs/mobile_sdk/
+    cp -R $ANDROID_SDK_FOLDER/* src/android/libs/mobile_sdk/
     echo "Copying Gradle wrapper files"
     cp $ANDROID_SDK_FOLDER/gradle.properties ./
     cp $ANDROID_SDK_FOLDER/gradlew.bat ./
