@@ -137,6 +137,15 @@ copy_android_sdk()
     echo "Copying SalesforceMobileSDK-Android workspace"
     mkdir -p src/android/libs/mobile_sdk/
     cp -R $ANDROID_SDK_FOLDER/* src/android/libs/mobile_sdk/
+    echo "Pruning sample apps and react native"
+    cat src/android/libs/mobile_sdk/settings.gradle.kts | grep -v "\"native" | grep -v "\"hybrid" | grep -v -i "react" | grep -v -i "jsc" > tmp
+    mv tmp src/android/libs/mobile_sdk/settings.gradle.kts
+    rm -rf src/android/libs/mobile_sdk/libs/SalesforceReact
+    rm -rf src/android/libs/mobile_sdk/native
+    rm -rf src/android/libs/mobile_sdk/hybrid
+    # Links confuse npm (and therefore cordova cli) when adding plugin from local directory
+    # We don't need the tests to run
+    find src/android/libs/mobile_sdk -type l -exec rm {} \;
     echo "Copying Gradle wrapper files"
     cp $ANDROID_SDK_FOLDER/gradle.properties ./
     cp $ANDROID_SDK_FOLDER/gradlew.bat ./
