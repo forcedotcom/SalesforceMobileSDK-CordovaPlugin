@@ -65,13 +65,13 @@ const pluginRoot = path.join('plugins', 'com.salesforce');
 const libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'libs');
 const appProjectRoot = path.join('platforms', 'android');
 
-console.log('Moving Salesforce libraries to the correct location');
-shelljs.cp('-R', path.join(libProjectRoot, 'mobile_sdk'), appProjectRoot);
-
 console.log('Fixing root level Gradle file for the generated app');
 replaceTextInFile(path.join(appProjectRoot, 'settings.gradle'), "include \":CordovaLib\"", "");
 
-shelljs.echo("includeBuild(new File(\"mobile_sdk\"))").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+shelljs.echo("def salesforceMobileSdkRoot = new File('mobile_sdk/SalesforceMobileSDK-Android');").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+shelljs.echo("if (salesforceMobileSdkRoot.exists()) {").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+shelljs.echo("  includeBuild(salesforceMobileSdkRoot)").toEnd(path.join(appProjectRoot, 'settings.gradle'));
+shelljs.echo("}").toEnd(path.join(appProjectRoot, 'settings.gradle'));
 
 console.log('Moving Gradle wrapper files to application directory');
 shelljs.cp('-R', path.join(pluginRoot, 'gradle.properties'), appProjectRoot);
@@ -88,9 +88,8 @@ if (data.indexOf("SalesforceHybrid") < 0)
     const oldAndroidDepTree = "android {";
     const newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    const newLibDep = "api 'com.salesforce.mobilesdk:SalesforceHybrid'";
+    const newLibDep = "api 'com.salesforce.mobilesdk:SalesforceHybrid:11.0.1'";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
-
