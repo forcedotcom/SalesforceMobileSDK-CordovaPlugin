@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+	android:versionCode="82"
+	android:versionName="11.1.0">
+
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+
+    <!--
+        USE_FINGERPRINT is available from API 23 to API 27
+        TODO: should be removed once minAPI > 27
+    -->
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+
+    <!-- USE_BIOMETRIC is available on API 28 and higher -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <application>
+
+        <!-- Metadata for supported app restrictions -->
+        <meta-data android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restrictions" />
+
+        <!-- Service required for authentication -->
+        <service android:exported="true"
+            android:name="com.salesforce.androidsdk.auth.AuthenticatorService"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <!-- Login activity -->
+        <activity android:name="com.salesforce.androidsdk.ui.LoginActivity"
+            android:theme="@style/SalesforceSDK"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustNothing"
+            android:exported="true" />
+
+        <!-- Screen Lock Activity-->
+        <activity android:name="com.salesforce.androidsdk.ui.ScreenLockActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateAlwaysVisible"
+            android:theme="@style/SalesforceSDK.ScreenLock" />
+
+        <!-- Manage space activity -->
+        <activity android:name="com.salesforce.androidsdk.ui.ManageSpaceActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/SalesforceSDK"
+            android:exported="false" />
+
+        <!-- Choose server activity -->
+        <activity android:name="com.salesforce.androidsdk.ui.ServerPickerActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/SalesforceSDK"
+            android:screenOrientation="portrait"
+            android:exported="false" />
+
+        <!-- Account switcher activity -->
+        <activity android:name="com.salesforce.androidsdk.ui.AccountSwitcherActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/SalesforceSDK"
+            android:screenOrientation="portrait"
+            android:exported="false" />
+
+        <!-- IDP auth code activity -->
+        <activity android:name="com.salesforce.androidsdk.auth.idp.IDPAuthCodeActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/SalesforceSDK"
+            android:exported="true"
+            android:screenOrientation="portrait" />
+
+        <!--  Dev info activity -->
+        <activity android:name="com.salesforce.androidsdk.ui.DevInfoActivity"
+            android:theme="@style/SalesforceSDK"
+            android:exported="false" />
+
+        <!-- Receiver in SP app for IDP-SP login flows -->
+        <receiver android:name="com.salesforce.androidsdk.auth.idp.SPReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.salesforce.androidsdk.IDP_TO_SP_REQUEST" />
+                <action android:name="com.salesforce.androidsdk.IDP_TO_SP_RESPONSE" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Receiver in IDP app for IDP-SP login flows -->
+        <receiver android:name="com.salesforce.androidsdk.auth.idp.IDPReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.salesforce.androidsdk.SP_TO_IDP_REQUEST" />
+                <action android:name="com.salesforce.androidsdk.SP_TO_IDP_RESPONSE" />
+            </intent-filter>
+        </receiver>
+
+
+        <service android:name="com.salesforce.androidsdk.push.SFDCFcmListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
