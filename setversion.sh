@@ -42,6 +42,13 @@ update_package_json ()
     gsed -i "s/\"version\":.*\"[^\"]*\"/\"version\": \"${version}\"/g" ${file}
 }
 
+update_tools_postinstall_android_sh ()
+{
+    local file=$1
+    local version=$2
+    gsed -i "s/\(com.salesforce.mobilesdk:SalesforceHybrid:\)[0-9]\+.[0-9]\+.[0-9]\+/\1$version/g" ${file}
+}
+
 update_plugin_xml ()
 {
     local file=$1
@@ -64,6 +71,9 @@ echo -e "${YELLOW}*** SETTING VERSION TO ${OPT_VERSION}, IS DEV = ${OPT_IS_DEV} 
 
 echo "*** Updating package.json ***"
 update_package_json "./package.json" "${OPT_VERSION}"
+
+echo "*** Updating postinstall-android.js ***"
+update_tools_postinstall_android_sh "./tools/postinstall-android.js" "${OPT_VERSION}"
 
 echo "*** Updating plugin.xml ***"
 update_plugin_xml "./plugin.xml" "${OPT_VERSION}" "${OPT_IS_DEV}"

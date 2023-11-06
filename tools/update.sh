@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -x  # turn trace on 
+#set -x  # turn trace on
 set -e   # stop at first error
 
 OPT_BRANCH=""
@@ -66,7 +66,7 @@ update_repo ()
 {
     local repo_dir=$1
     local git_repo_url=$2
-    local git_branch=${OPT_BRANCH}
+    local git_branch="${OPT_BRANCH}"
 
     if [ ! -d "$repo_dir" ]
     then
@@ -89,7 +89,7 @@ SHARED_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Shared.
 SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 
 update_ios_repo ()
-{   
+{
     update_repo "${IOS_HYBRID_SDK_FOLDER}" "${IOS_HYBRID_SDK_REPO_PATH}"
     update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
     cd ${ROOT_FOLDER}
@@ -118,8 +118,8 @@ create_android_dirs()
 copy_ios_sdk()
 {
     echo "*** iOS ***"
-    echo "Copying AppDelegate+SalesforceHybridSDK"    
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate+SalesforceHybridSDK.*  src/ios/classes
+    echo "Copying AppDelegate, UIApplication+SalesforceHybridSDK and InitialViewController"
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.m  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
@@ -134,16 +134,18 @@ copy_ios_sdk()
 copy_android_sdk()
 {
     echo "*** Android ***"
-    echo "Copying SalesforceAnalytics library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceAnalytics src/android/libs/
-    echo "Copying SalesforceSDK library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceSDK src/android/libs/
-    echo "Copying SmartStore library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SmartStore src/android/libs/
-    echo "Copying MobileSync library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/MobileSync src/android/libs/
-    echo "Copying SalesforceHybrid library"
-    cp -RL $ANDROID_SDK_FOLDER/libs/SalesforceHybrid src/android/libs/
+    echo "Copying SalesforceMobileSDK-Android workspace"
+    mkdir -p src/android/libs/mobile_sdk/
+    cp -R $ANDROID_SDK_FOLDER/* src/android/libs/mobile_sdk/
+    echo "Pruning sample apps and react native"
+    cat src/android/libs/mobile_sdk/settings.gradle.kts | grep -v "\"native" | grep -v "\"hybrid" | grep -v -i "react" | grep -v -i "jsc" > tmp
+    mv tmp src/android/libs/mobile_sdk/settings.gradle.kts
+    rm -rf src/android/libs/mobile_sdk/libs/SalesforceReact
+    rm -rf src/android/libs/mobile_sdk/native
+    rm -rf src/android/libs/mobile_sdk/hybrid
+    # Links confuse npm (and therefore cordova cli) when adding plugin from local directory
+    # We don't need the tests to run
+    find src/android/libs/mobile_sdk -type l -exec rm {} \;
     echo "Copying Gradle wrapper files"
     cp $ANDROID_SDK_FOLDER/gradle.properties ./
     cp $ANDROID_SDK_FOLDER/gradlew.bat ./
