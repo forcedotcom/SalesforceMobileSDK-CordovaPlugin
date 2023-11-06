@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sf__background">#F5F6FA</color>
+    <color name="sf__background_dark">#080707</color> <!-- SLDS grey 13 -->
+    <color name="sf__layout_background">#FFFFFF</color>
+    <color name="sf__layout_background_status_bar">#cccccc</color>
+    <color name="sf__layout_background_dark">#2b2826</color> <!-- SLDS grey 12 -->
+    <color name="sf__layout_background_dark_status_bar">#000000</color>
+    <color name="sf__text_color">#16325C</color>
+    <color name="sf__text_color_dark">#f0f0f0</color>
+    <color name="sf__border_color">#D9DDE6</color>
+    <color name="sf__border_color_dark">#3e3e3c</color> <!-- SLDS grey 11 -->
+    <color name="sf__primary_color">#0070D2</color> <!-- Salesforce Blue -->
+    <color name="sf__primary_color_dark">#0046a0</color>
+    <color name="sf__secondary_color">#FFFF</color>
+    <color name="sf__secondary_color_dark">#FFFF</color>
+    <color name="sf__hint_color">#42000000</color>
+    <color name="sf__hint_color_dark">#42D5B0B0</color>
+    <color name="sf__accessibility_nav_color">#3e3e3c</color> <!-- SLDS grey 11 -->
+    <color name="sf__subtext_color">#706E6B</color> <!-- SLDS grey 9 -->
+</resources>
