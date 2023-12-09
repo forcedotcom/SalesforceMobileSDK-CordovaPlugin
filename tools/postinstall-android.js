@@ -31,7 +31,7 @@ const getAndroidSDKToolPath = function() {
         console.log('You must set the ANDROID_HOME environment variable to the path of your installation of the Android SDK.');
         return null;
     }
-    const androidExePath = path.join(androidHomeDir, 'tools', 'android');
+    let androidExePath = path.join(androidHomeDir, 'tools', 'android');
     const isWindows = (/^win/i).test(process.platform);
     if (isWindows) {
         androidExePath = androidExePath + '.bat';
