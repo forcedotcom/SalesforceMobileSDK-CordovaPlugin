@@ -167,7 +167,7 @@
       <!-- To specify gradle and gradle plugin versions -->
       <preference name="GradleVersion" value="8.2.0" />
       <preference name="GradlePluginKotlinEnabled" value="true" />
-      <preference name="GradlePluginKotlinVersion" value="1.7.21" />
+      <preference name="GradlePluginKotlinVersion" value="1.9.20" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
@@ -194,7 +194,7 @@
 
       <!-- Kotlin in Plugin -->
       <preference name="GradlePluginKotlinEnabled" value="true" />
-      <preference name="GradlePluginKotlinVersion" value="1.7.21" />
+      <preference name="GradlePluginKotlinVersion" value="1.9.20" />
     </config-file>
 
     <config-file target="res/values/strings.xml" parent="/resources">
