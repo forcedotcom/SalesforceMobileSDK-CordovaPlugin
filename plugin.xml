@@ -124,7 +124,7 @@
     <framework src="AssetsLibrary.framework" weak="true" />
     <framework src="ImageIO.framework" weak="true" />
 
-    <!-- Post install script -->    
+    <!-- Post install script -->
     <hook type="after_plugin_install" src="tools/postinstall-ios.js" />
   </platform>
 
@@ -138,7 +138,7 @@
           android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
           android:theme="@style/SalesforceSDK_SplashScreen"
           android:windowSoftInputMode="adjustResize"
-          android:launchMode="singleTop" 
+          android:launchMode="singleTop"
           android:allowBackup="false"
           android:exported="true"/>
     </edit-config>
@@ -162,10 +162,10 @@
 
       <!-- To specify min and target SDK versions -->
       <preference name="android-minSdkVersion" value="24" />
-      <preference name="android-targetSdkVersion" value="33" />
+      <preference name="android-targetSdkVersion" value="34" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="7.4.2" />
+      <preference name="GradleVersion" value="8.2.0" />
       <preference name="GradlePluginKotlinEnabled" value="true" />
       <preference name="GradlePluginKotlinVersion" value="1.7.21" />
 
