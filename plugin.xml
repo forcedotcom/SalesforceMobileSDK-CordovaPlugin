@@ -166,7 +166,7 @@
 
       <!-- To specify gradle and gradle plugin versions -->
       <preference name="GradleVersion" value="8.2.0" />
-µπ      <preference name="AndroidGradlePluginVersion" value="8.2.0"/>
+      <preference name="AndroidGradlePluginVersion" value="8.2.0"/>
       <preference name="GradlePluginKotlinEnabled" value="true" />
       <preference name="GradlePluginKotlinVersion" value="1.7.21" />
 
