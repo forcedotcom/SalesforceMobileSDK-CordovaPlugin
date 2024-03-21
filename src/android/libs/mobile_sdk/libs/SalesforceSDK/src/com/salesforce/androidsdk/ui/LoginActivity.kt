@@ -29,11 +29,13 @@ package com.salesforce.androidsdk.ui
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager.ERROR_CODE_CANCELED
 import android.accounts.AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE
+import android.app.Activity
 import android.app.admin.DevicePolicyManager.ACTION_SET_NEW_PASSWORD
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager.FEATURE_FACE
 import android.content.pm.PackageManager.FEATURE_IRIS
 import android.os.Build.VERSION.SDK_INT
@@ -166,10 +168,7 @@ open class LoginActivity : AppCompatActivity(), OAuthWebviewHelperEvents {
         val loginOptions = fromBundleWithSafeLoginUrl(intent.extras)
 
         // Protect against screenshots
-        window.setFlags(
-            FLAG_SECURE,
-            FLAG_SECURE
-        )
+        window.setFlags(FLAG_SECURE, FLAG_SECURE)
 
         // Fetch authentication configuration if required
         salesforceSDKManager.fetchAuthenticationConfiguration()
@@ -235,6 +234,10 @@ open class LoginActivity : AppCompatActivity(), OAuthWebviewHelperEvents {
                 PRIORITY_DEFAULT
             ) { handleBackBehavior() }
         }
+
+        requestedOrientation = if (salesforceSDKManager.compactScreen(this))
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else
+            ActivityInfo.SCREEN_ORIENTATION_FULL_USER
     }
 
     override fun onDestroy() {
@@ -387,9 +390,15 @@ open class LoginActivity : AppCompatActivity(), OAuthWebviewHelperEvents {
         }
 
     private fun handleBackBehavior() {
+        // If app is using Native Login this activity is a fallback and can be dismissed.
+        if (SalesforceSDKManager.getInstance().nativeLoginActivity != null) {
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+            return // If we don't call return here moveTaskToBack can also be called below.
+        }
+
         // Do nothing if locked
         if (SalesforceSDKManager.getInstance().biometricAuthenticationManager?.locked == false) {
-
             /*
              * If there are no accounts signed in, the login screen needs to go
              * away and go back to the home screen. However, if the login screen
@@ -528,6 +537,7 @@ open class LoginActivity : AppCompatActivity(), OAuthWebviewHelperEvents {
             else -> USER_SWITCH_TYPE_DEFAULT
         }
         userAccountManager.sendUserSwitchIntent(userSwitchType, null)
+        setResult(Activity.RESULT_OK)
         finish()
     }
 

@@ -120,8 +120,7 @@ import com.salesforce.androidsdk.util.SalesforceSDKLogger.e
 import com.salesforce.androidsdk.util.SalesforceSDKLogger.w
 import com.salesforce.androidsdk.util.UriFragmentParser
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Default
-import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Request.Builder
@@ -380,7 +379,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                 doLoadPage()
             }
 
-            else -> CoroutineScope(Main).launch {
+            else -> CoroutineScope(IO).launch {
                 SwapJWTForAccessTokenTask().execute(loginOptions)
             }
         }
@@ -718,21 +717,21 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
      * successfully. The last step is to call the identity service to get the
      * username.
      */
-    fun onAuthFlowComplete(tr: TokenEndpointResponse?) {
+    fun onAuthFlowComplete(tr: TokenEndpointResponse?, nativeLogin: Boolean = false) {
         d(TAG, "token response -> $tr")
-        CoroutineScope(Main).launch {
-            FinishAuthTask().execute(tr)
+        CoroutineScope(IO).launch {
+            FinishAuthTask().execute(tr, nativeLogin)
         }
     }
 
     fun onWebServerFlowComplete(code: String?) =
-        CoroutineScope(Main).launch {
+        CoroutineScope(IO).launch {
             doCodeExchangeEndpoint(code)
         }
 
     private suspend fun doCodeExchangeEndpoint(
         code: String?
-    ) = withContext(Main) {
+    ) = withContext(IO) {
         var tokenResponse: TokenEndpointResponse? = null
         runCatching {
             tokenResponse = exchangeCode(
@@ -768,7 +767,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
             backgroundException = throwable
         }.getOrNull()
 
-        override fun onPostExecute(tr: TokenEndpointResponse?) {
+        override fun onPostExecute(tr: TokenEndpointResponse?, nativeLogin: Boolean) {
             if (backgroundException != null) {
                 handleJWTError()
                 loginOptions.jwt = null
@@ -821,8 +820,8 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
          * Finishes the authentication flow.
          * @param request The authentication response
          */
-        internal suspend fun execute(request: Parameter?) = withContext(Default) {
-            onPostExecute(doInBackground(request))
+        internal suspend fun execute(request: Parameter?, nativeLogin: Boolean = false) = withContext(IO) {
+            onPostExecute(doInBackground(request), nativeLogin)
         }
 
         /** The exception that occurred during background work, if applicable */
@@ -850,9 +849,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
             param: Parameter?
         ): TokenEndpointResponse?
 
-        open fun onPostExecute(
-            tr: TokenEndpointResponse?
-        ) {
+        open fun onPostExecute(tr: TokenEndpointResponse?, nativeLogin: Boolean) {
             val instance = SalesforceSDKManager.getInstance()
 
             // Failure cases
@@ -919,7 +916,10 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                 tr?.vfSid,
                 tr?.contentDomain,
                 tr?.contentSid,
-                tr?.csrfToken
+                tr?.csrfToken,
+                nativeLogin,
+                id?.language,
+                id?.locale,
             )
 
             // Set additional administrator prefs if they exist
@@ -953,6 +953,9 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                 .contentSid(accountOptions?.contentSid)
                 .csrfToken(accountOptions?.csrfToken)
                 .additionalOauthValues(accountOptions?.additionalOauthValues)
+                .nativeLogin(accountOptions?.nativeLogin)
+                .language(accountOptions?.language)
+                .locale(accountOptions?.locale)
                 .build()
 
             account.downloadProfilePhoto()
@@ -979,7 +982,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                         }.onFailure { throwable ->
                             w(TAG, "Revoking token failed", throwable)
                         }.onSuccess { uri ->
-                            CoroutineScope(Default).launch {
+                            CoroutineScope(IO).launch {
                                 revokeRefreshToken(
                                     DEFAULT,
                                     uri,
@@ -1150,7 +1153,10 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
             accountOptions?.vfSid,
             accountOptions?.contentDomain,
             accountOptions?.contentSid,
-            accountOptions?.csrfToken
+            accountOptions?.csrfToken,
+            accountOptions?.nativeLogin,
+            accountOptions?.language,
+            accountOptions?.locale
         )
 
         /*
@@ -1164,7 +1170,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
 
         when {
             SalesforceSDKManager.getInstance().isTestRun -> logAddAccount(account)
-            else -> CoroutineScope(Default).launch {
+            else -> CoroutineScope(IO).launch {
                 logAddAccount(account)
             }
         }
@@ -1235,7 +1241,10 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
         val vfSid: String?,
         val contentDomain: String?,
         val contentSid: String?,
-        val csrfToken: String?
+        val csrfToken: String?,
+        val nativeLogin: Boolean = false,
+        val language: String?,
+        val locale: String?
     ) {
         private var bundle: Bundle = Bundle()
 
@@ -1262,6 +1271,9 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
             bundle.putString(CONTENT_DOMAIN, contentDomain)
             bundle.putString(CONTENT_SID, contentSid)
             bundle.putString(CSRF_TOKEN, csrfToken)
+            bundle.putBoolean(NATIVE_LOGIN, nativeLogin)
+            bundle.putString(LANGUAGE, language)
+            bundle.putString(LOCALE, locale)
             bundle = MapUtil.addMapToBundle(
                 additionalOauthValues,
                 SalesforceSDKManager.getInstance().additionalOauthKeys, bundle
@@ -1295,6 +1307,9 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
             private const val CONTENT_DOMAIN = "content_domain"
             private const val CONTENT_SID = "content_sid"
             private const val CSRF_TOKEN = "csrf_token"
+            private const val NATIVE_LOGIN = "native_login"
+            private const val LANGUAGE = "language"
+            private const val LOCALE = "locale"
 
             fun fromBundle(options: Bundle?): AccountOptions? =
                 options?.run {
@@ -1321,7 +1336,10 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                         getString(VF_SID),
                         getString(CONTENT_DOMAIN),
                         getString(CONTENT_SID),
-                        getString(CSRF_TOKEN)
+                        getString(CSRF_TOKEN),
+                        getBoolean(NATIVE_LOGIN, false),
+                        getString(LANGUAGE),
+                        getString(LOCALE)
                     )
                 }
 
