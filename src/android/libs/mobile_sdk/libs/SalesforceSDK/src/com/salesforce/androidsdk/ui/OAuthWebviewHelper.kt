@@ -106,7 +106,7 @@ import com.salesforce.androidsdk.rest.ClientManager
 import com.salesforce.androidsdk.rest.ClientManager.LoginOptions
 import com.salesforce.androidsdk.rest.RestClient.clearCaches
 import com.salesforce.androidsdk.security.BiometricAuthenticationManager
-import com.salesforce.androidsdk.security.BiometricAuthenticationManager.Companion.isEnabled
+import com.salesforce.androidsdk.security.BiometricAuthenticationManager.Companion.isBiometricAuthenticationEnabled
 import com.salesforce.androidsdk.security.SalesforceKeyGenerator.getRandom128ByteKey
 import com.salesforce.androidsdk.security.SalesforceKeyGenerator.getSHA256Hash
 import com.salesforce.androidsdk.ui.LoginActivity.Companion.PICK_SERVER_REQUEST_CODE
@@ -143,7 +143,16 @@ import java.util.function.Consumer
  * c) Navigate to the authentication completion URL and token fetch
  * d) Call the id service to obtain additional info about the user
  * e) Create a local account and return an authentication result bundle
+ *
+ * @Deprecated This class will no longer be public starting in Mobile SDK 13.0.  It
+ * is no longer necessary to extend or change LoginActivity's instance of this class
+ * to support multi-factor authentication.  If there are other uses cases please
+ * inform the team via Github or our Trailblazer community.  
  */
+@Deprecated(
+    "This class will no longer be public starting in Mobile SDK 13.0.",
+    level = DeprecationLevel.WARNING,
+)
 open class OAuthWebviewHelper : KeyChainAliasCallback {
 
     private var codeVerifier: String? = null
@@ -185,14 +194,13 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
         loginOptions: LoginOptions,
         webView: WebView,
         savedInstanceState: Bundle?,
-        shouldReloadPage: Boolean = true
+        shouldReloadPage: Boolean = false,
     ) {
         this.activity = activity
         this.callback = callback
         this.context = webView.context
         this.webView = webView
         this.loginOptions = loginOptions
-        this.shouldReloadPage = shouldReloadPage
 
         webView.apply {
             webView.settings.apply {
@@ -240,7 +248,6 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
         this.loginOptions = loginOptions
         this.webView = null
         this.activity = null
-        this.shouldReloadPage = true
     }
 
     private val callback: OAuthWebviewHelperEvents
@@ -260,13 +267,12 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
     private var certChain: Array<X509Certificate>? = null
 
     /**
-     * Indicates whether the login page should be reloaded when the app is
-     * backgrounded and foregrounded. By default, this is set to 'true' in the
-     * SDK in order to support various supported OAuth flows. Subclasses may
-     * override this for cases where they need to display the page as-is, such
-     * as TBID or social login pages where a code is typed in.
+     * This value is no longer needed to support Multi-Factor Authentication via
+     * standard or advanced authentication flows.
+     *
+     * @Deprecated This value is no longer used.
      */
-    var shouldReloadPage: Boolean
+    var shouldReloadPage: Boolean = false
         private set
 
     fun saveState(outState: Bundle) {
@@ -392,7 +398,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
         runCatching {
             var uri = getAuthorizationUrl(
                 useWebServerAuthentication = instance.isBrowserLoginEnabled || instance.useWebServerAuthentication,
-                useHybridAuthentication = instance.shouldUseHybridAuthentication()
+                useHybridAuthentication = instance.useHybridAuthentication
             )
 
             callback.loadingLoginPage(loginOptions.loginUrl)
@@ -402,7 +408,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                     if (!instance.isShareBrowserSessionEnabled) {
                         uri = URI("$uri$PROMPT_LOGIN")
                     }
-                    loadLoginPageInChrome(uri)
+                    loadLoginPageInCustomTab(uri)
                 }
 
                 else -> webView?.loadUrl(uri.toString())
@@ -412,7 +418,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
         }
     }
 
-    private fun loadLoginPageInChrome(uri: URI) {
+    private fun loadLoginPageInCustomTab(uri: URI) {
         val activity = activity ?: return
 
         val customTabsIntent = CustomTabsIntent.Builder().apply {
@@ -464,15 +470,6 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
         val customTabBrowser = SalesforceSDKManager.getInstance().customTabBrowser
         if (doesBrowserExist(customTabBrowser)) {
             customTabsIntent.intent.setPackage(customTabBrowser)
-        }
-
-        /*
-         * Prevent Chrome custom tab from staying in the activity history stack.
-         * This flag ensures that the Chrome custom tab is dismissed once the
-         * login process is complete
-         */
-        if (shouldReloadPage) {
-            customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
         }
 
         runCatching {
@@ -984,6 +981,11 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                         }.onFailure { throwable ->
                             w(TAG, "Revoking token failed", throwable)
                         }.onSuccess { uri ->
+                            // The user authenticated via webview again, unlock the app.
+                            if (isBiometricAuthenticationEnabled(duplicateUserAccount)) {
+                                (SalesforceSDKManager.getInstance().biometricAuthenticationManager
+                                        as? BiometricAuthenticationManager)?.onUnlock()
+                            }
                             CoroutineScope(IO).launch {
                                 revokeRefreshToken(
                                     DEFAULT,
@@ -998,7 +1000,7 @@ open class OAuthWebviewHelper : KeyChainAliasCallback {
                 // If this account has biometric authentication enabled remove any others that also have it
                 if (id?.biometricAuth == true) {
                     existingUsers.forEach(Consumer { existingUser ->
-                        if (isEnabled(existingUser)) {
+                        if (isBiometricAuthenticationEnabled(existingUser)) {
                             activity?.runOnUiThread {
                                 makeText(
                                     activity,
