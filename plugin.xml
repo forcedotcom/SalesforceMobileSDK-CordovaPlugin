@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="11.1.0">
+        version="12.0.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -30,7 +30,7 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-ios" version="7.0.1" />
+    <engine name="cordova-ios" version="7.1.0" />
     <engine name="cordova-android" version="12.0.1" />
   </engines>
 
@@ -39,7 +39,7 @@
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="15.0" />
+      <preference name="deployment-target" value="16.0" />
       <preference name="WKWebViewOnly" value="true" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
@@ -94,16 +94,16 @@
              <source url="https://cdn.cocoapods.org"/>
          </config>
          <pods use-frameworks="true">
-           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v11.1.0" />
-           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v11.1.0" />
-           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v11.1.0" />
-           <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.5" />
-           <pod name="SQLCipher" git="https://github.com/sqlcipher/sqlcipher" tag="v4.5.4" />
-           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v11.1.0" />
-           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v11.1.0" />
-           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v11.1.0" />
+           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="FMDB/SQLCipher" git="https://github.com/ccgus/fmdb" tag="2.7.10" />
+           <pod name="SQLCipher" git="https://github.com/sqlcipher/sqlcipher" tag="v4.5.6" />
+           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <!-- Needed until cordova-ios gets posted to cocoapod.org -->
-           <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="7.0.1" />
+           <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="7.1.0" />
          </pods>
     </podspec>
 
@@ -124,7 +124,7 @@
     <framework src="AssetsLibrary.framework" weak="true" />
     <framework src="ImageIO.framework" weak="true" />
 
-    <!-- Post install script -->    
+    <!-- Post install script -->
     <hook type="after_plugin_install" src="tools/postinstall-ios.js" />
   </platform>
 
@@ -138,7 +138,7 @@
           android:name="com.salesforce.androidsdk.phonegap.ui.SalesforceDroidGapActivity"
           android:theme="@style/SalesforceSDK_SplashScreen"
           android:windowSoftInputMode="adjustResize"
-          android:launchMode="singleTop" 
+          android:launchMode="singleTop"
           android:allowBackup="false"
           android:exported="true"/>
     </edit-config>
@@ -161,11 +161,12 @@
       <preference name="AndroidInsecureFileModeEnabled" value="true" />
 
       <!-- To specify min and target SDK versions -->
-      <preference name="android-minSdkVersion" value="24" />
-      <preference name="android-targetSdkVersion" value="33" />
+      <preference name="android-minSdkVersion" value="26" />
+      <preference name="android-targetSdkVersion" value="34" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="7.4.2" />
+      <preference name="GradleVersion" value="8.2.0" />
+      <preference name="AndroidGradlePluginVersion" value="8.2.0"/>
       <preference name="GradlePluginKotlinEnabled" value="true" />
       <preference name="GradlePluginKotlinVersion" value="1.7.21" />
 

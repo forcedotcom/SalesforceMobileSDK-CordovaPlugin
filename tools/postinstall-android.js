@@ -31,7 +31,7 @@ const getAndroidSDKToolPath = function() {
         console.log('You must set the ANDROID_HOME environment variable to the path of your installation of the Android SDK.');
         return null;
     }
-    const androidExePath = path.join(androidHomeDir, 'tools', 'android');
+    let androidExePath = path.join(androidHomeDir, 'tools', 'android');
     const isWindows = (/^win/i).test(process.platform);
     if (isWindows) {
         androidExePath = androidExePath + '.bat';
@@ -88,7 +88,7 @@ if (data.indexOf("SalesforceHybrid") < 0)
     const oldAndroidDepTree = "android {";
     const newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    const newLibDep = "api 'com.salesforce.mobilesdk:SalesforceHybrid:11.1.0'";
+    const newLibDep = "api 'com.salesforce.mobilesdk:SalesforceHybrid:12.0.0'";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
 
