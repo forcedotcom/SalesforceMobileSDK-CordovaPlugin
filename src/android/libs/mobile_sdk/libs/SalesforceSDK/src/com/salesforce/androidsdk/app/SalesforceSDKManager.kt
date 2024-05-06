@@ -1448,7 +1448,7 @@ open class SalesforceSDKManager protected constructor(
         protected var INSTANCE: SalesforceSDKManager? = null
 
         /** The current version of this SDK */
-        const val SDK_VERSION = "12.1.0.dev"
+        const val SDK_VERSION = "12.0.1"
 
         /**
          * An intent action meant for instances of Salesforce SDK manager
@@ -1486,6 +1486,12 @@ open class SalesforceSDKManager protected constructor(
         @JvmStatic // This removes the `Companion` reference in in Java code
         @Suppress("NON_FINAL_MEMBER_IN_OBJECT") // This allows Java subtypes to override this property without an inspector warning
         open fun getInstance() = INSTANCE ?: throw RuntimeException("Apps must call SalesforceSDKManager.init() first.")
+
+        /** Allow Kotlin subclasses to set themselves as the instance. */
+        @JvmSynthetic
+        fun setInstance(subclass: SalesforceSDKManager) {
+            INSTANCE = subclass
+        }
 
         /**
          * Indicates if a Salesforce SDK manager instance is initialized.
