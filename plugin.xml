@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-ios" version="7.1.0" />
-    <engine name="cordova-android" version="12.0.1" />
+    <engine name="cordova-android" version="13.0.0" />
   </engines>
 
   <!-- ios -->
@@ -164,10 +164,12 @@
       <preference name="android-targetSdkVersion" value="34" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="8.2.0" />
-      <preference name="AndroidGradlePluginVersion" value="8.2.0"/>
+      <preference name="GradleVersion" value="8.7.0" />
+      <preference name="AndroidGradlePluginVersion" value="8.5.0"/>
+
+      <!-- Kotlin in Plugin -->      
       <preference name="GradlePluginKotlinEnabled" value="true" />
-      <preference name="GradlePluginKotlinVersion" value="1.7.21" />
+      <preference name="GradlePluginKotlinVersion" value="1.9.24" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
@@ -191,10 +193,6 @@
       <feature name="com.salesforce.sdkinfo"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SDKInfoPlugin"/></feature>
       <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
       <feature name="com.salesforce.mobilesync"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.MobileSyncPlugin"/></feature>
-
-      <!-- Kotlin in Plugin -->
-      <preference name="GradlePluginKotlinEnabled" value="true" />
-      <preference name="GradlePluginKotlinVersion" value="1.7.21" />
     </config-file>
 
     <config-file target="res/values/strings.xml" parent="/resources">
