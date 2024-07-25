@@ -102,7 +102,7 @@
            <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <!-- Needed until cordova-ios gets posted to cocoapod.org -->
-           <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="7.1.0" />
+           <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="7.1.1" />
          </pods>
     </podspec>
 
