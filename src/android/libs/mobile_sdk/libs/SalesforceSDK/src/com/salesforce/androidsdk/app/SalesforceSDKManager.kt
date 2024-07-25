@@ -74,8 +74,10 @@ import com.salesforce.androidsdk.R.style.SalesforceSDK_AlertDialog_Dark
 import com.salesforce.androidsdk.accounts.UserAccount
 import com.salesforce.androidsdk.accounts.UserAccountManager
 import com.salesforce.androidsdk.accounts.UserAccountManager.USER_SWITCH_TYPE_LOGOUT
+import com.salesforce.androidsdk.analytics.AnalyticsPublishingWorker.Companion.enqueueAnalyticsPublishWorkRequest
 import com.salesforce.androidsdk.analytics.EventBuilderHelper.createAndStoreEvent
 import com.salesforce.androidsdk.analytics.SalesforceAnalyticsManager
+import com.salesforce.androidsdk.analytics.SalesforceAnalyticsManager.SalesforceAnalyticsPublishingType.PublishOnAppBackground
 import com.salesforce.androidsdk.analytics.security.Encryptor
 import com.salesforce.androidsdk.app.Features.FEATURE_APP_IS_IDP
 import com.salesforce.androidsdk.app.Features.FEATURE_APP_IS_SP
@@ -87,6 +89,7 @@ import com.salesforce.androidsdk.auth.HttpAccess
 import com.salesforce.androidsdk.auth.HttpAccess.DEFAULT
 import com.salesforce.androidsdk.auth.NativeLoginManager
 import com.salesforce.androidsdk.auth.OAuth2.LogoutReason
+import com.salesforce.androidsdk.auth.OAuth2.LogoutReason.UNKNOWN
 import com.salesforce.androidsdk.auth.OAuth2.revokeRefreshToken
 import com.salesforce.androidsdk.auth.idp.SPConfig
 import com.salesforce.androidsdk.auth.idp.interfaces.IDPManager
@@ -105,9 +108,12 @@ import com.salesforce.androidsdk.developer.support.notifications.local.ShowDevel
 import com.salesforce.androidsdk.push.PushMessaging
 import com.salesforce.androidsdk.push.PushMessaging.UNREGISTERED_ATTEMPT_COMPLETE_EVENT
 import com.salesforce.androidsdk.push.PushMessaging.isRegistered
+import com.salesforce.androidsdk.push.PushMessaging.register
 import com.salesforce.androidsdk.push.PushMessaging.unregister
 import com.salesforce.androidsdk.push.PushNotificationInterface
 import com.salesforce.androidsdk.push.PushService
+import com.salesforce.androidsdk.push.PushService.Companion.pushNotificationsRegistrationType
+import com.salesforce.androidsdk.push.PushService.PushNotificationReRegistrationType.ReRegistrationOnAppForeground
 import com.salesforce.androidsdk.rest.ClientManager
 import com.salesforce.androidsdk.rest.ClientManager.LoginOptions
 import com.salesforce.androidsdk.rest.RestClient
@@ -898,7 +904,12 @@ open class SalesforceSDKManager protected constructor(
         frontActivity: Activity?,
         showLoginPage: Boolean = true,
     ) {
-        logout(account, frontActivity, showLoginPage)
+        logout(
+            account = account,
+            frontActivity = frontActivity,
+            showLoginPage = showLoginPage,
+            reason = UNKNOWN
+        )
     }
 
     // Note the below overload exists because @JvmOverloads generates non-overrideable
@@ -923,7 +934,7 @@ open class SalesforceSDKManager protected constructor(
         account: Account? = null,
         frontActivity: Activity?,
         showLoginPage: Boolean = true,
-        reason: LogoutReason = LogoutReason.UNKNOWN,
+        reason: LogoutReason = UNKNOWN,
     ) {
         createAndStoreEvent("userLogout", null, TAG, null)
         val clientMgr = ClientManager(
@@ -1451,6 +1462,14 @@ open class SalesforceSDKManager protected constructor(
     @OnLifecycleEvent(ON_STOP)
     protected open fun onAppBackgrounded() {
         screenLockManager?.onAppBackgrounded()
+
+        // Publish analytics one-time on app background, if enabled.
+        if (SalesforceAnalyticsManager.analyticsPublishingType() == PublishOnAppBackground) {
+            enqueueAnalyticsPublishWorkRequest(
+                getInstance().appContext
+            )
+        }
+
         (biometricAuthenticationManager as? BiometricAuthenticationManager)?.onAppBackgrounded()
 
         // Hide the Salesforce Mobile SDK "Show Developer Support" notification
@@ -1464,6 +1483,17 @@ open class SalesforceSDKManager protected constructor(
     protected open fun onAppForegrounded() {
         screenLockManager?.onAppForegrounded()
         (biometricAuthenticationManager as? BiometricAuthenticationManager)?.onAppForegrounded()
+
+        // Review push-notifications registration for the current user, if enabled.
+        userAccountManager.currentUser?.let { userAccount ->
+            if (pushNotificationsRegistrationType == ReRegistrationOnAppForeground) {
+                register(
+                    context = appContext,
+                    account = userAccount,
+                    recreateKey = false
+                )
+            }
+        }
 
         // Display the Salesforce Mobile SDK "Show Developer Support" notification
         if (userAccountManager.currentAccount != null && authenticatedActivityForDeveloperSupport != null) {
@@ -1801,6 +1831,8 @@ open class SalesforceSDKManager protected constructor(
                         browserLoginEnabled = false,
                         shareBrowserSessionEnabled = false
                     )
+
+                    return@withTimeout
                 }
 
                 getMyDomainAuthConfig(loginServer).let { authConfig ->
