@@ -88,7 +88,7 @@ if (data.indexOf("SalesforceHybrid") < 0)
     const oldAndroidDepTree = "android {";
     const newAndroidDepTree = "android {\n\tpackagingOptions {\n\t\texclude 'META-INF/LICENSE'\n\t\texclude 'META-INF/LICENSE.txt'\n\t\texclude 'META-INF/DEPENDENCIES'\n\t\texclude 'META-INF/NOTICE'\n\t}";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), oldAndroidDepTree, newAndroidDepTree);
-    const newLibDep = "api 'com.salesforce.mobilesdk:SalesforceHybrid:12.1.0'";
+    const newLibDep = "api 'com.salesforce.mobilesdk:SalesforceHybrid:12.2.0'";
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
 
