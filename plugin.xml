@@ -94,13 +94,13 @@
              <source url="https://cdn.cocoapods.org"/>
          </config>
          <pods use-frameworks="true">
-           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
-           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v12.1.0" />
+           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.1.0" />
+           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.1.0" />
            <pod name="FMDB" git="https://github.com/ccgus/fmdb" tag="2.7.10" />
-           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.1.0" />
+           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.1.0" />
+           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.1.0" />
            <!-- Needed until cordova-ios gets posted to cocoapod.org -->
            <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="7.1.1" />
          </pods>
