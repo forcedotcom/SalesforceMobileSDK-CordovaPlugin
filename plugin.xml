@@ -97,7 +97,6 @@
            <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
            <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
-           <pod name="FMDB" git="https://github.com/ccgus/fmdb" tag="2.7.10" />
            <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
