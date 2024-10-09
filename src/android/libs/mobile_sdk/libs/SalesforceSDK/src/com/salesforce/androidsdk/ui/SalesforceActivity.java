@@ -58,7 +58,7 @@ public abstract class SalesforceActivity extends AppCompatActivity implements Sa
     @Override
     public void onPause() {
         super.onPause();
-		delegate.onPause();
+        delegate.onPause();
     }
 
     @Override
