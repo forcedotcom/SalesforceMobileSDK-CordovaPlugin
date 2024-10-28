@@ -147,6 +147,7 @@ import com.salesforce.androidsdk.auth.idp.IDPManager as DefaultIDPManager
 import com.salesforce.androidsdk.auth.idp.SPManager as DefaultSPManager
 import com.salesforce.androidsdk.auth.interfaces.NativeLoginManager as NativeLoginManagerInterface
 import com.salesforce.androidsdk.security.interfaces.BiometricAuthenticationManager as BiometricAuthenticationManagerInterface
+import com.salesforce.androidsdk.security.interfaces.ScreenLockManager as ScreenLockManagerInterface
 
 /**
  * This class serves as an interface to the various functions of the Salesforce
@@ -214,6 +215,18 @@ open class SalesforceSDKManager protected constructor(
      */
     val loginActivityClass: Class<out Activity> = nativeLoginActivity ?: webviewLoginActivityClass
 
+    /**
+     * For Salesforce Identity API UI Bridge support, the overriding front door bridge URL to
+     * use in place of the default initial login URL
+     */
+    var frontDoorBridgeUrl: String? = null
+
+    /**
+     * For Salesforce Identity API UI Bridge support, the overriding front door bridge URL's
+     * optional web server flow code verifier
+     */
+    var frontDoorBridgeCodeVerifier: String? = null
+
     /** The class for the account switcher activity */
     var accountSwitcherActivityClass = AccountSwitcherActivity::class.java
 
@@ -221,7 +234,7 @@ open class SalesforceSDKManager protected constructor(
     private val screenLockManagerLock = Any()
 
     /** The Salesforce SDK manager's screen lock manager */
-    internal var screenLockManager: ScreenLockManager? = null
+    var screenLockManager: ScreenLockManagerInterface? = null
         @JvmName("getScreenLockManager")
         get() = field ?: synchronized(screenLockManagerLock) {
             ScreenLockManager()
@@ -257,6 +270,10 @@ open class SalesforceSDKManager protected constructor(
         set(value) {
             field = value
         }
+
+    /** Indicates if login via QR Code and UI bridge API is enabled */
+    @set:Synchronized
+    open var isQrCodeLoginEnabled = false
 
     /** Indicates if logout is in progress */
     var isLoggingOut = false
@@ -701,7 +718,7 @@ open class SalesforceSDKManager protected constructor(
             adminPermsManager?.resetAll()
             adminSettingsManager = null
             adminPermsManager = null
-            screenLockManager?.reset()
+            (screenLockManager as ScreenLockManager?)?.reset()
             screenLockManager = null
             biometricAuthenticationManager = null
         }
@@ -718,7 +735,7 @@ open class SalesforceSDKManager protected constructor(
         UserAccountManager.getInstance().clearCachedCurrentUser()
 
         userAccount?.let { userAccountResolved ->
-            screenLockManager?.cleanUp(userAccountResolved)
+            (screenLockManager as ScreenLockManager?)?.cleanUp(userAccountResolved)
             (biometricAuthenticationManager as BiometricAuthenticationManager)
                 .cleanUp(userAccountResolved)
         }
@@ -945,6 +962,9 @@ open class SalesforceSDKManager protected constructor(
         )
 
         val accountToLogout = account ?: clientMgr.account
+
+        frontDoorBridgeUrl = null
+        frontDoorBridgeCodeVerifier = null
 
         isLoggingOut = true
         val mgr = AccountManager.get(appContext)
@@ -1461,7 +1481,7 @@ open class SalesforceSDKManager protected constructor(
     @Suppress("unused")
     @OnLifecycleEvent(ON_STOP)
     protected open fun onAppBackgrounded() {
-        screenLockManager?.onAppBackgrounded()
+        (screenLockManager as ScreenLockManager?)?.onAppBackgrounded()
 
         // Publish analytics one-time on app background, if enabled.
         if (SalesforceAnalyticsManager.analyticsPublishingType() == PublishOnAppBackground) {
@@ -1481,7 +1501,7 @@ open class SalesforceSDKManager protected constructor(
     @Suppress("unused")
     @OnLifecycleEvent(ON_START)
     protected open fun onAppForegrounded() {
-        screenLockManager?.onAppForegrounded()
+        (screenLockManager as ScreenLockManager?)?.onAppForegrounded()
         (biometricAuthenticationManager as? BiometricAuthenticationManager)?.onAppForegrounded()
 
         // Review push-notifications registration for the current user, if enabled.
@@ -1514,7 +1534,7 @@ open class SalesforceSDKManager protected constructor(
         protected var INSTANCE: SalesforceSDKManager? = null
 
         /** The current version of this SDK */
-        const val SDK_VERSION = "12.1.1"
+        const val SDK_VERSION = "12.2.0.dev"
 
         /**
          * An intent action meant for instances of Salesforce SDK manager
@@ -1557,6 +1577,7 @@ open class SalesforceSDKManager protected constructor(
         open fun getInstance() = INSTANCE ?: throw RuntimeException("Apps must call SalesforceSDKManager.init() first.")
 
         /** Allow Kotlin subclasses to set themselves as the instance. */
+        @Suppress("unused")
         @JvmSynthetic
         fun setInstance(subclass: SalesforceSDKManager) {
             INSTANCE = subclass
@@ -1790,7 +1811,7 @@ open class SalesforceSDKManager protected constructor(
         fun encrypt(
             data: String?,
             key: String?
-        ): String? = Encryptor.encrypt(data, key)
+        ): String? = if (data == null || key == null) null else Encryptor.encrypt(data, key)
 
         /** The active encryption key */
         @JvmStatic
@@ -1808,7 +1829,7 @@ open class SalesforceSDKManager protected constructor(
         fun decrypt(
             data: String?,
             key: String?
-        ): String? = Encryptor.decrypt(data, key)
+        ): String? = if (data == null || key == null) null else Encryptor.decrypt(data, key)
     }
 
     /**
