@@ -215,18 +215,6 @@ open class SalesforceSDKManager protected constructor(
      */
     val loginActivityClass: Class<out Activity> = nativeLoginActivity ?: webviewLoginActivityClass
 
-    /**
-     * For Salesforce Identity API UI Bridge support, the overriding front door bridge URL to
-     * use in place of the default initial login URL
-     */
-    var frontDoorBridgeUrl: String? = null
-
-    /**
-     * For Salesforce Identity API UI Bridge support, the overriding front door bridge URL's
-     * optional web server flow code verifier
-     */
-    var frontDoorBridgeCodeVerifier: String? = null
-
     /** The class for the account switcher activity */
     var accountSwitcherActivityClass = AccountSwitcherActivity::class.java
 
@@ -270,10 +258,6 @@ open class SalesforceSDKManager protected constructor(
         set(value) {
             field = value
         }
-
-    /** Indicates if login via QR Code and UI bridge API is enabled */
-    @set:Synchronized
-    open var isQrCodeLoginEnabled = false
 
     /** Indicates if logout is in progress */
     var isLoggingOut = false
@@ -963,9 +947,6 @@ open class SalesforceSDKManager protected constructor(
 
         val accountToLogout = account ?: clientMgr.account
 
-        frontDoorBridgeUrl = null
-        frontDoorBridgeCodeVerifier = null
-
         isLoggingOut = true
         val mgr = AccountManager.get(appContext)
         var refreshToken: String? = null
@@ -1534,7 +1515,7 @@ open class SalesforceSDKManager protected constructor(
         protected var INSTANCE: SalesforceSDKManager? = null
 
         /** The current version of this SDK */
-        const val SDK_VERSION = "12.2.0.dev"
+        const val SDK_VERSION = "12.2.0"
 
         /**
          * An intent action meant for instances of Salesforce SDK manager
