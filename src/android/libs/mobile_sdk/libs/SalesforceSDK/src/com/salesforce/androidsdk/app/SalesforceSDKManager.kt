@@ -57,10 +57,8 @@ import android.webkit.URLUtil.isHttpsUrl
 import androidx.core.content.ContextCompat.RECEIVER_EXPORTED
 import androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
 import androidx.core.content.ContextCompat.registerReceiver
-import androidx.lifecycle.Lifecycle.Event.ON_START
-import androidx.lifecycle.Lifecycle.Event.ON_STOP
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowSizeClass
@@ -82,11 +80,13 @@ import com.salesforce.androidsdk.analytics.security.Encryptor
 import com.salesforce.androidsdk.app.Features.FEATURE_APP_IS_IDP
 import com.salesforce.androidsdk.app.Features.FEATURE_APP_IS_SP
 import com.salesforce.androidsdk.app.Features.FEATURE_BROWSER_LOGIN
+import com.salesforce.androidsdk.app.Features.FEATURE_NATIVE_LOGIN
 import com.salesforce.androidsdk.app.SalesforceSDKManager.Theme.DARK
 import com.salesforce.androidsdk.app.SalesforceSDKManager.Theme.SYSTEM_DEFAULT
 import com.salesforce.androidsdk.auth.AuthenticatorService.KEY_INSTANCE_URL
 import com.salesforce.androidsdk.auth.HttpAccess
 import com.salesforce.androidsdk.auth.HttpAccess.DEFAULT
+import com.salesforce.androidsdk.auth.JwtAccessToken
 import com.salesforce.androidsdk.auth.NativeLoginManager
 import com.salesforce.androidsdk.auth.OAuth2.LogoutReason
 import com.salesforce.androidsdk.auth.OAuth2.LogoutReason.UNKNOWN
@@ -138,6 +138,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 import java.lang.String.CASE_INSENSITIVE_ORDER
 import java.net.URI
+import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.Locale.US
 import java.util.SortedSet
 import java.util.UUID.randomUUID
@@ -168,7 +170,7 @@ open class SalesforceSDKManager protected constructor(
     mainActivity: Class<out Activity>,
     private val loginActivity: Class<out Activity>? = null,
     internal val nativeLoginActivity: Class<out Activity>? = null,
-) : LifecycleObserver {
+) : DefaultLifecycleObserver {
 
     constructor(
         context: Context,
@@ -582,6 +584,7 @@ open class SalesforceSDKManager protected constructor(
         googleCloudProjectId: String? = null,
         isReCaptchaEnterprise: Boolean = false
     ): NativeLoginManagerInterface {
+        registerUsedAppFeature(FEATURE_NATIVE_LOGIN)
         nativeLoginManager = NativeLoginManager(
             consumerKey,
             callbackUrl,
@@ -1254,6 +1257,7 @@ open class SalesforceSDKManager protected constructor(
             "IDP Enabled", "$isIDPLoginFlowEnabled",
             "Identity Provider", "$isIdentityProvider",
             "Current User", usersToString(userAccountManager.cachedCurrentUser),
+            "Access Token Expiration", accessTokenExpiration(),
             "Authenticated Users", usersToString(userAccountManager.authenticatedUsers)
         ).apply {
             addAll(
@@ -1278,6 +1282,23 @@ open class SalesforceSDKManager protected constructor(
                 )
             }
         }
+
+    private fun accessTokenExpiration(): String {
+        val currentUSer = userAccountManager.cachedCurrentUser
+        var expiration = "Unknown"
+
+        if (currentUSer.tokenFormat == "jwt") {
+            val jwtAccessToken = JwtAccessToken(currentUSer.authToken)
+            val expirationDate = jwtAccessToken.expirationDate()
+            if (expirationDate != null) {
+                val dateFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                expiration = dateFormatter.format(expirationDate)
+            }
+        }
+
+        return expiration
+    }
+
 
     /**
      * Information to display in the developer support dialog for a specified
@@ -1459,9 +1480,9 @@ open class SalesforceSDKManager protected constructor(
                 windowSizeClass.windowHeightSizeClass == WindowHeightSizeClass.COMPACT
     }
 
-    @Suppress("unused")
-    @OnLifecycleEvent(ON_STOP)
-    protected open fun onAppBackgrounded() {
+    override fun onPause(owner: LifecycleOwner) {
+        super.onPause(owner)
+
         (screenLockManager as ScreenLockManager?)?.onAppBackgrounded()
 
         // Publish analytics one-time on app background, if enabled.
@@ -1479,9 +1500,9 @@ open class SalesforceSDKManager protected constructor(
         }
     }
 
-    @Suppress("unused")
-    @OnLifecycleEvent(ON_START)
-    protected open fun onAppForegrounded() {
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+
         (screenLockManager as ScreenLockManager?)?.onAppForegrounded()
         (biometricAuthenticationManager as? BiometricAuthenticationManager)?.onAppForegrounded()
 
