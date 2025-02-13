@@ -160,11 +160,11 @@
 
       <!-- To specify min and target SDK versions -->
       <preference name="android-minSdkVersion" value="28" />
-      <preference name="android-targetSdkVersion" value="34" />
+      <preference name="android-targetSdkVersion" value="35" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="8.7.0" />
-      <preference name="AndroidGradlePluginVersion" value="8.6.1"/>
+      <preference name="GradleVersion" value="8.10.2" />
+      <preference name="AndroidGradlePluginVersion" value="8.8.0"/>
 
       <!-- Kotlin in Plugin -->      
       <preference name="GradlePluginKotlinEnabled" value="true" />
