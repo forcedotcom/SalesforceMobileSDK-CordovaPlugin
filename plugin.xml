@@ -3,7 +3,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="com.salesforce"
-        version="12.2.0">
+        version="13.0.0">
 
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
@@ -39,7 +39,7 @@
 
     <config-file target="config.xml" parent="/*">
       <preference name="BackupWebStorage" value="local" />
-      <preference name="deployment-target" value="16.0" />
+      <preference name="deployment-target" value="17.0" />
       <preference name="WKWebViewOnly" value="true" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
@@ -94,12 +94,12 @@
              <source url="https://cdn.cocoapods.org"/>
          </config>
          <pods use-frameworks="true">
-           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" tag="v12.2.0" />
-           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.2.0" />
-           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.2.0" />
-           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.2.0" />
-           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.2.0" />
-           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" tag="v12.2.0" />
+           <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+           <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+           <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
            <!-- Needed until cordova-ios gets posted to cocoapod.org -->
            <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="7.1.1" />
          </pods>
@@ -159,11 +159,11 @@
       <preference name="AndroidInsecureFileModeEnabled" value="true" />
 
       <!-- To specify min and target SDK versions -->
-      <preference name="android-minSdkVersion" value="26" />
-      <preference name="android-targetSdkVersion" value="34" />
+      <preference name="android-minSdkVersion" value="28" />
+      <preference name="android-targetSdkVersion" value="35" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="8.7.0" />
+      <preference name="GradleVersion" value="8.7" />
       <preference name="AndroidGradlePluginVersion" value="8.6.1"/>
 
       <!-- Kotlin in Plugin -->      

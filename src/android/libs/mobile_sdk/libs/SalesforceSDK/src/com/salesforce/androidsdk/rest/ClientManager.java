@@ -28,8 +28,6 @@ package com.salesforce.androidsdk.rest;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
 import android.accounts.NetworkErrorException;
 import android.app.Activity;
 import android.content.Context;
@@ -346,45 +344,12 @@ public class ClientManager {
     }
 
     /**
-     * Callback from either user account creation, or a call to getAuthToken, used
-     * by the Android account management components.
-     */
-    private class AccMgrCallback implements AccountManagerCallback<Bundle> {
-
-        private final RestClientCallback restCallback;
-
-        /**
-         * Constructor
-         * @param restCallback Who to directly call when we get a result for getAuthToken.
-         *
-         */
-        AccMgrCallback(RestClientCallback restCallback) {
-            assert restCallback != null : "you must supply a RestClientAvailable instance";
-            this.restCallback = restCallback;
-        }
-
-        @Override
-        public void run(AccountManagerFuture<Bundle> f) {
-            RestClient client = null;
-            try {
-                f.getResult();
-                client = peekRestClient();
-            } catch (Exception e) {
-                SalesforceSDKLogger.w(TAG, "Exception thrown while creating rest client", e);
-            }
-
-            // response. if we failed, null
-            restCallback.authenticatedRestClient(client);
-        }
-    }
-
-    /**
      * RestClientCallback interface.
      * You must provide an implementation of this interface when calling
      * {@link ClientManager#getRestClient(Activity, RestClientCallback) getRestClient}.
      */
     public interface RestClientCallback {
-        public void authenticatedRestClient(RestClient client);
+        void authenticatedRestClient(RestClient client);
     }
 
     /**
@@ -448,8 +413,10 @@ public class ClientManager {
                 final String cachedAuthToken = clientManager.peekRestClient(acc).getAuthToken();
                 clientManager.invalidateToken(cachedAuthToken);
                 final UserAccount userAccount = refreshStaleToken(acc);
-                newAuthToken = userAccount.getAuthToken();
-                newInstanceUrl = userAccount.getInstanceServer();
+
+                // NB: userAccount will be null if refresh token is no longer valid
+                newAuthToken = userAccount != null ? userAccount.getAuthToken() : null;
+                newInstanceUrl =  userAccount != null ? userAccount.getInstanceServer() : null;
 
                 Intent broadcastIntent;
                 if (newAuthToken == null) {
@@ -466,7 +433,7 @@ public class ClientManager {
                                 .logout(null, null, false, OAuth2.LogoutReason.REFRESH_TOKEN_EXPIRED);
                     }
 
-                    // Broadcasts an intent that the access token has been revoked.
+                    // Broadcasts an intent that the refresh token has been revoked.
                     broadcastIntent = new Intent(ACCESS_TOKEN_REVOKE_INTENT);
                 } else if (newInstanceUrl != null && !newInstanceUrl.equalsIgnoreCase(lastNewInstanceUrl)) {
 
