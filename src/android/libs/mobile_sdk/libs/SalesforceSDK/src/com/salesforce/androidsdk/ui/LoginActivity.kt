@@ -35,7 +35,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.admin.DevicePolicyManager.ACTION_SET_NEW_PASSWORD
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageManager.FEATURE_FACE
 import android.content.pm.PackageManager.FEATURE_IRIS
 import android.graphics.Bitmap
@@ -95,9 +94,12 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getMainExecutor
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
+import com.salesforce.androidsdk.R.color.sf__background
+import com.salesforce.androidsdk.R.color.sf__background_dark
 import com.salesforce.androidsdk.R.color.sf__primary_color
 import com.salesforce.androidsdk.R.drawable.sf__action_back
 import com.salesforce.androidsdk.R.string.sf__biometric_opt_in_title
@@ -113,10 +115,6 @@ import com.salesforce.androidsdk.R.string.sf__ssl_not_yet_valid
 import com.salesforce.androidsdk.R.string.sf__ssl_unknown_error
 import com.salesforce.androidsdk.R.string.sf__ssl_untrusted
 import com.salesforce.androidsdk.accounts.UserAccount
-import com.salesforce.androidsdk.accounts.UserAccountManager.USER_SWITCH_TYPE_DEFAULT
-import com.salesforce.androidsdk.accounts.UserAccountManager.USER_SWITCH_TYPE_FIRST_LOGIN
-import com.salesforce.androidsdk.accounts.UserAccountManager.USER_SWITCH_TYPE_LOGIN
-import com.salesforce.androidsdk.analytics.SalesforceAnalyticsManager
 import com.salesforce.androidsdk.app.Features.FEATURE_QR_CODE_LOGIN
 import com.salesforce.androidsdk.app.SalesforceSDKManager
 import com.salesforce.androidsdk.app.SalesforceSDKManager.Theme.DARK
@@ -130,10 +128,6 @@ import com.salesforce.androidsdk.config.RuntimeConfig.ConfigKey.ManagedAppCertAl
 import com.salesforce.androidsdk.config.RuntimeConfig.ConfigKey.RequireCertAuth
 import com.salesforce.androidsdk.config.RuntimeConfig.getRuntimeConfig
 import com.salesforce.androidsdk.security.BiometricAuthenticationManager
-import com.salesforce.androidsdk.ui.OAuthWebviewHelper.Companion.AUTHENTICATION_FAILED_INTENT
-import com.salesforce.androidsdk.ui.OAuthWebviewHelper.Companion.HTTP_ERROR_RESPONSE_CODE_INTENT
-import com.salesforce.androidsdk.ui.OAuthWebviewHelper.Companion.RESPONSE_ERROR_DESCRIPTION_INTENT
-import com.salesforce.androidsdk.ui.OAuthWebviewHelper.Companion.RESPONSE_ERROR_INTENT
 import com.salesforce.androidsdk.ui.components.LoginView
 import com.salesforce.androidsdk.util.EventsObservable
 import com.salesforce.androidsdk.util.EventsObservable.EventType.AuthWebViewPageFinished
@@ -283,7 +277,7 @@ open class LoginActivity : FragmentActivity() {
         viewModel.selectedServer.observe(this) {
             if (viewModel.singleServerCustomTabActivity) {
                 // Skip fetching authorization and show custom tab immediately.
-                viewModel.reloadWebview()
+                viewModel.reloadWebView()
                 viewModel.loginUrl.value?.let { url ->
                     loadLoginPageInCustomTab(url, customTabLauncher)
                 }
@@ -355,6 +349,8 @@ open class LoginActivity : FragmentActivity() {
             )
             this.accountAuthenticatorResponse = null
         }
+
+        viewModel.authFinished.value = false
         super.finish()
     }
 
@@ -454,7 +450,7 @@ open class LoginActivity : FragmentActivity() {
                                 key = getPrivateKey(this, alias)
                             }
 
-                            viewModel.reloadWebview()
+                            viewModel.reloadWebView()
                         }.onFailure { throwable ->
                             e(TAG, "Exception thrown while retrieving X.509 certificate", throwable)
                         }
@@ -506,34 +502,10 @@ open class LoginActivity : FragmentActivity() {
      * @param userAccount The newly created user account.
      */
     protected open fun onAuthFlowSuccess(userAccount: UserAccount) {
-        initAnalyticsManager(userAccount)
-        val userAccountManager = SalesforceSDKManager.getInstance().userAccountManager
-        val authenticatedUsers = userAccountManager.authenticatedUsers
-        val numAuthenticatedUsers = authenticatedUsers?.size ?: 0
-        val userSwitchType = when {
-            // We've already authenticated the first user, so there should be one
-            numAuthenticatedUsers == 1 -> USER_SWITCH_TYPE_FIRST_LOGIN
-
-            // Otherwise we're logging in with an additional user
-            numAuthenticatedUsers > 1 -> USER_SWITCH_TYPE_LOGIN
-
-            // This should never happen but if it does, pass in the "unknown" value
-            else -> USER_SWITCH_TYPE_DEFAULT
-        }
-        userAccountManager.sendUserSwitchIntent(userSwitchType, null)
-        setResult(Activity.RESULT_OK)
-
         // Create account and save result before switching to new user
         accountAuthenticatorResult = SalesforceSDKManager.getInstance().userAccountManager.createAccount(userAccount)
 
-        userAccountManager.switchToUser(userAccount)
-        with(SalesforceSDKManager.getInstance()) {
-            appContext.startActivity(Intent(appContext, mainActivityClass).apply {
-                setPackage(packageName)
-                flags = FLAG_ACTIVITY_NEW_TASK
-            })
-        }
-
+        setResult(Activity.RESULT_OK)
         finish()
     }
 
@@ -582,7 +554,7 @@ open class LoginActivity : FragmentActivity() {
         // Displays the error in a toast, clears cookies and reloads the login page
         runOnUiThread {
             makeText(this, "$error : $errorDesc", LENGTH_LONG).show()
-            viewModel.reloadWebview()
+            viewModel.reloadWebView()
         }
     }
 
@@ -630,9 +602,6 @@ open class LoginActivity : FragmentActivity() {
             }
         }
     }
-
-    private fun initAnalyticsManager(account: UserAccount?) =
-        SalesforceAnalyticsManager.getInstance(account)?.updateLoggingPrefs()
 
     internal inner class SPStatusCallback : StatusUpdateCallback {
         override fun onStatusUpdate(status: Status) {
@@ -834,7 +803,7 @@ open class LoginActivity : FragmentActivity() {
                         jwtFlowError()
                     } else {
                         viewModel.authCodeForJwtFlow = tokenResponse.authToken
-                        viewModel.reloadWebview()
+                        viewModel.reloadWebView()
                     }
                 }
             }
@@ -898,15 +867,28 @@ open class LoginActivity : FragmentActivity() {
                     )
 
                     else -> {
+                        // Show loading while we PKCE and/or create user account.
+                        viewModel.authFinished.value = true
+
                         // Determine if presence of override parameters require the user agent flow.
                         val overrideWithUserAgentFlow = viewModel.isUsingFrontDoorBridge
                                 && viewModel.frontdoorBridgeCodeVerifier == null
                         when {
-                            SalesforceSDKManager.getInstance().useWebServerAuthentication && !overrideWithUserAgentFlow ->
-                                viewModel.onWebServerFlowComplete(params["code"], ::onAuthFlowError, ::onAuthFlowSuccess)
+                            SalesforceSDKManager.getInstance().useWebServerAuthentication
+                                    && !overrideWithUserAgentFlow ->
+
+                                viewModel.onWebServerFlowComplete(
+                                    params["code"],
+                                    ::onAuthFlowError,
+                                    ::onAuthFlowSuccess
+                                )
 
                             else ->
-                                viewModel.onAuthFlowComplete(TokenEndpointResponse(params), ::onAuthFlowError, ::onAuthFlowSuccess)
+                                viewModel.onAuthFlowComplete(
+                                    TokenEndpointResponse(params),
+                                    ::onAuthFlowError,
+                                    ::onAuthFlowSuccess
+                                )
                         }
                     }
                 }
@@ -922,21 +904,23 @@ open class LoginActivity : FragmentActivity() {
 
         override fun onPageFinished(view: WebView?, url: String?) {
             view?.evaluateJavascript(BACKGROUND_COLOR_JAVASCRIPT) { result ->
-                viewModel.loading.value = false
                 if (url == ABOUT_BLANK) {
-                    viewModel.dynamicBackgroundColor.value = Color.White
+                    val isDark = SalesforceSDKManager.getInstance().isDarkTheme
+                    viewModel.dynamicBackgroundColor.value = Color(ContextCompat.getColor(baseContext,
+                        if (isDark) sf__background_dark else sf__background))
+
                     return@evaluateJavascript
                 }
 
-                viewModel.dynamicBackgroundColor.value = validateAndExtractBackgroundColor(result) ?: return@evaluateJavascript
+                viewModel.dynamicBackgroundColor.value = validateAndExtractBackgroundColor(result)
+                    ?: return@evaluateJavascript
+            }.also {
+                if (!viewModel.authFinished.value) {
+                    viewModel.loading.value = false
+                }
             }
 
-            // Remove the native login buttons (biometric, IDP) once on the allow/deny screen
-            if (url?.contains(ALLOW_SCREEN_INDICATOR) == true) {
-                viewModel.showBottomBarButtons.value = false
-            }
             EventsObservable.get().notifyEvent(AuthWebViewPageFinished, url)
-
             super.onPageFinished(view, url)
         }
 
@@ -991,6 +975,10 @@ open class LoginActivity : FragmentActivity() {
         private const val SETUP_REQUEST_CODE = 72
         private const val TAG = "LoginActivity"
         private const val PROMPT_LOGIN = "&prompt=login"
+        private const val AUTHENTICATION_FAILED_INTENT = "com.salesforce.auth.intent.AUTHENTICATION_ERROR"
+        private const val HTTP_ERROR_RESPONSE_CODE_INTENT = "com.salesforce.auth.intent.HTTP_RESPONSE_CODE"
+        private const val RESPONSE_ERROR_INTENT = "com.salesforce.auth.intent.RESPONSE_ERROR"
+        private const val RESPONSE_ERROR_DESCRIPTION_INTENT = "com.salesforce.auth.intent.RESPONSE_ERROR_DESCRIPTION"
 
         // This parses the expected "rgb(x, x, x)" string.
         private val rgbTextPattern = "rgb\\((\\d{1,3}), (\\d{1,3}), (\\d{1,3})\\)".toRegex()
@@ -999,7 +987,6 @@ open class LoginActivity : FragmentActivity() {
         // region LoginWebviewClient Constants
 
         internal const val ABOUT_BLANK = "about:blank"
-        private const val ALLOW_SCREEN_INDICATOR = "frontdoor.jsp"
         private const val BACKGROUND_COLOR_JAVASCRIPT =
             "(function() { return window.getComputedStyle(document.body, null).getPropertyValue('background-color'); })();"
 
