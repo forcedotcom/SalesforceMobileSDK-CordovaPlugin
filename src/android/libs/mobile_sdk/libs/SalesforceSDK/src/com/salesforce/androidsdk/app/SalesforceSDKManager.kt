@@ -111,6 +111,7 @@ import com.salesforce.androidsdk.developer.support.notifications.local.ShowDevel
 import com.salesforce.androidsdk.developer.support.notifications.local.ShowDeveloperSupportNotifier.Companion.showDeveloperSupportNotification
 import com.salesforce.androidsdk.push.PushMessaging
 import com.salesforce.androidsdk.push.PushMessaging.UNREGISTERED_ATTEMPT_COMPLETE_EVENT
+import com.salesforce.androidsdk.push.PushMessaging.getNotificationsTypes
 import com.salesforce.androidsdk.push.PushMessaging.isRegistered
 import com.salesforce.androidsdk.push.PushMessaging.register
 import com.salesforce.androidsdk.push.PushMessaging.unregister
@@ -119,6 +120,8 @@ import com.salesforce.androidsdk.push.PushService
 import com.salesforce.androidsdk.push.PushService.Companion.pushNotificationsRegistrationType
 import com.salesforce.androidsdk.push.PushService.PushNotificationReRegistrationType.ReRegistrationOnAppForeground
 import com.salesforce.androidsdk.rest.ClientManager
+import com.salesforce.androidsdk.rest.NotificationsActionsResponseBody
+import com.salesforce.androidsdk.rest.NotificationsApiClient
 import com.salesforce.androidsdk.rest.RestClient
 import com.salesforce.androidsdk.security.BiometricAuthenticationManager
 import com.salesforce.androidsdk.security.SalesforceKeyGenerator.getEncryptionKey
@@ -416,7 +419,6 @@ open class SalesforceSDKManager protected constructor(
         _lightColorScheme = value
     }
 
-
     /**
      * The dark color scheme to use in Mobile SDK screens
      * Defaults to com.salesforce.androidsdk.ui.theme.sfDarkColors
@@ -608,6 +610,46 @@ open class SalesforceSDKManager protected constructor(
             isReCaptchaEnterprise
         )
         return nativeLoginManager as NativeLoginManagerInterface
+    }
+
+    /**
+     * Returns the Salesforce Notifications API types endpoint notification type
+     * with the provided type.
+     * @param type The notification type
+     * @return The notification type from the Salesforce Notifications API types
+     * endpoint or null
+     */
+    fun getNotificationsType(
+        type: String
+    ) = userAccountManager.currentUser?.let { currentUser ->
+        getNotificationsTypes(
+            currentUser
+        )?.notificationTypes?.firstOrNull { notificationType ->
+            notificationType.type == type
+        }
+    }
+
+    /**
+     * Invokes a Salesforce Notifications API notification action.
+     * @param notificationId The Salesforce actionable notification's id
+     * @param actionKey The Salesforce actionable notification's action key
+     * @param restClient The REST client to use when invoking the Salesforce
+     * Notifications API.  Note the REST client determines the user account used
+     * as well.  This defaults to the current user's REST client.
+     * @return The Salesforce Notifications API actions endpoint response or
+     * null
+     */
+    fun invokeServerNotificationAction(
+        notificationId: String,
+        actionKey: String,
+        restClient: RestClient = clientManager.peekRestClient(userAccountManager.currentUser)
+    ): NotificationsActionsResponseBody? {
+        return NotificationsApiClient(
+            restClient = restClient
+        ).submitNotificationAction(
+            notificationId = notificationId,
+            actionKey = actionKey
+        )
     }
 
     /**

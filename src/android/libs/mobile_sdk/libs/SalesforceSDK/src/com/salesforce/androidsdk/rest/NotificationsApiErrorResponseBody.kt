@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-present, salesforce.com, inc.
+ * Copyright (c) 2025-present, salesforce.com, inc.
  * All rights reserved.
  * Redistribution and use of this software in source and binary forms, with or
  * without modification, are permitted provided that the following conditions
@@ -24,55 +24,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.salesforce.androidsdk.rest;
+package com.salesforce.androidsdk.rest
 
-import android.content.Context;
-
-import androidx.annotation.VisibleForTesting;
-
-import com.salesforce.androidsdk.R;
-import com.salesforce.androidsdk.app.SalesforceSDKManager;
+import com.salesforce.androidsdk.rest.SfapApiClient.Companion.jsonIgnoreUnknownKeys
+import kotlinx.serialization.Serializable
 
 /**
- * This is where all the API version info lives. This allows us to change one
- * line here and affect all our api calls.
+ * Models the Salesforce Notifications API actions endpoint's `error` response.
+ * See https://salesforce.quip.com/dwjPAf3py4Br
+ * TODO: Replace the documentation link with the final documentation. ECJ20250320
  */
-public class ApiVersionStrings {
+@Serializable
+data class NotificationsApiErrorResponseBody(
+    val errorCode: String? = null,
+    val message: String? = null,
+    val messageCode: String? = null
+) {
 
-    public static final String VERSION_NUMBER = "v63.0";
+    /** The original JSON used to initialize this response body */
+    var sourceJson: String? = null
+        private set
 
-    /** A version number override exclusively to support unit tests */
-    @VisibleForTesting
-    public static String VERSION_NUMBER_TEST = null;
+    companion object {
 
-    public static final String API_PREFIX = "/services/data/";
+        /**
+         * Returns an Salesforce Notifications API actions endpoint error
+         * response from the JSON text.
+         * @param json The JSON text
+         * @return The Salesforce Notifications API actions endpoint error
+         * response
+         */
+        fun fromJson(json: String): Array<NotificationsApiErrorResponseBody> {
 
-    public static String getBasePath() {
-        return API_PREFIX + getVersionNumber(SalesforceSDKManager.getInstance().getAppContext());
-    }
-
-    public static String getBaseChatterPath() {
-        return getBasePath() + "/chatter/";
-    }
-
-    public static String getBaseSObjectPath() {
-        return getBasePath() + "/sobjects/";
-    }
-
-    /**
-     * Returns the API version number to be used.
-     *
-     * @param context Context. Could be null in some test runs.
-     * @return API version number to be used.
-     */
-    public static String getVersionNumber(Context context) {
-        String apiVersion = VERSION_NUMBER;
-        if (context != null) {
-            apiVersion = context.getString(R.string.api_version);
+            val results = jsonIgnoreUnknownKeys.decodeFromString<Array<NotificationsApiErrorResponseBody>>(json)
+            results.forEach { it.sourceJson = json }
+            return results
         }
-        if (VERSION_NUMBER_TEST != null) {
-            apiVersion = VERSION_NUMBER_TEST;
-        }
-        return apiVersion;
     }
 }
