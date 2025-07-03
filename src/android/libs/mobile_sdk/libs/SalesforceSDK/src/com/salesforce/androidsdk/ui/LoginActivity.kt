@@ -74,6 +74,8 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting.Companion.PROTECTED
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
@@ -100,10 +102,12 @@ import androidx.core.content.ContextCompat.getMainExecutor
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import com.salesforce.androidsdk.R.color.sf__background
 import com.salesforce.androidsdk.R.color.sf__background_dark
 import com.salesforce.androidsdk.R.color.sf__primary_color
 import com.salesforce.androidsdk.R.drawable.sf__action_back
+import com.salesforce.androidsdk.R.string.cannot_use_another_apps_login_qr_code
 import com.salesforce.androidsdk.R.string.sf__biometric_opt_in_title
 import com.salesforce.androidsdk.R.string.sf__generic_authentication_error_title
 import com.salesforce.androidsdk.R.string.sf__jwt_authentication_error
@@ -126,6 +130,7 @@ import com.salesforce.androidsdk.auth.OAuth2.TokenEndpointResponse
 import com.salesforce.androidsdk.auth.OAuth2.swapJWTForTokens
 import com.salesforce.androidsdk.auth.idp.interfaces.SPManager.Status
 import com.salesforce.androidsdk.auth.idp.interfaces.SPManager.StatusUpdateCallback
+import com.salesforce.androidsdk.config.LoginServerManager.LoginServer
 import com.salesforce.androidsdk.config.RuntimeConfig.ConfigKey.ManagedAppCertAlias
 import com.salesforce.androidsdk.config.RuntimeConfig.ConfigKey.RequireCertAuth
 import com.salesforce.androidsdk.config.RuntimeConfig.getRuntimeConfig
@@ -139,6 +144,7 @@ import com.salesforce.androidsdk.util.SalesforceSDKLogger.e
 import com.salesforce.androidsdk.util.SalesforceSDKLogger.w
 import com.salesforce.androidsdk.util.UriFragmentParser
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -157,7 +163,8 @@ import java.security.cert.X509Certificate
  */
 open class LoginActivity : FragmentActivity() {
     // View Model
-    protected open val viewModel: LoginViewModel
+    @VisibleForTesting(otherwise = PROTECTED)
+    open val viewModel: LoginViewModel
             by viewModels { SalesforceSDKManager.getInstance().loginViewModelFactory }
 
     // Webview and Clients
@@ -195,13 +202,15 @@ open class LoginActivity : FragmentActivity() {
             SalesforceSDKManager.getInstance().setViewNavigationVisibility(this)
         }
 
+        // Set the Salesforce Welcome Login hint and host for the OAuth authorize URL, if applicable.
+        useLoginHint(intent)
+
         /*
          * For Salesforce Identity API UI Bridge support, the overriding
          * frontdoor bridge URL to use in place of the default initial login URL
          * plus the optional web server flow code verifier accompanying the
          * frontdoor bridge URL.
          */
-        viewModel.isUsingFrontDoorBridge = isFrontdoorBridgeUrlIntent(intent) || isQrCodeLoginUrlIntent(intent)
         val uiBridgeApiParameters = if (isQrCodeLoginUrlIntent(intent)) {
             uiBridgeApiParametersFromQrCodeLoginUrl(intent.data?.toString())
         } else intent.getStringExtra(EXTRA_KEY_FRONTDOOR_BRIDGE_URL)?.let { frontdoorBridgeUrl ->
@@ -209,6 +218,29 @@ open class LoginActivity : FragmentActivity() {
                 frontdoorBridgeUrl,
                 intent.getStringExtra(EXTRA_KEY_PKCE_CODE_VERIFIER)
             )
+        }
+
+        /**
+         *  The Salesforce Connected App or External Client App consumer key
+         *  from the Salesforce Identity API UI Bridge front door URL.  This
+         *  is sometimes known as "client id" or "remote access consumer
+         *  key".
+         */
+        val uiBridgeApiParametersConsumerKey = uiBridgeApiParameters?.frontdoorBridgeUrl?.toUri()?.getQueryParameter("startURL")?.toUri()?.getQueryParameter("client_id")
+
+        // Choose front door bridge use by verifying intent data and such that only front door bridge URLs with matching consumer keys are used.
+        val uiBridgeApiParametersFrontDoorBridgeUrlMismatchedConsumerKey = uiBridgeApiParametersConsumerKey != null && uiBridgeApiParametersConsumerKey != viewModel.bootConfig.remoteAccessConsumerKey
+        viewModel.isUsingFrontDoorBridge = (isFrontdoorBridgeUrlIntent(intent) || isQrCodeLoginUrlIntent(intent)) && !uiBridgeApiParametersFrontDoorBridgeUrlMismatchedConsumerKey
+
+        // Alert the user if the front door bridge URL is not for this app and was discarded.
+        if (uiBridgeApiParametersFrontDoorBridgeUrlMismatchedConsumerKey) {
+            runOnUiThread {
+                makeText(
+                    this,
+                    getString(cannot_use_another_apps_login_qr_code),
+                    LENGTH_LONG
+                ).show()
+            }
         }
 
         // Don't let sharedBrowserSession org setting stop a new user from logging in.
@@ -286,11 +318,18 @@ open class LoginActivity : FragmentActivity() {
                 }
             } else {
                 with(SalesforceSDKManager.getInstance()) {
-                    if (useWebServerAuthentication) {
-                        // Fetch well known config and load in custom tab if required.
-                        fetchAuthenticationConfiguration {
-                            if (isBrowserLoginEnabled) {
+                    // Fetch well known config and load in custom tab if required.
+                    fetchAuthenticationConfiguration {
+                        if (isBrowserLoginEnabled) {
+                            if (useWebServerAuthentication) {
                                 viewModel.loginUrl.value?.let { url -> loadLoginPageInCustomTab(url, customTabLauncher) }
+                            } else {
+                                /* Reload the webview now that isBrowserLoginEnabled has been set
+                                   to true so that we generate an authorization URL with PKCE values.  */
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    viewModel.reloadWebView()
+                                    viewModel.loginUrl.value?.let { url -> loadLoginPageInCustomTab(url, customTabLauncher) }
+                                }
                             }
                         }
                     }
@@ -435,7 +474,27 @@ open class LoginActivity : FragmentActivity() {
     }
 
     // endregion
+    // region Salesforce Welcome Login Private Implementation
 
+    /**
+     * Uses the Salesforce Welcome login hint and host in the Intent, if
+     * applicable.
+     */
+    private fun useLoginHint(intent: Intent) {
+
+        viewModel.loginHint = intent.getStringExtra(EXTRA_KEY_LOGIN_HINT)
+        intent.getStringExtra(EXTRA_KEY_LOGIN_HOST)?.let { loginHost ->
+            SalesforceSDKManager.getInstance().loginServerManager.setSelectedLoginServer(
+                LoginServer(
+                    loginHost,
+                    "https://$loginHost",
+                    true
+                )
+            )
+        }
+    }
+
+    // endregion
     // End of Public Functions
 
     protected open fun certAuthOrLogin() {
@@ -873,25 +932,19 @@ open class LoginActivity : FragmentActivity() {
                         // Show loading while we PKCE and/or create user account.
                         viewModel.authFinished.value = true
 
-                        // Determine if presence of override parameters require the user agent flow.
-                        val overrideWithUserAgentFlow = viewModel.isUsingFrontDoorBridge
-                                && viewModel.frontdoorBridgeCodeVerifier == null
                         when {
-                            SalesforceSDKManager.getInstance().useWebServerAuthentication
-                                    && !overrideWithUserAgentFlow ->
-
+                            viewModel.useWebServerFlow ->
                                 viewModel.onWebServerFlowComplete(
                                     params["code"],
                                     ::onAuthFlowError,
-                                    ::onAuthFlowSuccess
+                                    ::onAuthFlowSuccess,
                                 )
-
                             else ->
                                 CoroutineScope(Default).launch {
                                     viewModel.onAuthFlowComplete(
                                         TokenEndpointResponse(params),
                                         ::onAuthFlowError,
-                                        ::onAuthFlowSuccess
+                                        ::onAuthFlowSuccess,
                                     )
                                 }
                         }
@@ -1001,6 +1054,15 @@ open class LoginActivity : FragmentActivity() {
         internal const val ABOUT_BLANK = "about:blank"
         private const val BACKGROUND_COLOR_JAVASCRIPT =
             "(function() { return window.getComputedStyle(document.body, null).getPropertyValue('background-color'); })();"
+
+        // endregion
+        // region Log In With Login Hint Public Implementation
+
+        /** Intent extra key for login hint value */
+        const val EXTRA_KEY_LOGIN_HINT = "login_hint"
+
+        /** Intent extra key for login host to use with login hint */
+        const val EXTRA_KEY_LOGIN_HOST = "login_host"
 
         // endregion
         // region QR Code Login Via Salesforce Identity API UI Bridge Public Implementation

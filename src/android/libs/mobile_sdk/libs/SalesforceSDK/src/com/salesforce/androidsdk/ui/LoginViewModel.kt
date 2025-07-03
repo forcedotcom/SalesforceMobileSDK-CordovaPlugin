@@ -144,6 +144,14 @@ open class LoginViewModel(val bootConfig: BootConfig) : ViewModel() {
     protected open val authorizationDisplayType =
         SalesforceSDKManager.getInstance().appContext.getString(oauth_display_type)
 
+    internal val useWebServerFlow: Boolean
+        get() = with(SalesforceSDKManager.getInstance()) {
+            // Browser based authentication requires the Web Server flow for PKCE security.
+            (useWebServerAuthentication || isBrowserLoginEnabled)
+                    // QR Code login may require User Agent flow.
+                    && !(isUsingFrontDoorBridge && frontdoorBridgeCodeVerifier == null)
+        }
+
     /**
      * Setting this option to true will enable a mode where only a custom tab will be shown.  The first server will be
      * launched in a custom tab immediately and the user will not be able to switch servers.  The LoginActivity is
@@ -162,6 +170,9 @@ open class LoginViewModel(val bootConfig: BootConfig) : ViewModel() {
     // The default, locally generated code verifier
     @VisibleForTesting
     internal var codeVerifier: String? = null
+
+    /** The Salesforce Welcome Login hint parameter value for the OAuth authorize endpoint */
+    internal var loginHint: String? = null
 
     // Auth code we receive from the JWT swap for magic links.
     internal var authCodeForJwtFlow: String? = null
@@ -306,17 +317,17 @@ open class LoginViewModel(val bootConfig: BootConfig) : ViewModel() {
             else -> additionalParameters
         }
 
-        // NB code verifier / code challenge are only used when useWebServerAuthentication is true
         val codeVerifier = getRandom128ByteKey().also { codeVerifier = it }
         val codeChallenge = getSHA256Hash(codeVerifier)
 
         val authorizationUrl = OAuth2.getAuthorizationUrl(
-            SalesforceSDKManager.getInstance().useWebServerAuthentication,
+            useWebServerFlow,
             SalesforceSDKManager.getInstance().useHybridAuthentication,
             URI(server),
             clientId,
             bootConfig.oauthRedirectURI,
             bootConfig.oauthScopes,
+            loginHint,
             authorizationDisplayType,
             codeChallenge,
             additionalParams
