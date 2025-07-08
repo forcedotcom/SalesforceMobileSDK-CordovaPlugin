@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-ios" version="7.1.1" />
-    <engine name="cordova-android" version="13.0.0" />
+    <engine name="cordova-android" version="14.0.1" />
   </engines>
 
   <!-- ios -->
@@ -164,7 +164,7 @@
 
       <!-- To specify gradle and gradle plugin versions -->
       <preference name="GradleVersion" value="8.14.2" />
-      <preference name="AndroidGradlePluginVersion" value="8.8.2"/>
+      <preference name="AndroidGradlePluginVersion" value="8.10.1"/>
 
       <!-- Kotlin in Plugin -->      
       <preference name="GradlePluginKotlinEnabled" value="true" />
