@@ -1,6 +1,6 @@
 {
     "name": "salesforce-mobilesdk-cordova-plugin",
-    "version": "13.0.1",
+    "version": "13.0.2",
     "description": "Cordova Plugin for Salesforce Mobile SDK",
     "keywords": [
         "mobilesdk",
