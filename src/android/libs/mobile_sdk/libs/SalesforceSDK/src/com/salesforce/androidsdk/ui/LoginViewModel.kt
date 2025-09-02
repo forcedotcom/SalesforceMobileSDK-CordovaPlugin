@@ -144,12 +144,30 @@ open class LoginViewModel(val bootConfig: BootConfig) : ViewModel() {
     protected open val authorizationDisplayType =
         SalesforceSDKManager.getInstance().appContext.getString(oauth_display_type)
 
+    /**
+     * Determines use of OAuth 2.0 Web Server Flow or User-Agent Flow.
+     *
+     * When a Salesforce Identity API UI Bridge Front-Door URL is in use for log
+     * in and it has a PKCE/Code verifier Web Server Flow will be Enabled.  For
+     * a Front-Door Bridge URL without a PKCE/Code Verifier User-Agent Flow will
+     * be enabled.
+     *
+     * When no Front-Door Bridge URL is in use, Web Server Flow is
+     * enabled when web server authentication or browser login are enabled.
+     * @return True if Web Server Flow is enabled, false if User-Agent Flow is
+     * enabled.
+     */
     internal val useWebServerFlow: Boolean
         get() = with(SalesforceSDKManager.getInstance()) {
-            // Browser based authentication requires the Web Server flow for PKCE security.
-            (useWebServerAuthentication || isBrowserLoginEnabled)
-                    // QR Code login may require User Agent flow.
-                    && !(isUsingFrontDoorBridge && frontdoorBridgeCodeVerifier == null)
+            // First, an in-use Salesforce Identity API UI Bridge front-door bridge URL takes precedence.
+            if (isUsingFrontDoorBridge) {
+                // A front-door bridge URL accompanied by a PKCE code verifier requires Web Server Flow.  Otherwise, User Agent-Flow must be used.
+                frontdoorBridgeCodeVerifier != null
+            }
+            // Second, when not using a front-door bridge URL, the app's preferences can be used.
+            else {
+                useWebServerAuthentication || isBrowserLoginEnabled
+            }
         }
 
     /**
@@ -163,7 +181,7 @@ open class LoginViewModel(val bootConfig: BootConfig) : ViewModel() {
     open val singleServerCustomTabActivity = false
 
     /** Value representing if the back button should be shown on the login view. */
-    val shouldShowBackButton = with(SalesforceSDKManager.getInstance()) {
+    open val shouldShowBackButton = with(SalesforceSDKManager.getInstance()) {
         !(userAccountManager.authenticatedUsers.isNullOrEmpty() || biometricAuthenticationManager?.locked ?: false)
     }
 
@@ -210,6 +228,11 @@ open class LoginViewModel(val bootConfig: BootConfig) : ViewModel() {
     /** Reloads the WebView with a newly generated authorization URL. */
     open fun reloadWebView() {
         if (!isUsingFrontDoorBridge) {
+            // The Web Server Flow code challenge makes the authorization url unique each time,
+            // which triggers recomposition.  For User Agent Flow, change it to blank.
+            if (!SalesforceSDKManager.getInstance().useWebServerAuthentication) {
+                loginUrl.value = ABOUT_BLANK
+            }
             loginUrl.value = getAuthorizationUrl(selectedServer.value ?: return)
         }
     }
