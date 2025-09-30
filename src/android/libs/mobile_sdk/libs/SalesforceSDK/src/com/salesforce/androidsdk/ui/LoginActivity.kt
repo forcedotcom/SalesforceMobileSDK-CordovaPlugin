@@ -57,10 +57,10 @@ import android.provider.Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED
 import android.security.KeyChain.choosePrivateKeyAlias
 import android.security.KeyChain.getCertificateChain
 import android.security.KeyChain.getPrivateKey
-import android.view.Display.FLAG_SECURE
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_BACK
 import android.view.ViewGroup
+import android.view.WindowManager.LayoutParams.FLAG_SECURE
 import android.webkit.ClientCertRequest
 import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
@@ -186,7 +186,7 @@ open class LoginActivity : FragmentActivity() {
     @VisibleForTesting(otherwise = PROTECTED)
     open val webChromeClient = WebChromeClient()
     open val webView: WebView by lazy {
-        WebView(this.baseContext).apply {
+        WebView(this).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -278,7 +278,8 @@ open class LoginActivity : FragmentActivity() {
             // Check if the user backed out of the custom tab.
             if (result.resultCode == Activity.RESULT_CANCELED) {
                 if (viewModel.singleServerCustomTabActivity) {
-                    finish()
+                    // Show blank page and spinner until PKCE is done.
+                    viewModel.loginUrl.value = ABOUT_BLANK
                 } else {
                     // Don't show server picker if we are re-authenticating with cookie.
                     clearWebView(showServerPicker = !sharedBrowserSession)
@@ -310,7 +311,8 @@ open class LoginActivity : FragmentActivity() {
                 with(SalesforceSDKManager.getInstance()) {
                     // Fetch well known config and load in custom tab if required.
                     fetchAuthenticationConfiguration {
-                        if (isBrowserLoginEnabled) {
+                        /* Browser-based authentication is applicable when not authenticating with a front-door bridge URL */
+                        if (isBrowserLoginEnabled && !viewModel.isUsingFrontDoorBridge) {
                             if (useWebServerAuthentication) {
                                 viewModel.loginUrl.value?.let { url -> loadLoginPageInCustomTab(url, customTabLauncher) }
                             } else {
@@ -1192,7 +1194,7 @@ open class LoginActivity : FragmentActivity() {
                 val useLightIcons = titleTextColorLight ?: topAppBarDark ?: dynamicThemeIsDark
                 WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = useLightIcons
             }.also {
-                if (!viewModel.authFinished.value) {
+                if (!viewModel.authFinished.value && url != ABOUT_BLANK) {
                     viewModel.loading.value = false
                 }
             }
