@@ -728,7 +728,7 @@ open class SalesforceSDKManager protected constructor(
      * Cleans cached credentials and data.
      *
      * @param frontActivity The front activity
-     * @param account The user account
+     * @param userAccount The user account
      * @param shouldDismissActivity Dismisses the current activity if true; does
      * nothing otherwise
      */
