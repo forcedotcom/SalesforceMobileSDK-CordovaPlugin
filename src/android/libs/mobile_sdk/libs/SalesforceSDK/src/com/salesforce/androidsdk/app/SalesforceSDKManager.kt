@@ -728,7 +728,7 @@ open class SalesforceSDKManager protected constructor(
      * Cleans cached credentials and data.
      *
      * @param frontActivity The front activity
-     * @param account The user account
+     * @param userAccount The user account
      * @param shouldDismissActivity Dismisses the current activity if true; does
      * nothing otherwise
      */
@@ -1615,7 +1615,7 @@ open class SalesforceSDKManager protected constructor(
         protected var INSTANCE: SalesforceSDKManager? = null
 
         /** The current version of this SDK */
-        const val SDK_VERSION = "13.1.0"
+        const val SDK_VERSION = "13.1.1"
 
         /**
          * An intent action meant for instances of Salesforce SDK manager
