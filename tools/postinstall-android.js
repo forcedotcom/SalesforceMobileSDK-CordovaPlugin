@@ -25,24 +25,6 @@ function loadShellJs() {
     }
 }
 
-const getAndroidSDKToolPath = function() {
-    const androidHomeDir = process.env.ANDROID_HOME;
-    if (typeof androidHomeDir !== 'string') {
-        console.log('You must set the ANDROID_HOME environment variable to the path of your installation of the Android SDK.');
-        return null;
-    }
-    let androidExePath = path.join(androidHomeDir, 'tools', 'android');
-    const isWindows = (/^win/i).test(process.platform);
-    if (isWindows) {
-        androidExePath = androidExePath + '.bat';
-    }
-    if (!fs.existsSync(androidExePath)) {
-        console.log('The "android" utility does not exist at ' + androidExePath + '.  Make sure you\'ve properly installed the Android SDK.');
-        return null;
-    }
-    return androidExePath;
-};
-
 function replaceTextInFile(fileName, textInFile, replacementText) {
     const contents = fs.readFileSync(fileName, 'utf8');
     const lines = contents.split(/\r*\n/);
@@ -56,11 +38,6 @@ function replaceTextInFile(fileName, textInFile, replacementText) {
 //--------------------------------------
 // Doing actual post installation work
 //--------------------------------------
-const androidExePath = getAndroidSDKToolPath();
-if (androidExePath === null) {
-    process.exit(2);
-}
-
 const pluginRoot = path.join('plugins', 'com.salesforce');
 const libProjectRoot = path.join('plugins', 'com.salesforce', 'src', 'android', 'libs');
 const appProjectRoot = path.join('platforms', 'android');
