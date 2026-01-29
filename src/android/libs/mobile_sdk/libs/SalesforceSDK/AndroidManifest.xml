@@ -2,7 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-	android:versionCode="91"
+	android:versionCode="92"
 	android:versionName="13.2.0.dev">
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -68,11 +68,6 @@
             android:excludeFromRecents="true"
             android:theme="@style/SalesforceSDK"
             android:exported="true" />
-
-        <!--  Dev info activity -->
-        <activity android:name="com.salesforce.androidsdk.ui.DevInfoActivity"
-            android:theme="@style/SalesforceSDK"
-            android:exported="false" />
 
         <!-- Receiver in SP app for IDP-SP login flows -->
         <receiver android:name="com.salesforce.androidsdk.auth.idp.SPReceiver"

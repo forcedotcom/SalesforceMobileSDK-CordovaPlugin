@@ -46,15 +46,12 @@ import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 import okhttp3.FormBody;
 import okhttp3.Request;
@@ -387,17 +384,13 @@ public class OAuth2 {
     }
 
     /**
-     * Computes the scope parameter from an array of scopes. Also adds
-     * the 'refresh_token' scope if it hasn't already been added.
+     * Computes the scope parameter from an array of scopes.
      *
      * @param scopes Array of scopes.
-     * @return Scope parameter.
+     * @return Scope parameter string (possibly empty).
      */
     public static String computeScopeParameter(String[] scopes) {
-        final List<String> scopesList = Arrays.asList(scopes == null ? new String[]{} : scopes);
-        final Set<String> scopesSet = new TreeSet<>(scopesList);
-        scopesSet.add(REFRESH_TOKEN);
-        return TextUtils.join(SINGLE_SPACE, scopesSet.toArray(new String[]{}));
+        return ScopeParser.computeScopeParameter(scopes);
     }
 
     /**
@@ -456,7 +449,10 @@ public class OAuth2 {
         builder.add(FORMAT, JSON);
         if (addlParams != null ) {
             for (final Map.Entry<String,String> entry : addlParams.entrySet()) {
-                builder.add(entry.getKey(),entry.getValue());
+                // Safely ignore missing values since, for instance, a user account that is being upgraded may not have received that value yet.
+                if (entry.getValue() != null) {
+                    builder.add(entry.getKey(), entry.getValue());
+                }
             }
         }
         return makeTokenEndpointRequest(httpAccessor, loginServer, builder);
@@ -842,6 +838,7 @@ public class OAuth2 {
         public String tokenFormat;
         public String beaconChildConsumerKey;
         public String beaconChildConsumerSecret;
+        public String scope;
 
         /**
          * Parameterized constructor built from params during user agent login flow.
@@ -882,6 +879,7 @@ public class OAuth2 {
                 sidCookieName = callbackUrlParams.get(SID_COOKIE_NAME);
                 parentSid = callbackUrlParams.get(PARENT_SID);
                 tokenFormat = callbackUrlParams.get(TOKEN_FORMAT);
+                scope = callbackUrlParams.get(SCOPE);
 
                 // NB: beacon apps not supported with user agent flow so no beacon child fields expected
 
@@ -959,6 +957,7 @@ public class OAuth2 {
                 if (parsedResponse.has(BEACON_CHILD_CONSUMER_SECRET)) {
                     beaconChildConsumerSecret = parsedResponse.getString(BEACON_CHILD_CONSUMER_SECRET);
                 }
+                scope = parsedResponse.optString(SCOPE);
 
             } catch (Exception e) {
                 SalesforceSDKLogger.w(TAG, "Could not parse token endpoint response", e);
