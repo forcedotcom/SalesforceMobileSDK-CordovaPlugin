@@ -163,8 +163,8 @@
       <preference name="android-targetSdkVersion" value="35" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="8.14.2" />
-      <preference name="AndroidGradlePluginVersion" value="8.10.1"/>
+      <preference name="GradleVersion" value="8.14.3" />
+      <preference name="AndroidGradlePluginVersion" value="8.12.0"/>
 
       <!-- Kotlin in Plugin -->      
       <preference name="GradlePluginKotlinEnabled" value="true" />
