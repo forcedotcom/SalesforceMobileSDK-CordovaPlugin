@@ -433,7 +433,7 @@ public class ClientManager {
                         if (Looper.myLooper() == null) {
                             Looper.prepare();
                         }
-                        boolean showLoginPage = accounts.length > 1;
+                        boolean showLoginPage = accounts.length == 1;
                         // Note: As of writing (2024) this call will never succeed because revoke API is an
                         // authenticated endpoint.  However, there is no harm in attempting and the debug logs
                         // produced may help developers better understand the state of their app.
@@ -508,7 +508,7 @@ public class ClientManager {
                 }
                 return null;
             } catch (Exception e) {
-                SalesforceSDKLogger.w(TAG, "Exception thrown while getting new auth token", e);
+                SalesforceSDKLogger.e(TAG, "Exception thrown while getting new auth token", e);
                 throw new NetworkErrorException(e);
             }
         }

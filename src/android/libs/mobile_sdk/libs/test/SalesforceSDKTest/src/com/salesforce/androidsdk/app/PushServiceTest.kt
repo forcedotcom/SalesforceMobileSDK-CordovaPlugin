@@ -35,6 +35,7 @@ import com.salesforce.androidsdk.rest.RestClient.ClientInfo
 import com.salesforce.androidsdk.rest.RestResponse
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.serialization.json.Json.Default.encodeToJsonElement
 import kotlinx.serialization.json.Json.Default.encodeToString
 import kotlinx.serialization.json.JsonArray
@@ -706,6 +707,7 @@ class PushServiceTest {
 
         // Setup.
         val notificationsTypesResponseBody = fromJson(NOTIFICATIONS_TYPES_JSON)
+        val originalNotificationTypes = notificationsTypesResponseBody.notificationTypes
         createTestAccountInAccountManager(userAccountManager)
 
         // Test when no notification types are in the data.
@@ -713,9 +715,17 @@ class PushServiceTest {
         PushService().registerNotificationChannels(notificationsTypesResponseBody.copy(notificationTypes = null))
 
         salesforceSdkManager.appContext.getSystemService(NotificationManager::class.java).run {
-            assertTrue(
-                notificationChannels.isEmpty()
-            )
+            // Verify that the Salesforce notification channel group exists but has no channels.
+            val channelGroup = getNotificationChannelGroup(NOTIFICATION_CHANNEL_GROUP_SALESFORCE_ID)
+            assertNotNull(channelGroup)
+            assertTrue(channelGroup.channels.isEmpty())
+            
+            // Verify that no channels with the original notification type IDs exist.
+            originalNotificationTypes?.forEach {
+                assertNull(notificationChannels.firstOrNull { notificationChannel ->
+                    notificationChannel.id == it.type
+                })
+            }
         }
     }
 
@@ -738,6 +748,7 @@ class PushServiceTest {
         val restClient = mockk<RestClient>()
         every { restClient.sendSync(any()) } returns restResponse
 
+        val account = createTestAccount()
         var actualStatus: Int? = null
         val actualId = object : PushService() {
             override fun onPushNotificationRegistrationStatus(
@@ -750,9 +761,15 @@ class PushServiceTest {
             }
         }.registerSFDCPushNotification(
             registrationId = "test_registration_id",
-            account = createTestAccount(),
+            account = account,
             restClient = restClient
         )
+
+        verify(exactly = 1) {
+            restClient.sendSync(withArg {
+                assertEquals("test_community_id", it.requestBodyAsJson.get("NetworkId"))
+            })
+        }
 
         assertEquals(REGISTRATION_STATUS_SUCCEEDED, actualStatus)
         assertEquals("test_id", actualId)
