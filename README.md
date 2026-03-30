@@ -267,23 +267,26 @@ Source Repositories:
 
 ## Configuration
 
-### Connected App Setup
+### External Client App Setup
 
-To use this plugin, you need a Salesforce Connected App:
+To use this plugin, you need a Salesforce External Client App (ECA):
 
-1. Go to **Setup** → **App Manager** in Salesforce
-2. Click **New Connected App**
+1. Go to **Setup** → **Apps** → **External Client Apps** in Salesforce
+2. Click **New External Client App**
 3. Fill in the required fields:
-   - **Connected App Name**: Your app name
-   - **API Name**: Automatically generated
+   - **External Client App Name**: Your app name
+   - **Description**: Brief description of your app
    - **Contact Email**: Your email
-4. Enable **OAuth Settings**
-5. Set **Callback URL**: `sfdc://oauth/success` (for mobile apps)
-6. Select **OAuth Scopes**:
-   - Access and manage your data (api)
-   - Perform requests on your behalf at any time (refresh_token, offline_access)
-   - Full access (full)
-7. Save and copy the **Consumer Key**
+4. Under **API Integration**:
+   - Enable **OAuth 2.0 Enabled**
+   - Set **Callback URL**: `sfdc://oauth/success` (for mobile apps)
+   - Select **OAuth Scopes**:
+     - Access and manage your data (api)
+     - Manage user data via Web browsers (web)
+     - Perform requests on your behalf at any time (refresh_token, offline_access)
+5. Save and copy the **Consumer Key**
+
+**Note**: External Client Apps replace the legacy Connected App model. For more information, see the [External Client Apps documentation](https://help.salesforce.com/s/articleView?id=platform.hosted_mcp_servers_eca.htm&type=5).
 
 ### App Configuration
 
