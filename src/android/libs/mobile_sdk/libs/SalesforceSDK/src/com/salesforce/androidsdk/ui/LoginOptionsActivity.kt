@@ -1,3 +1,29 @@
+/*
+ * Copyright (c) 2021-present, salesforce.com, inc.
+ * All rights reserved.
+ * Redistribution and use of this software in source and binary forms, with or
+ * without modification, are permitted provided that the following conditions
+ * are met:
+ * - Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * - Neither the name of salesforce.com, inc. nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission of salesforce.com, inc.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.salesforce.androidsdk.ui
 
 import android.os.Bundle
@@ -42,8 +68,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,8 +86,6 @@ import com.salesforce.androidsdk.R.string.sf__server_url_save
 import com.salesforce.androidsdk.app.SalesforceSDKManager
 import com.salesforce.androidsdk.config.BootConfig
 import com.salesforce.androidsdk.config.OAuthConfig
-import com.salesforce.androidsdk.ui.components.CORNER_RADIUS
-import com.salesforce.androidsdk.ui.components.PADDING_SIZE
 import com.salesforce.androidsdk.ui.components.TEXT_SIZE
 import com.salesforce.androidsdk.ui.theme.hintTextColor
 import com.salesforce.androidsdk.util.test.ExcludeFromJacocoGeneratedReport
@@ -134,8 +163,10 @@ fun OptionToggle(
         Switch(
             checked = checked,
             onCheckedChange = { optionData.value = it },
-            modifier = Modifier.semantics {
+            modifier = Modifier.clearAndSetSemantics {
                 this.contentDescription = contentDescription
+                this.toggleableState = ToggleableState(checked)
+                this.role = Role.Switch
             }
         )
     }
@@ -149,6 +180,7 @@ fun BootConfigView(config: OAuthConfig? = null) {
     val consumerKeyFieldDesc = stringResource(R.string.sf__login_options_consumer_key_field_content_description)
     val redirectFieldDesc = stringResource(R.string.sf__login_options_redirect_uri_field_content_description)
     val scopesFieldDesc = stringResource(R.string.sf__login_options_scopes_field_content_description)
+    val saveContentDesc = stringResource(R.string.sf__login_options_save_button_content_description)
     val validInput = overrideConsumerKey.isNotBlank() && overrideRedirectUri.isNotBlank()
     val activity = LocalActivity.current
 
@@ -220,7 +252,9 @@ fun BootConfigView(config: OAuthConfig? = null) {
         )
 
         Button(
-            modifier = Modifier.padding(PADDING_SIZE.dp).fillMaxWidth(),
+            modifier = Modifier.padding(PADDING_SIZE.dp)
+                .fillMaxWidth()
+                .semantics { contentDescription = saveContentDesc },
             shape = RoundedCornerShape(CORNER_RADIUS.dp),
             contentPadding = PaddingValues(PADDING_SIZE.dp),
             colors = ButtonColors(
@@ -334,8 +368,10 @@ fun LoginOptionsScreen(
                         SalesforceSDKManager.getInstance().debugOverrideAppConfig = null
                     }
                 },
-                modifier = Modifier.semantics {
+                modifier = Modifier.clearAndSetSemantics {
                     contentDescription = dynamicConfigToggleDesc
+                    toggleableState = ToggleableState(useDynamicConfig)
+                    role = Role.Switch
                 }
             )
         }

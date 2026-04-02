@@ -128,6 +128,7 @@ import com.salesforce.androidsdk.rest.NotificationsActionsResponseBody
 import com.salesforce.androidsdk.rest.NotificationsApiClient
 import com.salesforce.androidsdk.rest.RestClient
 import com.salesforce.androidsdk.security.BiometricAuthenticationManager
+import com.salesforce.androidsdk.security.SalesforceKeyGenerator
 import com.salesforce.androidsdk.security.SalesforceKeyGenerator.getEncryptionKey
 import com.salesforce.androidsdk.security.ScreenLockManager
 import com.salesforce.androidsdk.ui.AccountSwitcherActivity
@@ -790,6 +791,10 @@ open class SalesforceSDKManager protected constructor(
             (screenLockManager as ScreenLockManager?)?.reset()
             screenLockManager = null
             biometricAuthenticationManager = null
+
+            // Clear stored identifiers and user info from shared preferences
+            SalesforceKeyGenerator.clearAll()
+            userAccountManager.clearStoredCurrentUserInfo()
         }
     }
 
@@ -1475,32 +1480,8 @@ open class SalesforceSDKManager protected constructor(
 
     /** Indicates if this is a debug build */
     internal val isDebugBuild
-        get() = getBuildConfigValue(
-            appContext,
-            "DEBUG"
-        ) as Boolean
+        get() = DEBUG
 
-    /**
-     * Gets a field from the project's build configuration.
-     *
-     * @param context An Android context providing the build configuration's
-     * package
-     * @param fieldName The name of the build configuration field
-     * @return The value of the build configuration field or null if the field
-     * is not found
-     */
-    private fun getBuildConfigValue(
-        context: Context,
-        @Suppress("SameParameterValue") fieldName: String
-    ) = runCatching {
-        Class.forName(
-            "${context.packageName ?: ""}.BuildConfig"
-        ).getField(
-            fieldName
-        )[null]
-    }.onFailure { e ->
-        e(TAG, "getBuildConfigValue failed", e)
-    }.getOrDefault(DEBUG)
 
     /**
      * Indicates if the The Salesforce Mobile SDK user interface dark theme is
@@ -1570,7 +1551,7 @@ open class SalesforceSDKManager protected constructor(
         // Publish analytics one-time on app background, if enabled.
         if (SalesforceAnalyticsManager.analyticsPublishingType() == PublishOnAppBackground) {
             enqueueAnalyticsPublishWorkRequest(
-                getInstance().appContext
+                appContext
             )
         }
 
@@ -1618,7 +1599,7 @@ open class SalesforceSDKManager protected constructor(
         protected var INSTANCE: SalesforceSDKManager? = null
 
         /** The current version of this SDK */
-        const val SDK_VERSION = "13.2.0.dev"
+        const val SDK_VERSION = "13.2.0"
 
         /**
          * An intent action meant for instances of Salesforce SDK manager

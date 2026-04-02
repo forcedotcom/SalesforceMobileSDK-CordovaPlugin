@@ -125,6 +125,7 @@ import com.salesforce.androidsdk.R.string.sf__ssl_unknown_error
 import com.salesforce.androidsdk.R.string.sf__ssl_untrusted
 import com.salesforce.androidsdk.accounts.UserAccount
 import com.salesforce.androidsdk.app.Features.FEATURE_QR_CODE_LOGIN
+import com.salesforce.androidsdk.app.Features.FEATURE_WELCOME_DISCOVERY_LOGIN
 import com.salesforce.androidsdk.app.SalesforceSDKManager
 import com.salesforce.androidsdk.app.SalesforceSDKManager.Theme.DARK
 import com.salesforce.androidsdk.auth.HttpAccess
@@ -198,6 +199,7 @@ open class LoginActivity : FragmentActivity() {
             webViewClient = this@LoginActivity.webViewClient
             webChromeClient = this@LoginActivity.webChromeClient
             setBackgroundColor(Color.Transparent.toArgb())
+            this@LoginActivity.baseUserAgentString = settings.userAgentString ?: ""
             settings.apply {
                 domStorageEnabled = true /* Salesforce Welcome Discovery requires this */
                 @SuppressLint("SetJavaScriptEnabled")
@@ -205,13 +207,14 @@ open class LoginActivity : FragmentActivity() {
                 userAgentString = format(
                     "%s %s",
                     SalesforceSDKManager.getInstance().userAgent,
-                    userAgentString ?: "",
+                    this@LoginActivity.baseUserAgentString
                 )
             }
         }
     }
 
     // Private variables
+    private var baseUserAgentString = "";
     private var wasBackgrounded = false
     private var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
     private var accountAuthenticatorResult: Bundle? = null
@@ -239,6 +242,7 @@ open class LoginActivity : FragmentActivity() {
             newUserIntent = true
         }
 
+        // TODO: Move to non-deprecated getParcelableExtra when min API >= 33
         accountAuthenticatorResponse = intent.getParcelableExtra<AccountAuthenticatorResponse?>(
             KEY_ACCOUNT_AUTHENTICATOR_RESPONSE
         )?.apply {
@@ -901,6 +905,24 @@ open class LoginActivity : FragmentActivity() {
      */
     private fun applySalesforceWelcomeDiscoveryIntent(intent: Intent) {
 
+        // Set welcome discovery feature flag if applicable
+        if (isLoginWithWelcomeDiscovery(intent)) {
+            SalesforceSDKManager.getInstance()
+                .registerUsedAppFeature(FEATURE_WELCOME_DISCOVERY_LOGIN);
+        }
+        else {
+            SalesforceSDKManager.getInstance().unregisterUsedAppFeature(
+                FEATURE_WELCOME_DISCOVERY_LOGIN
+            );
+        }
+
+        // Re-apply user agent to WebView
+        webView.settings.userAgentString = format(
+            "%s %s",
+            SalesforceSDKManager.getInstance().userAgent,
+            baseUserAgentString
+        )
+
         // Apply the intent extras' Salesforce Welcome Login hint and host for use in the OAuth authorize URL, if applicable.
         applySalesforceWelcomeLoginHintAndHost(intent)
 
@@ -927,6 +949,19 @@ open class LoginActivity : FragmentActivity() {
             val loginUrl = "https://$loginHost"
             loginServerManager.addCustomLoginServer(loginHost, loginUrl)
         }
+    }
+
+    /**
+     * Returns true if intent is for a login with Welcome discovery
+     * - either because the the login url is Welcome discovery (part 1 of the flow)
+     * - there is a login hint (part 2 of the flow)
+     *
+     * @return true when the intent is for a login with Welcome discovery
+     */
+    private fun isLoginWithWelcomeDiscovery(intent: Intent): Boolean {
+        val isWelcomeDiscoveryUrl = intent.data?.let { isSalesforceWelcomeDiscoveryMobileUrl(it) } == true
+        val hasLoginHint = intent.getStringExtra(EXTRA_KEY_LOGIN_HOST) != null
+        return isWelcomeDiscoveryUrl || hasLoginHint
     }
 
     /**
@@ -1217,18 +1252,6 @@ open class LoginActivity : FragmentActivity() {
             d(TAG, "Received client certificate request from server")
             request.proceed(key, certChain)
         }
-
-        private fun validateAndExtractBackgroundColor(javaScriptResult: String): Color? {
-            val rgbMatch = rgbTextPattern.find(javaScriptResult)
-
-            // groupValues[0] is the entire match.  [1] is red, [2] is green, [3] is green.
-            rgbMatch?.groupValues?.get(3) ?: return null
-            val red = rgbMatch.groupValues[1].toIntOrNull() ?: return null
-            val green = rgbMatch.groupValues[2].toIntOrNull() ?: return null
-            val blue = rgbMatch.groupValues[3].toIntOrNull() ?: return null
-
-            return Color(red, green, blue)
-        }
     }
 
     companion object {
@@ -1245,14 +1268,26 @@ open class LoginActivity : FragmentActivity() {
         private const val RESPONSE_ERROR_DESCRIPTION_INTENT = "com.salesforce.auth.intent.RESPONSE_ERROR_DESCRIPTION"
 
         // This parses the expected "rgb(x, x, x)" string.
-        private val rgbTextPattern = "rgb\\((\\d{1,3}), (\\d{1,3}), (\\d{1,3})\\)".toRegex()
+        internal val rgbTextPattern = "rgb\\((\\d{1,3}), (\\d{1,3}), (\\d{1,3})\\)".toRegex()
 
         // endregion
         // region LoginWebviewClient Constants
 
         internal const val ABOUT_BLANK = "about:blank"
-        private const val BACKGROUND_COLOR_JAVASCRIPT =
+        internal const val BACKGROUND_COLOR_JAVASCRIPT =
             "(function() { return window.getComputedStyle(document.body, null).getPropertyValue('background-color'); })();"
+
+        internal fun validateAndExtractBackgroundColor(javaScriptResult: String): Color? {
+            val rgbMatch = rgbTextPattern.find(javaScriptResult)
+
+            // groupValues[0] is the entire match.  [1] is red, [2] is green, [3] is green.
+            rgbMatch?.groupValues?.get(3) ?: return null
+            val red = rgbMatch.groupValues[1].toIntOrNull() ?: return null
+            val green = rgbMatch.groupValues[2].toIntOrNull() ?: return null
+            val blue = rgbMatch.groupValues[3].toIntOrNull() ?: return null
+
+            return Color(red, green, blue)
+        }
 
         // endregion
         // region Log In Via Salesforce Identity API UI Bridge Front Door URL Public Implementation
