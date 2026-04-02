@@ -133,6 +133,7 @@ public class OAuth2 {
     private static final String QUESTION = "?";
     private static final String TOUCH = "touch";
     private static final String FRONTDOOR = "/secur/frontdoor.jsp?";
+    public static final String FRONTDOOR_URL_KEY = "frontdoor_uri";
     private static final String SID = "sid";
     private static final String RETURL = "retURL";
     protected static final String AUTHORIZATION = "Authorization";
@@ -878,7 +879,7 @@ public class OAuth2 {
                 cookieSidClient = callbackUrlParams.get(COOKIE_SID_CLIENT);
                 sidCookieName = callbackUrlParams.get(SID_COOKIE_NAME);
                 parentSid = callbackUrlParams.get(PARENT_SID);
-                tokenFormat = callbackUrlParams.get(TOKEN_FORMAT);
+                tokenFormat = callbackUrlParams.getOrDefault(TOKEN_FORMAT, "");
                 scope = callbackUrlParams.get(SCOPE);
 
                 // NB: beacon apps not supported with user agent flow so no beacon child fields expected
