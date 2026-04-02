@@ -175,7 +175,8 @@ import java.security.cert.X509Certificate
 open class LoginActivity : FragmentActivity() {
 
     /** The activity result launcher used when browser-based authentication loads the OAuth authorization URL in the external browser custom tab activity */
-    private val customTabLauncher = registerForActivityResult(StartActivityForResult(), CustomTabActivityResult())
+    @VisibleForTesting
+    internal val customTabLauncher = registerForActivityResult(StartActivityForResult(), CustomTabActivityResult())
 
     // View Model
     @VisibleForTesting(otherwise = PROTECTED)
@@ -215,7 +216,9 @@ open class LoginActivity : FragmentActivity() {
     private var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
     private var accountAuthenticatorResult: Bundle? = null
     private var newUserIntent = false
-    private val sharedBrowserSession: Boolean
+
+    @VisibleForTesting
+    internal val sharedBrowserSession: Boolean
         get() = SalesforceSDKManager.getInstance().isShareBrowserSessionEnabled && !newUserIntent
 
     // KeychainAliasCallback variables
@@ -291,6 +294,17 @@ open class LoginActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
         wasBackgrounded = false
+
+        // If debug LoginOptions were changed reload the webview.
+        //
+        // Note:  The dev menu cannot be access when a Custom Tab is displayed so
+        // we can safely ignore that scenario.
+        with(SalesforceSDKManager.getInstance()) {
+            if (isDebugBuild && loginDevMenuReload) {
+                viewModel.reloadWebView()
+                loginDevMenuReload = false
+            }
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent) =
@@ -315,7 +329,8 @@ open class LoginActivity : FragmentActivity() {
         viewModel.applyPendingServer(pendingLoginServer = viewModel.pendingServer.value)
     }
 
-    private fun clearWebView(showServerPicker: Boolean = true) {
+    @VisibleForTesting
+    internal fun clearWebView(showServerPicker: Boolean = true) {
         runOnUiThread {
             viewModel.loginUrl.value = ABOUT_BLANK
             if (showServerPicker) {
@@ -513,6 +528,8 @@ open class LoginActivity : FragmentActivity() {
         e: Throwable? = null,
     ) {
         // Reset state from previous log in attempt.
+        // - Reset the auth-finished property which keeps the progress spinner displayed even when the web view finishing would normally hide it.
+        viewModel.authFinished.value = false
         // - Salesforce Identity UI Bridge API log in, such as QR code login.
         viewModel.resetFrontDoorBridgeUrl()
         e(TAG, "$error: $errorDesc", e)
@@ -925,7 +942,7 @@ open class LoginActivity : FragmentActivity() {
     ) = salesforceWelcomeDiscoveryHostAndPathUrl.buildUpon()
         .appendQueryParameter(
             SALESFORCE_WELCOME_DISCOVERY_MOBILE_URL_QUERY_PARAMETER_KEY_CLIENT_ID,
-            viewModel.bootConfig.remoteAccessConsumerKey
+            viewModel.oAuthConfig.consumerKey,
         )
         .appendQueryParameter(
             SALESFORCE_WELCOME_DISCOVERY_MOBILE_URL_QUERY_PARAMETER_KEY_CLIENT_VERSION,
@@ -944,7 +961,8 @@ open class LoginActivity : FragmentActivity() {
      * @return Boolean true if a switch between default or Salesforce Welcome
      * Discovery log is made, false otherwise.
      */
-    private fun switchDefaultOrSalesforceWelcomeDiscoveryLogin(pendingLoginServerUri: Uri) =
+    @VisibleForTesting
+    internal fun switchDefaultOrSalesforceWelcomeDiscoveryLogin(pendingLoginServerUri: Uri) =
 
         // If the pending login server is a change to a new Salesforce Welcome Discovery URL and host.
         if (isSalesforceWelcomeDiscoveryUrlPath(pendingLoginServerUri)) {
@@ -1042,7 +1060,8 @@ open class LoginActivity : FragmentActivity() {
      * @param singleServerCustomTabActivity Indicates single server custom
      * browser tab authentication is active
      */
-    private fun startBrowserCustomTabAuthorization(
+    @VisibleForTesting
+    internal open fun startBrowserCustomTabAuthorization(
         authorizationUrl: String,
         activityResultLauncher: ActivityResultLauncher<Intent>,
         isBrowserLoginEnabled: Boolean = SalesforceSDKManager.getInstance().isBrowserLoginEnabled,
@@ -1093,7 +1112,7 @@ open class LoginActivity : FragmentActivity() {
             }
 
             val formattedUrl = request.url.toString().replace("///", "/").lowercase()
-            val callbackUrl = viewModel.bootConfig.oauthRedirectURI.replace("///", "/").lowercase()
+            val callbackUrl = viewModel.oAuthConfig.redirectUri.replace("///", "/").lowercase()
             val authFlowFinished = formattedUrl.startsWith(callbackUrl)
 
             if (authFlowFinished) {
@@ -1492,7 +1511,8 @@ open class LoginActivity : FragmentActivity() {
          * @param loginHint The Salesforce Welcome login username hint
          * @param loginHost The Salesforce Welcome login host
          */
-        private fun startDefaultLoginWithHintAndHost(
+        @VisibleForTesting
+        internal fun startDefaultLoginWithHintAndHost(
             context: Context,
             loginHint: String,
             loginHost: String,
@@ -1516,7 +1536,8 @@ open class LoginActivity : FragmentActivity() {
      * @param activity The login activity.  This parameter is intended for
      * testing purposes only. Defaults to this inner class receiver
      */
-    private inner class CustomTabActivityResult(
+    @VisibleForTesting
+    internal inner class CustomTabActivityResult(
         private val activity: LoginActivity = this@LoginActivity
     ) : ActivityResultCallback<ActivityResult> {
 
@@ -1569,13 +1590,21 @@ open class LoginActivity : FragmentActivity() {
      * @param activity The login activity.  This parameter is intended for
      * testing purposes only. Defaults to this inner class receiver
      */
-    private inner class PendingServerObserver(
+    @VisibleForTesting
+    internal inner class PendingServerObserver(
         private val activity: LoginActivity = this@LoginActivity
     ) : Observer<String> {
         override fun onChanged(value: String) {
-            // Guard against observing a pending login server already provided by the intent data, such as a Salesforce Welcome Discovery mobile URL.
             val pendingServerUri = value.toUri()
-            if ((activity.intent.data?.host == pendingServerUri.host && activity.intent.data?.path == pendingServerUri.path) || activity.intent.getStringExtra(EXTRA_KEY_LOGIN_HOST) == pendingServerUri.host) {
+            val intent = activity.intent
+            val data = intent.data
+
+            // Guard against observing a pending login server already provided by the intent data, such as a Salesforce Welcome Discovery mobile URL.
+            val dataHostMatches = data?.host == pendingServerUri.host
+            val dataPathMatches = data?.path == pendingServerUri.path
+            val uriMatches = dataHostMatches && dataPathMatches
+            val extraMatches = intent.getStringExtra(EXTRA_KEY_LOGIN_HOST) == pendingServerUri.host
+            if (uriMatches || extraMatches) {
                 activity.viewModel.previousPendingServer = value
                 return
             }
