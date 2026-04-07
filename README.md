@@ -209,7 +209,7 @@ com.salesforce.plugin.network.sendRequest(
 
 | Platform | Minimum Version | Cordova Version |
 |----------|----------------|-----------------|
-| **iOS** | 17.0 | cordova-ios 7.1.1 |
+| **iOS** | 18.0 | cordova-ios 7.1.1 |
 | **Android** | API 28 (Android 9.0) | cordova-android 14.0.1 |
 
 ## Requirements
@@ -218,7 +218,7 @@ com.salesforce.plugin.network.sendRequest(
 - macOS
 - Xcode 15+
 - CocoaPods
-- iOS 17.0+ device or simulator
+- iOS 18.0+ device or simulator
 
 ### For Android Development
 - Java 17+
