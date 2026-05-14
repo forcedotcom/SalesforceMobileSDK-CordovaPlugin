@@ -45,7 +45,7 @@ const appProjectRoot = path.join('platforms', 'android');
 console.log('Fixing cordova.gradle');
 // TODO: Remove fix once we switch to cordova android 15.0.1
 //       Fix should be in cordova android 15.0.1 - see https://github.com/apache/cordova-android/pull/1896
-replaceTextInFle(path.join(appProjectRoot, 'CordovaLib', 'cordova.gradle'), 'import java.util.regex.Pattern', 'import groovy.xml.XmlParser\nimport java.util.regex.Pattern');
+replaceTextInFile(path.join(appProjectRoot, 'CordovaLib', 'cordova.gradle'), 'import java.util.regex.Pattern', 'import groovy.xml.XmlParser\nimport java.util.regex.Pattern');
 
 console.log('Fixing root level Gradle file for the generated app');
 replaceTextInFile(path.join(appProjectRoot, 'settings.gradle'), "include \":CordovaLib\"", "");
