@@ -31,7 +31,7 @@
 
   <engines>
     <engine name="cordova-ios" version="7.1.1" />
-    <engine name="cordova-android" version="14.0.1" />
+    <engine name="cordova-android" version="15.0.0" />
   </engines>
 
   <!-- ios -->
@@ -161,15 +161,15 @@
 
       <!-- To specify min and target SDK versions -->
       <preference name="android-minSdkVersion" value="28" />
-      <preference name="android-targetSdkVersion" value="35" />
+      <preference name="android-targetSdkVersion" value="36" />
 
       <!-- To specify gradle and gradle plugin versions -->
-      <preference name="GradleVersion" value="8.14.3" />
-      <preference name="AndroidGradlePluginVersion" value="8.12.0"/>
+      <preference name="GradleVersion" value="9.4.1" />
+      <preference name="AndroidGradlePluginVersion" value="9.1.1"/>
 
       <!-- Kotlin in Plugin -->      
       <preference name="GradlePluginKotlinEnabled" value="true" />
-      <preference name="GradlePluginKotlinVersion" value="1.9.24" />
+      <preference name="GradlePluginKotlinVersion" value="2.1.21" />
 
       <!-- To allow XHR requests with the new Whitelist plugin -->
       <allow-navigation href="https://localhost" />
