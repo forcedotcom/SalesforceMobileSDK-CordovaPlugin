@@ -164,7 +164,7 @@
 
       <!-- To specify gradle and gradle plugin versions -->
       <preference name="GradleVersion" value="9.4.1" />
-      <preference name="AndroidGradlePluginVersion" value="9.1.2"/>
+      <preference name="AndroidGradlePluginVersion" value="9.1.1"/>
 
       <!-- Kotlin in Plugin -->      
       <preference name="GradlePluginKotlinEnabled" value="true" />
