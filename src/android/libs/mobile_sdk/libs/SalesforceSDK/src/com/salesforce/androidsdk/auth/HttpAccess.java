@@ -126,7 +126,7 @@ public class HttpAccess {
      */
     public OkHttpClient.Builder createNewClientBuilder() {
         ConnectionSpec connectionSpec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                .tlsVersions(TlsVersion.TLS_1_1, TlsVersion.TLS_1_2)
+                .tlsVersions(TlsVersion.TLS_1_2)
                 .build();
         return new OkHttpClient.Builder()
                 .connectionSpecs(Collections.singletonList(connectionSpec))

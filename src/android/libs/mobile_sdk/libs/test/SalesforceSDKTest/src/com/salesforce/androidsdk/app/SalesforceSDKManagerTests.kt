@@ -3,7 +3,9 @@ package com.salesforce.androidsdk.app
 import android.app.Activity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.salesforce.androidsdk.auth.HttpAccess
+import com.salesforce.androidsdk.config.LoginServerManager
 import com.salesforce.androidsdk.config.LoginServerManager.LoginServer
 import com.salesforce.androidsdk.config.LoginServerManager.PRODUCTION_LOGIN_URL
 import com.salesforce.androidsdk.config.LoginServerManager.WELCOME_LOGIN_URL
@@ -12,6 +14,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
@@ -22,6 +25,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -35,38 +39,69 @@ import org.junit.runner.RunWith
 class SalesforceSDKManagerTests {
 
     private val responseBodyString =
-        "{\"id\":\"https://login.ietf.reserved.test.example.com/id/1234567890ABCDEFGH/ABCDEFGH1234567890\",\"asserted_user\":true,\"user_id\":\"ABCDEFGH1234567890\",\"organization_id\":\"1234567890ABCDEFGH\",\"username\":\"ietf_reserved_test_domain@example.com\",\"nick_name\":\"username\",\"display_name\":\"Test User\",\"email\":\"ietf_reserved_test_domain@example.com\",\"email_verified\":true,\"first_name\":\"First\",\"last_name\":\"Last\",\"timezone\":\"America/Los_Angeles\",\"photos\":{\"picture\":\"https://ietf.reserved.test.example.com/profilephoto/ZYXWVUTSRQPONML/F\",\"thumbnail\":\"https://ietf.reserved.test.example.com/profilephoto/ZYXWVUTSRQPONML/T\"},\"addr_street\":null,\"addr_city\":null,\"addr_state\":null,\"addr_country\":null,\"addr_zip\":null,\"mobile_phone\":null,\"mobile_phone_verified\":true,\"is_lightning_login_user\":false,\"status\":{\"created_date\":null,\"body\":null},\"urls\":{\"enterprise\":\"https://ietf.reserved.test.example.com/services/Soap/c/{version}/0987654321EDCVA\",\"metadata\":\"https://ietf.reserved.test.example.com/services/Soap/m/{version}/0987654321EDCVA\",\"partner\":\"https://ietf.reserved.test.example.com/services/Soap/u/{version}/0987654321EDCVA\",\"rest\":\"https://ietf.reserved.test.example.com/services/data/v{version}/\",\"sobjects\":\"https://ietf.reserved.test.example.com/services/data/v{version}/sobjects/\",\"search\":\"https://ietf.reserved.test.example.com/services/data/v{version}/search/\",\"query\":\"https://ietf.reserved.test.example.com/services/data/v{version}/query/\",\"recent\":\"https://ietf.reserved.test.example.com/services/data/v{version}/recent/\",\"tooling_soap\":\"https://ietf.reserved.test.example.com/services/Soap/T/{version}/0987654321EDCVA\",\"tooling_rest\":\"https://ietf.reserved.test.example.com/services/data/v{version}/tooling/\",\"profile\":\"https://ietf.reserved.test.example.com/ABCDEFGH1234567890\",\"feeds\":\"https://ietf.reserved.test.example.com/services/data/v{version}/chatter/feeds\",\"groups\":\"https://ietf.reserved.test.example.com/services/data/v{version}/chatter/groups\",\"users\":\"https://ietf.reserved.test.example.com/services/data/v{version}/chatter/users\",\"feed_items\":\"https://ietf.reserved.test.example.com/services/data/v{version}/chatter/feed-items\",\"feed_elements\":\"https://ietf.reserved.test.example.com/services/data/v{version}/chatter/feed-elements\",\"custom_domain\":\"https://ietf.reserved.test.example.com\"},\"active\":true,\"user_type\":\"STANDARD\",\"language\":\"en_US\",\"locale\":\"en_US\",\"utcOffset\":-28800000,\"last_modified_date\":\"2025-02-28T18:14:06Z\"}"
+        "{\"MobileSDK\":{\"UseAndroidNativeBrowserForAuthentication\":false,\"shareBrowserSessionAndroid\":false}}"
 
-    private val responseBody = mockk<ResponseBody>().apply {
-        every { contentType() } returns "application/json;charset=UTF-8".toMediaType()
-        every { bytes() } returns this@SalesforceSDKManagerTests.responseBodyString.toByteArray()
-    }
-
-    private val response = mockk<Response>().apply {
-        every { isSuccessful } returns true
-        every { body } returns this@SalesforceSDKManagerTests.responseBody
-        every { close() } just runs
-    }
-
-    private val call = mockk<Call>().apply {
-        every { execute() } returns this@SalesforceSDKManagerTests.response
-    }
-
-    private val okHttpClient = mockk<OkHttpClient>().apply {
-        every { newCall(any()) } returns this@SalesforceSDKManagerTests.call
-    }
-
-    private val httpAccess = mockk<HttpAccess>().apply {
-        every { getOkHttpClient() } returns this@SalesforceSDKManagerTests.okHttpClient
-    }
+    private lateinit var responseBody: ResponseBody
+    private lateinit var response: Response
+    private lateinit var call: Call
+    private lateinit var okHttpClient: OkHttpClient
+    private lateinit var httpAccess: HttpAccess
 
     @Before
     fun setup() {
+        // Ensure the singleton SalesforceSDKManager is properly initialized
+        // This is needed because AuthConfigUtil.getMyDomainAuthConfig() uses the singleton
+        try {
+            SalesforceSDKManager.getInstance()
+        } catch (e: RuntimeException) {
+            // Only initialize if this is the expected "not initialized" exception
+            // Re-throw any other RuntimeException (memory issues, context problems, etc.)
+            if (e.message?.contains("SalesforceSDKManager.init") == true) {
+                SalesforceSDKManager.initNative(
+                    getInstrumentation().targetContext,
+                    LoginActivity::class.java
+                )
+            } else {
+                throw e
+            }
+        }
+
+        // Initialize mocks fresh for each test to avoid stale mock state
+        // Using strict mocking (no relaxed = true) to catch unexpected method calls
+        responseBody = mockk<ResponseBody>().apply {
+            every { contentType() } returns "application/json;charset=UTF-8".toMediaType()
+            every { bytes() } returns this@SalesforceSDKManagerTests.responseBodyString.toByteArray()
+        }
+
+        response = mockk<Response>().apply {
+            every { isSuccessful } returns true
+            every { body } returns this@SalesforceSDKManagerTests.responseBody
+            every { close() } just runs
+        }
+
+        call = mockk<Call>().apply {
+            every { execute() } returns this@SalesforceSDKManagerTests.response
+        }
+
+        okHttpClient = mockk<OkHttpClient>().apply {
+            every { newCall(any()) } returns this@SalesforceSDKManagerTests.call
+        }
+
+        httpAccess = mockk<HttpAccess>().apply {
+            every { getOkHttpClient() } returns this@SalesforceSDKManagerTests.okHttpClient
+        }
     }
 
     @After
     fun teardown() {
-        SalesforceSDKManager.getInstance().loginServerManager.reset()
+        // Reset all singleton state to ensure test isolation
+        // This prevents state leakage between tests
+        SalesforceSDKManager.getInstance().apply {
+            loginServerManager.reset()
+            isBrowserLoginEnabled = false
+            isShareBrowserSessionEnabled = false
+        }
+        unmockkAll()
     }
 
     @Test
@@ -191,6 +226,8 @@ class SalesforceSDKManagerTests {
 
         assertFalse(SalesforceSDKManager.getInstance().isBrowserLoginEnabled)
         assertFalse(SalesforceSDKManager.getInstance().isShareBrowserSessionEnabled)
+
+        // No verification for invalid URL - the fetch is skipped
     }
 
     @Test
@@ -252,6 +289,80 @@ class SalesforceSDKManagerTests {
     }
 
     @Test
+    fun salesforceSdkManager_ClearsAppAttestationHostName_ForNonMyDomainServer() {
+
+        // Create test instance with production server (non-My Domain)
+        val salesforceSdkManager = TestSalesforceSDKManagerWithAttestation(
+            context = getInstrumentation().targetContext,
+            mainActivity = LoginActivity::class.java,
+            loginActivity = LoginActivity::class.java,
+            googleCloudProjectId = 123456L,
+            testLoginServer = LoginServer(
+                "Production",
+                PRODUCTION_LOGIN_URL,
+                false
+            )
+        )
+
+        // Verify app attestation client exists and get non-null reference
+        val appAttestationClient = requireNotNull(salesforceSdkManager.appAttestationClient) {
+            "App attestation client should not be null"
+        }
+
+        // Set initial hostname value
+        appAttestationClient.apiHostName = "test.example.com"
+        assertEquals("test.example.com", appAttestationClient.apiHostName)
+
+        runBlocking {
+            salesforceSdkManager.fetchAuthenticationConfiguration(
+                httpAccess = httpAccess,
+            ) {
+                /* Completion Does Not Require Verification */
+            }.join()
+        }
+
+        // Verify hostname was cleared for non-My Domain server
+        assertNull(appAttestationClient.apiHostName)
+    }
+
+    @Test
+    fun salesforceSdkManager_SetsAppAttestationHostName_ForMyDomainServer() {
+
+        // Create test instance with My Domain server
+        val testLoginServer = LoginServer(
+            "Example",
+            "https://www.example.com",
+            true
+        )
+        val salesforceSdkManager = TestSalesforceSDKManagerWithAttestation(
+            context = getInstrumentation().targetContext,
+            mainActivity = LoginActivity::class.java,
+            loginActivity = LoginActivity::class.java,
+            googleCloudProjectId = 123456L,
+            testLoginServer = testLoginServer
+        )
+
+        // Verify app attestation client exists and get non-null reference
+        val appAttestationClient = requireNotNull(salesforceSdkManager.appAttestationClient) {
+            "App attestation client should not be null"
+        }
+
+        // Initial hostname should be null
+        assertNull(appAttestationClient.apiHostName)
+
+        runBlocking {
+            salesforceSdkManager.fetchAuthenticationConfiguration(
+                httpAccess = httpAccess,
+            ) {
+                /* Completion Does Not Require Verification */
+            }.join()
+        }
+
+        // Verify hostname was set to the My Domain server host
+        assertEquals("www.example.com", appAttestationClient.apiHostName)
+    }
+
+    @Test
     fun getDevActions_ReturnsAllActions_ForNonLoginActivity() {
         // Arrange
         val mockActivity = mockk<Activity>(relaxed = true)
@@ -287,5 +398,119 @@ class SalesforceSDKManagerTests {
         assertFalse(devActions.containsKey("Switch User"))
         assertNotNull(devActions["Show dev info"])
         assertNotNull(devActions["Login Options"])
+    }
+
+    @Test
+    fun salesforceSdkManager_appAttestationClient_isNullWhenNoGoogleCloudProjectIdProvided() {
+
+        val salesforceSdkManager = createTestSalesforceSDKManager()
+
+        assertNull(
+            "appAttestationClient should be null when no googleCloudProjectId is provided.",
+            salesforceSdkManager.appAttestationClient,
+        )
+    }
+
+    @Test
+    fun salesforceSdkManager_appAttestationClient_isCreatedWhenGoogleCloudProjectIdProvided() = runBlocking {
+
+        val salesforceSdkManager = createTestSalesforceSDKManager(googleCloudProjectId = 123456L)
+
+        val appAttestationClient = salesforceSdkManager.appAttestationClient
+        assertNotNull(
+            "appAttestationClient should be non-null when googleCloudProjectId is provided.",
+            appAttestationClient,
+        )
+        assertEquals(123456L, appAttestationClient?.googleCloudProjectId)
+        assertNotNull(appAttestationClient?.deviceId)
+        assertEquals("__CONSUMER_KEY__", appAttestationClient?.remoteAccessConsumerKeyProvider?.getRemoteConsumerKey("https://login.salesforce.com"))
+        assertNotNull(appAttestationClient?.restClient)
+        // apiHostName starts null — it is set later by fetchAuthenticationConfiguration.
+        assertNull(
+            "apiHostName should initially be null before fetchAuthenticationConfiguration is called.",
+            appAttestationClient?.apiHostName,
+        )
+    }
+
+    @Test
+    fun salesforceSdkManager_createAppAttestationClient_returnsNullForNullGoogleCloudProjectId() {
+
+        val salesforceSdkManager = createTestSalesforceSDKManager()
+
+        assertNull(salesforceSdkManager.createAppAttestationClient(googleCloudProjectId = null))
+    }
+
+    @Test
+    fun salesforceSdkManager_createAppAttestationClient_returnsNullWhenCalledWithoutParameter() {
+
+        val salesforceSdkManager = createTestSalesforceSDKManager()
+
+        assertNull(salesforceSdkManager.createAppAttestationClient())
+    }
+
+    @Test
+    fun salesforceSdkManager_createAppAttestationClient_returnsClientForNonNullGoogleCloudProjectId() {
+
+        val salesforceSdkManager = createTestSalesforceSDKManager()
+
+        val client = salesforceSdkManager.createAppAttestationClient(googleCloudProjectId = 654321L)
+        assertNotNull(client)
+        assertEquals(654321L, client?.googleCloudProjectId)
+    }
+
+
+    /**
+     * Helper to create a test [SalesforceSDKManager] instance with optional
+     * [googleCloudProjectId] for app attestation tests.
+     */
+    private fun createTestSalesforceSDKManager(
+        googleCloudProjectId: Long? = null
+    ): SalesforceSDKManager = if (googleCloudProjectId != null) {
+        TestSalesforceSDKManagerWithAttestation(
+            context = getInstrumentation().targetContext,
+            mainActivity = LoginActivity::class.java,
+            loginActivity = LoginActivity::class.java,
+            googleCloudProjectId = googleCloudProjectId,
+        )
+    } else {
+        SalesforceSDKManager(
+            context = getInstrumentation().targetContext,
+            mainActivity = LoginActivity::class.java,
+            loginActivity = LoginActivity::class.java,
+        )
+    }
+
+    /**
+     * A minimal subclass of [SalesforceSDKManager] that exposes the protected
+     * primary constructor so that tests can supply a [googleCloudProjectId].
+     *
+     * This subclass also overrides [loginServerManager] to provide an
+     * isolated test instance that doesn't share state via SharedPreferences.
+     */
+    private class TestSalesforceSDKManagerWithAttestation(
+        context: android.content.Context,
+        mainActivity: Class<out Activity>,
+        loginActivity: Class<out Activity>? = null,
+        googleCloudProjectId: Long? = null,
+        private val testLoginServer: LoginServer? = null,
+    ) : SalesforceSDKManager(context, mainActivity, loginActivity, null, googleCloudProjectId) {
+
+        /**
+         * Override to provide a test-specific LoginServerManager that uses
+         * in-memory storage instead of SharedPreferences for test isolation.
+         */
+        override val loginServerManager: LoginServerManager by lazy {
+            // Create a mock that doesn't use SharedPreferences
+            mockk<LoginServerManager>(relaxed = true).apply {
+                // Return the test login server when asked
+                every { selectedLoginServer } returns (testLoginServer ?: LoginServer(
+                    "Test",
+                    "https://test.example.com",
+                    false
+                ))
+                // No-op for reset() to avoid SharedPreferences access
+                every { reset() } just runs
+            }
+        }
     }
 }
