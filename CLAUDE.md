@@ -181,8 +181,8 @@ Maps JavaScript files to Cordova namespaces:
 ```xml
 <platform name="android">
   <!-- Gradle and SDK versions -->
-  <preference name="android-minSdkVersion" value="28" />
-  <preference name="android-targetSdkVersion" value="35" />
+  <preference name="android-minSdkVersion" value="31" />
+  <preference name="android-targetSdkVersion" value="36" />
   <preference name="GradleVersion" value="8.14.3" />
   <preference name="AndroidGradlePluginVersion" value="8.12.0"/>
 

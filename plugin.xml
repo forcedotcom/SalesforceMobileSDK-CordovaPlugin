@@ -160,7 +160,7 @@
       <preference name="AndroidInsecureFileModeEnabled" value="true" />
 
       <!-- To specify min and target SDK versions -->
-      <preference name="android-minSdkVersion" value="28" />
+      <preference name="android-minSdkVersion" value="31" />
       <preference name="android-targetSdkVersion" value="36" />
 
       <!-- To specify gradle and gradle plugin versions -->

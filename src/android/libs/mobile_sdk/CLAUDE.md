@@ -42,8 +42,8 @@ SalesforceReact
 - [Android Javadoc](https://forcedotcom.github.io/SalesforceMobileSDK-Android/index.html)
 
 ### Android Build Details
-- **Minimum SDK**: 28 (Android 9.0)
-- **Compile SDK**: 35 (Android 15.0)
+- **Minimum SDK**: 31 (Android 12)
+- **Compile SDK**: 36 (Android 16)
 - **Target SDK**: Follows compileSdk
 - **Build system**: Gradle 8.14.3 with Kotlin DSL (`.gradle.kts` files)
 - **AGP (Android Gradle Plugin)**: 8.12.0
