@@ -1,400 +1,253 @@
 # Cordova Plugin for Salesforce Mobile SDK
 
-The **Salesforce Mobile SDK Cordova Plugin** enables developers to build hybrid mobile applications that integrate with the Salesforce Platform using Apache Cordova (PhoneGap).
+This repository is an **aggregation-only distribution package**. Source code is NOT developed here. The plugin assembles JavaScript from `SalesforceMobileSDK-Shared`, iOS bridge code from `SalesforceMobileSDK-iOS-Hybrid`, iOS resources from `SalesforceMobileSDK-iOS`, and the entire Android SDK from `SalesforceMobileSDK-Android` into a single Cordova plugin distributed via npm.
 
-## Overview
+## Repository Structure
 
-This plugin provides JavaScript APIs that bridge to native iOS and Android implementations of the Salesforce Mobile SDK. It allows hybrid apps built with HTML, CSS, and JavaScript to leverage:
+```
+SalesforceMobileSDK-CordovaPlugin/
+├── www/                              # JavaScript (copied from Shared repo)
+│   ├── com.salesforce.plugin.oauth.js
+│   ├── com.salesforce.plugin.network.js
+│   ├── com.salesforce.plugin.sdkinfo.js
+│   ├── com.salesforce.plugin.smartstore.js
+│   ├── com.salesforce.plugin.smartstore.client.js
+│   ├── com.salesforce.plugin.sfaccountmanager.js
+│   ├── com.salesforce.plugin.mobilesync.js
+│   ├── com.salesforce.util.bootstrap.js
+│   ├── com.salesforce.util.event.js
+│   ├── com.salesforce.util.exec.js
+│   ├── com.salesforce.util.logger.js
+│   ├── com.salesforce.util.promiser.js
+│   └── com.salesforce.util.push.js
+│
+├── src/ios/
+│   ├── classes/                      # Objective-C bridge (copied from iOS-Hybrid)
+│   │   ├── AppDelegate.m
+│   │   ├── InitialViewController.h
+│   │   ├── InitialViewController.m
+│   │   ├── UIApplication+SalesforceHybridSDK.h
+│   │   └── UIApplication+SalesforceHybridSDK.m
+│   └── resources/                    # Assets (copied from iOS SDK)
+│       ├── Images.xcassets
+│       ├── SalesforceSDKAssets.xcassets
+│       └── SalesforceSDKResources.bundle
+│
+├── src/android/libs/mobile_sdk/      # Entire Android repo (pruned)
+│   ├── libs/
+│   │   ├── SalesforceSDK/
+│   │   ├── SmartStore/
+│   │   ├── MobileSync/
+│   │   └── SalesforceHybrid/
+│   ├── settings.gradle.kts
+│   └── ...
+│
+├── plugin.xml                        # Cordova plugin manifest
+├── package.json                      # npm package definition
+│
+├── tools/
+│   ├── update.sh                     # Copies source files from upstream repos
+│   ├── postinstall-ios.js            # Runs after `cordova plugin add` on iOS
+│   └── postinstall-android.js        # Runs after `cordova plugin add` on Android
+│
+├── gradle/                           # Gradle wrapper (copied from Android)
+├── gradlew
+├── gradlew.bat
+└── gradle.properties
+```
 
-- **OAuth Authentication** - Salesforce login and user management
-- **SmartStore** - Encrypted local storage (SQLCipher-backed)
-- **MobileSync** - Bidirectional data synchronization
-- **REST API** - Access to Salesforce APIs
-- **Multi-User Support** - Account switching and management
+## `tools/update.sh` -- The Update Pipeline
 
-## Installation
+This script clones source repositories and copies their files into this repo. It must be run manually after changes in source repos, and is also called automatically by `release/release.js` in the Package repo at release time.
 
-### Recommended: Use forcehybrid CLI
-
-The easiest way to create a Salesforce hybrid app is using the [forcehybrid](https://npmjs.org/package/forcehybrid) command-line tool:
+### Usage
 
 ```bash
-# Install the CLI
-npm install -g forcehybrid
-
-# Create a new hybrid app
-forcehybrid create
-    --platform ios,android
-    --appname MyHybridApp
-    --packagename com.mycompany.myhybridapp
-    --organization "My Company"
+./tools/update.sh -b <branch> -o <ios|android|all>
 ```
 
-This generates a complete Cordova app with the Salesforce Mobile SDK plugin pre-installed and configured.
-
-### Manual Installation
-
-If you need to add the plugin to an existing Cordova project:
-
+Examples:
 ```bash
-# From npm
-cordova plugin add salesforce-mobilesdk-cordova-plugin
-
-# From GitHub
-cordova plugin add https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin.git
-
-# From local directory
-cordova plugin add /path/to/SalesforceMobileSDK-CordovaPlugin
+./tools/update.sh -b dev -o all          # Update both platforms from dev
+./tools/update.sh -b dev -o ios          # Update only iOS
+./tools/update.sh -b v14.0.0 -o all      # Update from a release tag
 ```
 
-**Note**: Manual installation requires additional configuration steps. We strongly recommend using the forcehybrid CLI.
+### What it does, step by step
 
-## Features
+1. **Clones source repos** at the specified branch (shallow, single-branch):
+   - `SalesforceMobileSDK-Shared`
+   - `SalesforceMobileSDK-iOS-Hybrid`
+   - `SalesforceMobileSDK-iOS`
+   - `SalesforceMobileSDK-Android`
 
-### OAuth & Authentication
+2. **Wipes both `src/ios/` and `src/android/`** regardless of the `-o` flag, then recreates only the directories matching the requested platform.
 
-Authenticate users with Salesforce and manage sessions:
+3. **Copies iOS bridge code** from iOS-Hybrid:
+   - `iOS-Hybrid/shared/hybrid/AppDelegate.m` -> `src/ios/classes/`
+   - `iOS-Hybrid/shared/hybrid/UIApplication+SalesforceHybridSDK.{h,m}` -> `src/ios/classes/`
+   - `iOS-Hybrid/shared/hybrid/InitialViewController.{h,m}` -> `src/ios/classes/`
+
+4. **Copies iOS resources** from iOS SDK:
+   - `iOS/shared/resources/Images.xcassets` -> `src/ios/resources/`
+   - `iOS/shared/resources/SalesforceSDKAssets.xcassets` -> `src/ios/resources/`
+   - `iOS/shared/resources/SalesforceSDKResources.bundle` -> `src/ios/resources/`
+
+5. **Copies Android SDK**:
+   - Copies entire Android repo -> `src/android/libs/mobile_sdk/`
+   - Prunes `native/`, `hybrid/`, and `libs/SalesforceReact` directories
+   - Removes those pruned modules from `settings.gradle.kts`
+   - Removes symlinks (npm cannot handle them)
+   - Copies Gradle wrapper files (`gradle.properties`, `gradlew`, `gradlew.bat`, `gradle/`) to the repo root
+
+6. **Copies JavaScript** from Shared:
+   - `Shared/gen/plugins/com.salesforce/*.js` -> `www/`
+
+7. **Deletes the cloned temp directories**.
+
+## `plugin.xml` -- The Cordova Manifest
+
+The manifest declares the plugin structure with id `com.salesforce`.
+
+### JavaScript modules
+
+Six plugin modules plus `smartstore.client`, plus six utility modules -- all served from `www/`. The `<clobbers>` element sets global JS names:
+
+```xml
+<js-module src="www/com.salesforce.plugin.smartstore.js" name="plugin.smartstore">
+  <clobbers target="navigator.smartstore" />
+</js-module>
+<js-module src="www/com.salesforce.plugin.smartstore.client.js" name="plugin.smartstore.client">
+  <clobbers target="navigator.smartstoreClient" />
+</js-module>
+```
+
+### Engine requirements
+
+```xml
+<engines>
+  <engine name="cordova-ios" version="7.1.1" />
+  <engine name="cordova-android" version="15.0.0" />
+</engines>
+```
+
+### iOS platform section
+
+- **`<feature>` entries** map service names to Objective-C classes:
+  ```xml
+  <feature name="com.salesforce.oauth"><param name="ios-package" value="SalesforceOAuthPlugin"/></feature>
+  <feature name="com.salesforce.smartstore"><param name="ios-package" value="SFSmartStorePlugin"/></feature>
+  ```
+
+- **`<podspec>` block** pulls `SalesforceHybridSDK` from iOS-Hybrid and the full iOS SDK pod chain (`MobileSync`, `SmartStore`, `SalesforceSDKCore`, `SalesforceAnalytics`, `SalesforceSDKCommon`) from GitHub:
+  ```xml
+  <podspec>
+    <pods use-frameworks="true">
+      <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+      <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+      ...
+    </pods>
+  </podspec>
+  ```
+
+- **Source and resource files** from `src/ios/`.
+
+- **Post-install hook**: `tools/postinstall-ios.js`.
+
+### Android platform section
+
+- **`<feature>` entries** map service names to Kotlin/Java classes:
+  ```xml
+  <feature name="com.salesforce.oauth"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SalesforceOAuthPlugin"/></feature>
+  <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
+  ```
+
+- **Manifest edits** set `SalesforceDroidGapActivity` as the main activity and `HybridApp` as the application class.
+
+- **Gradle/Kotlin version preferences**:
+  ```xml
+  <preference name="GradleVersion" value="9.4.1" />
+  <preference name="AndroidGradlePluginVersion" value="9.1.1"/>
+  <preference name="GradlePluginKotlinEnabled" value="true" />
+  <preference name="GradlePluginKotlinVersion" value="2.1.21" />
+  ```
+
+- **Post-install hook**: `tools/postinstall-android.js`.
+
+## Post-Install Hooks
+
+These scripts run automatically when a developer executes `cordova plugin add com.salesforce`.
+
+### `postinstall-ios.js`
+
+Patches `project.pbxproj` to redirect `AppDelegate.m` to `Plugins/com.salesforce/AppDelegate.m`, so the SDK's bootstrap app delegate is used instead of the default Cordova stub:
 
 ```javascript
-// Get authenticated user credentials
-com.salesforce.plugin.oauth.getAuthCredentials(
-    function(credentials) {
-        console.log('Access Token:', credentials.accessToken);
-        console.log('Instance URL:', credentials.instanceUrl);
-        console.log('User ID:', credentials.userId);
-    },
-    function(error) {
-        console.error('Authentication error:', error);
-    }
-);
-
-// Logout
-com.salesforce.plugin.oauth.logout();
+replaceTextInFile(projectFile,
+    'path = AppDelegate.m;',
+    'name = AppDelegate.m; path = Plugins/com.salesforce/AppDelegate.m;');
 ```
 
-### SmartStore - Encrypted Storage
+### `postinstall-android.js`
 
-Store data securely on the device with SQLCipher encryption:
+Performs four operations on the generated Cordova Android project:
 
-```javascript
-// Register a soup (table)
-navigator.smartstore.registerSoup(
-    false,  // isGlobalStore
-    'contacts',
-    [
-        {path: 'Id', type: 'string'},
-        {path: 'Name', type: 'string'},
-        {path: 'LastModifiedDate', type: 'string'}
-    ],
-    function() {
-        console.log('Soup registered');
-    },
-    function(error) {
-        console.error('Registration error:', error);
-    }
-);
+1. **Fixes `CordovaLib/cordova.gradle`** -- Adds a missing `import groovy.xml.XmlParser` (workaround for a cordova-android 15.0.0 bug).
 
-// Query the soup
-var querySpec = navigator.smartstore.buildExactQuerySpec('Id', '003...', 10);
-navigator.smartstore.querySoup(
-    false,
-    'contacts',
-    querySpec,
-    function(cursor) {
-        console.log('Found', cursor.totalEntries, 'entries');
-    },
-    function(error) {
-        console.error('Query error:', error);
-    }
-);
+2. **Patches `settings.gradle`** -- Removes `include ":CordovaLib"` and adds an `includeBuild` pointing to `mobile_sdk/SalesforceMobileSDK-Android`, so the Android SDK is consumed as a composite build instead of CordovaLib.
 
-// Use Smart SQL
-var smartSql = 'SELECT {contacts:Name} FROM {contacts} ORDER BY {contacts:Name}';
-navigator.smartstore.runSmartQuery(
-    false,
-    smartSql,
-    function(cursor) {
-        console.log('Query results:', cursor.currentPageOrderedEntries);
-    },
-    function(error) {
-        console.error('Smart SQL error:', error);
-    }
-);
-```
+3. **Patches `app/build.gradle`** -- Adds packaging exclusions for duplicate META-INF files, and replaces `implementation(project(path: ":CordovaLib"))` with `api 'com.salesforce.mobilesdk:SalesforceHybrid:14.0.0'`.
 
-### MobileSync - Data Synchronization
+4. **Copies Gradle wrapper files** (`gradle.properties`, `gradlew`, `gradlew.bat`, `gradle/`) from the plugin into the app project directory.
 
-Sync data between SmartStore and Salesforce:
+## What NOT to Edit Here
 
-```javascript
-// Sync down from Salesforce
-var target = {
-    type: 'soql',
-    query: 'SELECT Id, Name, Industry FROM Account'
-};
+| Path | Source repo | Go there for changes |
+|------|-------------|---------------------|
+| `www/*.js` | SalesforceMobileSDK-Shared | `gen/plugins/com.salesforce/` |
+| `src/ios/classes/` | SalesforceMobileSDK-iOS-Hybrid | `shared/hybrid/` |
+| `src/ios/resources/` | SalesforceMobileSDK-iOS | `shared/resources/` |
+| `src/android/` | SalesforceMobileSDK-Android | (entire repo) |
 
-com.salesforce.plugin.mobilesync.syncDown(
-    false,  // isGlobalStore
-    target,
-    'accounts',
-    {},
-    'accountSync',
-    function(sync) {
-        if (sync.status === 'DONE') {
-            console.log('Sync complete');
-        }
-    },
-    function(error) {
-        console.error('Sync error:', error);
-    }
-);
+Only edit these files directly in this repository:
+- `plugin.xml`
+- `tools/update.sh`, `tools/postinstall-ios.js`, `tools/postinstall-android.js`
+- `package.json`
 
-// Sync up to Salesforce
-var syncUpTarget = {type: 'syncUp'};
+## Release Workflow
 
-com.salesforce.plugin.mobilesync.syncUp(
-    false,
-    syncUpTarget,
-    'accounts',
-    {},
-    'accountSyncUp',
-    function(sync) {
-        if (sync.status === 'DONE') {
-            console.log('Sync up complete');
-        }
-    },
-    function(error) {
-        console.error('Sync up error:', error);
-    }
-);
-```
+1. Run the update script against the release tag:
+   ```bash
+   ./tools/update.sh -b v14.0.0 -o all
+   ```
 
-### REST API
+2. Verify copied files look correct (diff against prior release).
 
-Make REST API calls to Salesforce:
+3. Update version in `plugin.xml` and `package.json`.
 
-```javascript
-// SOQL Query
-com.salesforce.plugin.network.sendRequest(
-    '/services/data/v56.0/query/',
-    'SELECT Id, Name FROM Account LIMIT 10',
-    function(response) {
-        var accounts = JSON.parse(response).records;
-        console.log('Accounts:', accounts);
-    },
-    function(error) {
-        console.error('Query error:', error);
-    },
-    'GET'
-);
+4. Commit, tag, push:
+   ```bash
+   git add .
+   git commit -m "Release v14.0.0"
+   git tag v14.0.0
+   git push origin dev
+   git push origin v14.0.0
+   ```
 
-// Create a record
-var newAccount = {Name: 'Acme Corp', Industry: 'Technology'};
-com.salesforce.plugin.network.sendRequest(
-    '/services/data/v56.0/sobjects/Account/',
-    JSON.stringify(newAccount),
-    function(response) {
-        var result = JSON.parse(response);
-        console.log('Created account:', result.id);
-    },
-    function(error) {
-        console.error('Create error:', error);
-    },
-    'POST',
-    'application/json'
-);
-```
+5. Publish:
+   ```bash
+   npm publish
+   ```
 
-## Platform Support
+## Related Repositories
 
-| Platform | Minimum Version | Cordova Version |
-|----------|----------------|-----------------|
-| **iOS** | 18.0 | cordova-ios 7.1.1 |
-| **Android** | API 28 (Android 9.0) | cordova-android 14.0.1 |
-
-## Requirements
-
-### For iOS Development
-- macOS
-- Xcode 15+
-- CocoaPods
-- iOS 18.0+ device or simulator
-
-### For Android Development
-- Java 17+
-- Android Studio
-- Android SDK (API 28+)
-- Gradle 8.14.3
-
-## Plugin Architecture
-
-This plugin is an **aggregation point** that combines code from multiple repositories:
-
-```
-Source Repositories:
-  - SalesforceMobileSDK-Shared (JavaScript)
-  - SalesforceMobileSDK-iOS-Hybrid (iOS native bridge)
-  - SalesforceMobileSDK-Android (Android native bridge)
-           ↓
-    Cordova Plugin (this repo)
-           ↓
-        npm Package
-           ↓
-     Hybrid Applications
-```
-
-### JavaScript Layer (`www/`)
-- OAuth plugin
-- SmartStore plugin
-- MobileSync plugin
-- Network (REST API) plugin
-- SDKInfo plugin
-- Account Manager plugin
-- Utility modules (bootstrap, event, logger, promiser, push)
-
-### iOS Implementation (`src/ios/`)
-- Cordova plugin bridges (Objective-C)
-- App delegate template
-- View controller setup
-- Resource bundles
-- CocoaPods integration for iOS SDK
-
-### Android Implementation (`src/android/`)
-- Cordova plugin bridges (Kotlin)
-- Activity setup
-- Gradle integration for Android SDK
-- Android Manifest configuration
-
-## Configuration
-
-### External Client App Setup
-
-To use this plugin, you need a Salesforce External Client App (ECA):
-
-1. Go to **Setup** → **Apps** → **External Client Apps** in Salesforce
-2. Click **New External Client App**
-3. Fill in the required fields:
-   - **External Client App Name**: Your app name
-   - **Description**: Brief description of your app
-   - **Contact Email**: Your email
-4. Under **API Integration**:
-   - Enable **OAuth 2.0 Enabled**
-   - Set **Callback URL**: `sfdc://oauth/success` (for mobile apps)
-   - Select **OAuth Scopes**:
-     - Access and manage your data (api)
-     - Manage user data via Web browsers (web)
-     - Perform requests on your behalf at any time (refresh_token, offline_access)
-5. Save and copy the **Consumer Key**
-
-**Note**: External Client Apps replace the legacy Connected App model. For more information, see the [External Client Apps documentation](https://help.salesforce.com/s/articleView?id=platform.hosted_mcp_servers_eca.htm&type=5).
-
-### App Configuration
-
-Configure your app's `bootconfig.json`:
-
-```json
-{
-  "remoteAccessConsumerKey": "YOUR_CONSUMER_KEY",
-  "oauthRedirectURI": "sfdc://oauth/success",
-  "oauthScopes": [
-    "api",
-    "web",
-    "refresh_token"
-  ],
-  "isLocal": true,
-  "startPage": "index.html",
-  "errorPage": "error.html",
-  "shouldAuthenticate": true,
-  "attemptOfflineLoad": false
-}
-```
-
-## Documentation
-
-### API Reference
-
-For detailed API documentation, see:
-- **JavaScript APIs**: See comments in `www/` directory files
-- **iOS Native**: https://forcedotcom.github.io/SalesforceMobileSDK-iOS
-- **Android Native**: https://forcedotcom.github.io/SalesforceMobileSDK-Android
-
-### Developer Guides
-- **Mobile SDK Development Guide**: https://developer.salesforce.com/docs/platform/mobile-sdk/guide
-- **Mobile SDK Trail**: https://trailhead.salesforce.com/trails/mobile_sdk_intro
-- **Cordova Documentation**: https://cordova.apache.org/docs/
-
-## Sample Apps
-
-Sample applications are available in related repositories:
-
-- **AccountEditor**: Basic CRUD operations (in iOS-Hybrid and Android repos)
-- **MobileSyncExplorerHybrid**: Complete offline sync demo (in iOS-Hybrid and Android repos)
-- **Sample code**: Various samples in the Shared repository
-
-## Version Compatibility
-
-| Plugin Version | iOS SDK | Android SDK | Cordova iOS | Cordova Android |
-|---------------|---------|-------------|-------------|-----------------|
-| 13.2.0        | 13.2.0  | 13.2.0      | 7.1.1       | 14.0.1          |
-| 13.1.0        | 13.1.0  | 13.1.0      | 7.1.0       | 13.0.0          |
-| 13.0.0        | 13.0.0  | 13.0.0      | 7.1.0       | 13.0.0          |
-
-See [release notes](https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/releases) for version details.
-
-## Related Tools & Packages
-
-### CLI Tools
-- **forcehybrid**: https://npmjs.org/package/forcehybrid - Create hybrid apps
-- **forceios**: https://npmjs.org/package/forceios - Create native iOS apps
-- **forcedroid**: https://npmjs.org/package/forcedroid - Create native Android apps
-- **forcereactnative**: https://npmjs.org/package/forcereactnative - Create React Native apps
-
-### Related Repositories
-- **Shared JavaScript**: https://github.com/forcedotcom/SalesforceMobileSDK-Shared
-- **iOS Hybrid**: https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid
-- **iOS SDK**: https://github.com/forcedotcom/SalesforceMobileSDK-iOS
-- **Android SDK**: https://github.com/forcedotcom/SalesforceMobileSDK-Android
-- **Templates**: https://github.com/forcedotcom/SalesforceMobileSDK-Templates
-- **Package/CLI**: https://github.com/forcedotcom/SalesforceMobileSDK-Package
-
-## Support
-
-### Getting Help
-- **Issues**: [GitHub Issues](https://github.com/forcedotcom/SalesforceMobileSDK-CordovaPlugin/issues)
-- **Questions**: [Salesforce Stack Exchange](https://salesforce.stackexchange.com/questions/tagged/mobilesdk)
-- **Community**: [Trailblazer Community](https://trailhead.salesforce.com/trailblazer-community/groups/0F94S000000kH0HSAU)
-
-### Troubleshooting
-
-**iOS Build Errors**:
-- Make sure you're using Xcode 15+
-- Run `pod install` in the `platforms/ios` directory
-- Clean build folder in Xcode (Cmd+Shift+K)
-
-**Android Build Errors**:
-- Verify Java 17+ is installed
-- Check Gradle version compatibility
-- Run `./gradlew clean` in the `platforms/android` directory
-
-**Plugin Installation Issues**:
-- Use forcehybrid CLI instead of manual installation
-- Remove and re-add the plugin
-- Check Cordova and platform versions
-
-## Contributing
-
-We welcome contributions! Please:
-1. Read the [CLAUDE.md](CLAUDE.md) file for development guidelines
-2. Understand this is primarily a distribution repo (source code lives elsewhere)
-3. For JavaScript changes: Contribute to [SalesforceMobileSDK-Shared](https://github.com/forcedotcom/SalesforceMobileSDK-Shared)
-4. For iOS changes: Contribute to [SalesforceMobileSDK-iOS-Hybrid](https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid)
-5. For Android changes: Contribute to [SalesforceMobileSDK-Android](https://github.com/forcedotcom/SalesforceMobileSDK-Android)
-6. For plugin configuration: Create issues or PRs in this repository
+- [SalesforceMobileSDK-Shared](https://github.com/forcedotcom/SalesforceMobileSDK-Shared) -- JavaScript source
+- [SalesforceMobileSDK-iOS-Hybrid](https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid) -- iOS bridge source
+- [SalesforceMobileSDK-iOS](https://github.com/forcedotcom/SalesforceMobileSDK-iOS) -- iOS SDK
+- [SalesforceMobileSDK-Android](https://github.com/forcedotcom/SalesforceMobileSDK-Android) -- Android SDK
+- [SalesforceMobileSDK-Package](https://github.com/forcedotcom/SalesforceMobileSDK-Package) -- CLI tools and release automation
+- [SalesforceMobileSDK-Templates](https://github.com/forcedotcom/SalesforceMobileSDK-Templates) -- App templates that consume this plugin
 
 ## License
 
 Salesforce Mobile SDK License. See [LICENSE.md](LICENSE.md) for details.
-
-## Security
-
-Please report security vulnerabilities to [security@salesforce.com](mailto:security@salesforce.com).
