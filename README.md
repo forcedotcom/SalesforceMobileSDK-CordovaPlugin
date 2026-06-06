@@ -223,7 +223,14 @@ Only edit these files directly in this repository:
 
 2. Verify copied files look correct (diff against prior release).
 
-3. Update version in `plugin.xml` and `package.json`.
+3. Run `setversion.sh` to update the version number across all files:
+   ```bash
+   # On dev branch (pre-release):
+   ./setversion.sh -v 14.0.0 -d yes
+   # On master branch (after merging dev → master at release):
+   ./setversion.sh -v 14.0.0 -d no
+   ```
+   This updates `package.json`, bumps `SalesforceHybrid:<version>` in `postinstall-android.js`, and switches `plugin.xml` pod references between `branch="dev"` and `tag="v14.0.0"`.
 
 4. Commit, tag, push:
    ```bash
