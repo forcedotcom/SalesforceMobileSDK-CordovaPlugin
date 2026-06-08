@@ -103,7 +103,7 @@ This script is the **heart of the distribution process**. It clones source repos
 # Examples:
 ./tools/update.sh -b dev -o all       # Update both platforms from dev branch
 ./tools/update.sh -b main -o ios      # Update only iOS from main branch
-./tools/update.sh -b v13.2.0 -o android  # Update Android from tagged release
+./tools/update.sh -b v14.0.0 -o android  # Update Android from tagged release
 ```
 
 **What it does**:
@@ -135,7 +135,7 @@ The `plugin.xml` file defines:
 
 ### Plugin Metadata
 ```xml
-<plugin id="com.salesforce" version="13.2.0">
+<plugin id="com.salesforce" version="14.0.0">
   <name>SalesforceMobileSDK Plugins</name>
   <description>SalesforceMobileSDK Plugins</description>
   <keywords>salesforce,oauth,smartstore,mobilesync</keywords>
@@ -183,8 +183,8 @@ Maps JavaScript files to Cordova namespaces:
   <!-- Gradle and SDK versions -->
   <preference name="android-minSdkVersion" value="31" />
   <preference name="android-targetSdkVersion" value="36" />
-  <preference name="GradleVersion" value="8.14.3" />
-  <preference name="AndroidGradlePluginVersion" value="8.12.0"/>
+  <preference name="GradleVersion" value="9.4.1" />
+  <preference name="AndroidGradlePluginVersion" value="9.1.1"/>
 
   <!-- Cordova plugins → Native classes -->
   <feature name="com.salesforce.oauth">
@@ -338,10 +338,10 @@ This repo follows a specific release workflow:
 6. **Commit and tag**:
 ```bash
 git add .
-git commit -m "Release v13.2.0"
-git tag v13.2.0
+git commit -m "Release v14.0.0"
+git tag v14.0.0
 git push origin dev
-git push origin v13.2.0
+git push origin v14.0.0
 ```
 
 7. **Publish to npm**:
@@ -358,6 +358,7 @@ npm publish
 
 | Cordova Plugin | Shared | iOS Hybrid | Android | Cordova iOS | Cordova Android |
 |---------------|--------|------------|---------|-------------|-----------------|
+| 14.0.0        | 14.0.0 | 14.0.0     | 14.0.0  | 7.1.1       | 15.0.0          |
 | 13.2.0        | 13.2.0 | 13.2.0     | 13.2.0  | 7.1.1       | 14.0.1          |
 | 13.1.0        | 13.1.0 | 13.1.0     | 13.1.0  | 7.1.0       | 13.0.0          |
 | 13.0.0        | 13.0.0 | 13.0.0     | 13.0.0  | 7.1.0       | 13.0.0          |
