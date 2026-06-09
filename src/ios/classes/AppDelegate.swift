@@ -26,6 +26,7 @@ import UIKit
 import SalesforceHybridSDK
 import SalesforceSDKCore
 
+@main
 #if compiler(>=6.1)
 @objc @implementation
 #else
