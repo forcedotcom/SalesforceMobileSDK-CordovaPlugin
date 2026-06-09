@@ -17,9 +17,9 @@
  FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
  */
 
 import UIKit
@@ -34,18 +34,18 @@ import SalesforceSDKCore
 extension AppDelegate {
 
     public override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Initialize SalesforceHybridSDKManager
+        // Initialize SalesforceHybridSDKManager — required for hybrid apps
         SalesforceHybridSDKManager.initializeSDK()
 
         #if DEBUG
-        SalesforceHybridSDKManager.shared().isDevSupportEnabled = true
+        SalesforceHybridSDKManager.shared.isDevSupportEnabled = true
         #else
-        SalesforceHybridSDKManager.shared().isDevSupportEnabled = false
+        SalesforceHybridSDKManager.shared.isDevSupportEnabled = false
         #endif
 
-        // Set up URL cache with localhost substitution support
-        let cacheSizeMemory = 8 * 1024 * 1024  // 8 MB
-        let cacheSizeDisk   = 32 * 1024 * 1024 // 32 MB
+        // Set up URL cache with localhost substitution support for local hybrid apps
+        let cacheSizeMemory: UInt = 8 * 1024 * 1024   // 8 MB
+        let cacheSizeDisk: UInt   = 32 * 1024 * 1024  // 32 MB
         let sharedCache = SFLocalhostSubstitutionCache(memoryCapacity: cacheSizeMemory, diskCapacity: cacheSizeDisk, diskPath: "nsurlcache")
         URLCache.shared = sharedCache
 
@@ -54,33 +54,33 @@ extension AppDelegate {
 
         initializeAppViewState()
 
-        SFSDKAuthHelper.loginIfRequired { [weak self] in
+        AuthHelper.loginIfRequired { [weak self] in
             self?.setupRootViewController()
         }
 
-        // Register for user change notifications
-        SFSDKAuthHelper.registerBlock(forCurrentUserChangeNotifications: { [weak self] in
+        // Register for user-change notifications so view state is reset on account switch
+        AuthHelper.registerBlock(forCurrentUserChangeNotifications: { [weak self] in
             self?.resetViewState {
                 self?.setupRootViewController()
             }
         })
 
-        // Return false: we handle window setup ourselves; Cordova's super implementation
-        // would create a second window with a bare WebView which we don't want.
+        // Return false: Cordova's super implementation would create a second window
+        // with a bare WebView. We handle window setup entirely here.
         return false
     }
 
     public override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        SFPushNotificationManager.sharedInstance().didRegisterForRemoteNotifications(withDeviceToken: deviceToken)
-        if SFUserAccountManager.sharedInstance().currentUser?.credentials.accessToken != nil {
-            SFPushNotificationManager.sharedInstance().registerSalesforceNotifications(completionBlock: nil, fail: nil)
+        PushNotificationManager.sharedInstance().didRegisterForRemoteNotifications(withDeviceToken: deviceToken)
+        if UserAccountManager.shared.currentUserAccount?.credentials.accessToken != nil {
+            PushNotificationManager.sharedInstance().registerSalesforceNotifications(completionBlock: nil, failBlock: nil)
         }
         super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
 
     public override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         // Uncomment to enable IDP Login flow:
-        // return SFUserAccountManager.sharedInstance().handleIDPAuthenticationResponse(url, options: options)
+        // return UserAccountManager.shared.handleIDPAuthenticationResponse(url, options: options)
         return false
     }
 
@@ -91,12 +91,14 @@ extension AppDelegate {
             DispatchQueue.main.async { self.initializeAppViewState() }
             return
         }
+        // InitialViewController is an ObjC class — imported via Bridging-Header.h
+        // by the postinstall-ios.js hook which adds #import "InitialViewController.h"
         window?.rootViewController = InitialViewController(nibName: nil, bundle: nil)
         window?.makeKeyAndVisible()
     }
 
     private func setupRootViewController() {
-        let config = SalesforceHybridSDKManager.shared().appConfig as? SFHybridViewConfig
+        let config = SalesforceHybridSDKManager.shared.appConfig as? SFHybridViewConfig
         viewController = SFHybridViewController(config: config)
         window?.rootViewController = viewController
     }
