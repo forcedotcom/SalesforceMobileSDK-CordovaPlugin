@@ -40,6 +40,8 @@ if (fs.existsSync(bridgingHeaderFile)) {
     if (!bridgingContents.includes(importLine)) {
         fs.writeFileSync(bridgingHeaderFile, bridgingContents + '\n' + importLine + '\n', 'utf8');
     }
+} else {
+    console.warn('WARNING: Bridging-Header.h not found at ' + bridgingHeaderFile + ' — InitialViewController will not be visible from Swift. The build will likely fail.');
 }
 
 console.log('Done running SalesforceMobileSDK plugin ios post-install script');
