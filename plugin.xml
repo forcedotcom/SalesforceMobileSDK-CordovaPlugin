@@ -79,7 +79,10 @@
     <header-file src="src/ios/classes/InitialViewController.h" />
 
     <!-- Source files -->
-    <source-file src="src/ios/classes/AppDelegate.swift" />
+    <!-- NOTE: AppDelegate.swift is NOT declared as a source-file because in cordova-ios 8.x,
+         <source-file> entries go into the CordovaPlugins SPM target which cannot link against
+         CocoaPods frameworks. AppDelegate.swift is instead copied to the Plugins dir and the
+         app target's reference is redirected by postinstall-ios.js. -->
     <source-file src="src/ios/classes/UIApplication+SalesforceHybridSDK.m" />
     <source-file src="src/ios/classes/InitialViewController.m" />
 
