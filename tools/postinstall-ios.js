@@ -13,7 +13,7 @@ function replaceTextInFile(fileName, textInFile, replacementText) {
 }
 
 
-console.log('Pointing to AppDelegate.m defined in plugin');
+console.log('Pointing to AppDelegate.swift defined in plugin');
 const appProjectRoot = path.join('platforms', 'ios');
 const appName = path.parse(fs.readdirSync(appProjectRoot).filter(f=>f.endsWith('.xcworkspace'))[0]).name;
 const projectFile = path.join(appProjectRoot, `${appName}.xcodeproj`, 'project.pbxproj');
