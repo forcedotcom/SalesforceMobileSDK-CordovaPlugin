@@ -5,23 +5,31 @@ set -e   # stop at first error
 
 OPT_BRANCH=""
 OPT_OS=""
+OPT_IOS_HYBRID_ORG="forcedotcom"
+OPT_ANDROID_ORG="forcedotcom"
 
 usage ()
 {
-    echo "usage: $0 -b <branch name> -o <os name>"
+    echo "usage: $0 -b <branch name> -o <os name> [-i <ios_hybrid_org>] [-a <android_org>]"
     echo "  Where <branch name> is the branch to update to."
     echo "  Where <os name> is the name of the platform to update."
+    echo "  Where <ios_hybrid_org> is the GitHub org for iOS-Hybrid repo (default: forcedotcom)."
+    echo "  Where <android_org> is the GitHub org for Android repo (default: forcedotcom)."
 }
 
 parse_opts ()
 {
-    while getopts :b:o: command_line_opt
+    while getopts :b:o:i:a: command_line_opt
     do
         case ${command_line_opt} in
             b)
                 OPT_BRANCH=${OPTARG};;
             o)
                 OPT_OS=${OPTARG};;
+            i)
+                OPT_IOS_HYBRID_ORG=${OPTARG};;
+            a)
+                OPT_ANDROID_ORG=${OPTARG};;
             ?)
                 echo "Unknown option '-${OPTARG}'."
                 usage
@@ -79,9 +87,9 @@ update_repo ()
 }
 
 ROOT_FOLDER=$(get_root_folder)
-ANDROID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Android.git"
+ANDROID_SDK_REPO_PATH="https://github.com/${OPT_ANDROID_ORG}/SalesforceMobileSDK-Android.git"
 ANDROID_SDK_FOLDER="SalesforceMobileSDK-Android"
-IOS_HYBRID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid.git"
+IOS_HYBRID_SDK_REPO_PATH="https://github.com/${OPT_IOS_HYBRID_ORG}/SalesforceMobileSDK-iOS-Hybrid.git"
 IOS_HYBRID_SDK_FOLDER="SalesforceMobileSDK-iOS-Hybrid"
 IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git"
 IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
@@ -119,7 +127,7 @@ copy_ios_sdk()
 {
     echo "*** iOS ***"
     echo "Copying AppDelegate, UIApplication+SalesforceHybridSDK and InitialViewController"
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.m  src/ios/classes
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.swift  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
