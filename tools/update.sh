@@ -186,7 +186,8 @@ then
     update_ios_repo
     update_android_repo
 fi
-update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}"
+# Shared is always cloned at dev since it is not branched for plugin upgrades
+update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}" "dev"
 
 cd ${ROOT_FOLDER}
 echo "*** Creating directories ***"
