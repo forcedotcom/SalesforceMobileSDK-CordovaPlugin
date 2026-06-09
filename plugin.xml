@@ -95,7 +95,7 @@
         <source url="https://www.github.com/forcedotcom/SalesforceMobileSDK-iOS-Specs" />
       </config>
       <pods use-frameworks="true">
-        <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
+        <pod name="SalesforceHybridSDK" git="https://github.com/wmathurin/SalesforceMobileSDK-iOS-Hybrid" branch="W-21080629-cordova-ios-8" />
         <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
         <pod name="SmartStore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
         <pod name="SalesforceSDKCore" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
