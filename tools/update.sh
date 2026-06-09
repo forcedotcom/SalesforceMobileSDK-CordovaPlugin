@@ -87,9 +87,7 @@ update_repo ()
 }
 
 ROOT_FOLDER=$(get_root_folder)
-ANDROID_SDK_REPO_PATH="https://github.com/${OPT_ANDROID_ORG}/SalesforceMobileSDK-Android.git"
 ANDROID_SDK_FOLDER="SalesforceMobileSDK-Android"
-IOS_HYBRID_SDK_REPO_PATH="https://github.com/${OPT_IOS_HYBRID_ORG}/SalesforceMobileSDK-iOS-Hybrid.git"
 IOS_HYBRID_SDK_FOLDER="SalesforceMobileSDK-iOS-Hybrid"
 IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git"
 IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
@@ -162,6 +160,10 @@ copy_android_sdk()
 }
 
 parse_opts "$@"
+
+# Set repo paths after opts are parsed so org overrides take effect
+ANDROID_SDK_REPO_PATH="https://github.com/${OPT_ANDROID_ORG}/SalesforceMobileSDK-Android.git"
+IOS_HYBRID_SDK_REPO_PATH="https://github.com/${OPT_IOS_HYBRID_ORG}/SalesforceMobileSDK-iOS-Hybrid.git"
 
 # Work from the root of the repo.
 cd ${ROOT_FOLDER}
