@@ -74,7 +74,7 @@ update_repo ()
 {
     local repo_dir=$1
     local git_repo_url=$2
-    local git_branch="${OPT_BRANCH}"
+    local git_branch="${3:-${OPT_BRANCH}}"
 
     if [ ! -d "$repo_dir" ]
     then
@@ -97,7 +97,8 @@ SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 update_ios_repo ()
 {
     update_repo "${IOS_HYBRID_SDK_FOLDER}" "${IOS_HYBRID_SDK_REPO_PATH}"
-    update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
+    # iOS SDK is always cloned at dev since it is not branched for plugin upgrades
+    update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}" "dev"
     cd ${ROOT_FOLDER}
 }
 
