@@ -33,7 +33,7 @@ import SalesforceSDKCore
 #endif
 extension AppDelegate {
 
-    override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    public override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Initialize SalesforceHybridSDKManager
         SalesforceHybridSDKManager.initializeSDK()
 
@@ -70,7 +70,7 @@ extension AppDelegate {
         return false
     }
 
-    override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    public override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         SFPushNotificationManager.sharedInstance().didRegisterForRemoteNotifications(withDeviceToken: deviceToken)
         if SFUserAccountManager.sharedInstance().currentUser?.credentials.accessToken != nil {
             SFPushNotificationManager.sharedInstance().registerSalesforceNotifications(completionBlock: nil, fail: nil)
@@ -78,7 +78,7 @@ extension AppDelegate {
         super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
 
-    override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+    public override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
         // Uncomment to enable IDP Login flow:
         // return SFUserAccountManager.sharedInstance().handleIDPAuthenticationResponse(url, options: options)
         return false
