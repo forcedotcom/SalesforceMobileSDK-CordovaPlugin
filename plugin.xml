@@ -30,7 +30,7 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-ios" version="7.1.1" />
+    <engine name="cordova-ios" version="8.1.0" />
     <engine name="cordova-android" version="15.0.0" />
   </engines>
 
@@ -79,7 +79,10 @@
     <header-file src="src/ios/classes/InitialViewController.h" />
 
     <!-- Source files -->
-    <source-file src="src/ios/classes/AppDelegate.m" />
+    <!-- NOTE: AppDelegate.swift is NOT declared as a source-file because in cordova-ios 8.x,
+         <source-file> entries go into the CordovaPlugins SPM target which cannot link against
+         CocoaPods frameworks. AppDelegate.swift is instead copied to the Plugins dir and the
+         app target's reference is redirected by postinstall-ios.js. -->
     <source-file src="src/ios/classes/UIApplication+SalesforceHybridSDK.m" />
     <source-file src="src/ios/classes/InitialViewController.m" />
 
@@ -102,7 +105,7 @@
         <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
         <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
         <!-- Needed until cordova-ios gets posted to cocoapod.org -->
-        <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="7.1.1" />
+        <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="rel/8.1.0" />
       </pods>
     </podspec>
 
