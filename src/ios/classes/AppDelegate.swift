@@ -98,7 +98,7 @@ extension AppDelegate {
     }
 
     private func setupRootViewController() {
-        let config = SalesforceHybridSDKManager.shared.appConfig as? SFHybridViewConfig
+        let config = SalesforceHybridSDKManager.shared.bootConfig as? SFHybridViewConfig
         viewController = SFHybridViewController(config: config)
         window?.rootViewController = viewController
     }
