@@ -89,11 +89,12 @@ if (packageMatch) {
     shelljs.cp(mainAppSrc, mainAppDest);
     replaceTextInFile(mainAppDest, '__PACKAGE_NAME__', packageName);
 
-    // Fix android:name in AndroidManifest.xml to point to app's MainApplication
+    // Set android:name in AndroidManifest.xml to point to the app's MainApplication.
+    // plugin.xml no longer sets android:name, so we inject it here into the <application> tag.
     const manifestFile = path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml');
     replaceTextInFile(manifestFile,
-        'android:name="com.salesforce.androidsdk.phonegap.app.HybridApp"',
-        `android:name="${packageName}.MainApplication"`);
+        'android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity"',
+        `android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="${packageName}.MainApplication"`);
     console.log(`MainApplication.kt injected at ${mainAppDest}`);
 } else {
     console.warn('WARNING: Could not determine package name from config.xml — MainApplication.kt not injected');
