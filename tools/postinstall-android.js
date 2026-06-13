@@ -74,4 +74,27 @@ if (data.indexOf("SalesforceHybrid") < 0)
     replaceTextInFile(path.join(appProjectRoot, 'app', 'build.gradle'), 'implementation(project(path: \":CordovaLib\"))', newLibDep);
 }
 
+console.log('Injecting MainApplication.kt into generated app');
+const buildGradle = fs.readFileSync(path.join(appProjectRoot, 'app', 'build.gradle'), 'utf8');
+const packageMatch = buildGradle.match(/applicationId\s+["']([^"']+)["']/);
+if (packageMatch) {
+    const packageName = packageMatch[1];
+    const packagePath = packageName.replace(/\./g, path.sep);
+    const mainAppSrcDir = path.join(appProjectRoot, 'app', 'src', 'main', 'java', packagePath);
+    shelljs.mkdir('-p', mainAppSrcDir);
+    const mainAppSrc = path.join(pluginRoot, 'src', 'android', 'MainApplication.kt');
+    const mainAppDest = path.join(mainAppSrcDir, 'MainApplication.kt');
+    shelljs.cp(mainAppSrc, mainAppDest);
+    replaceTextInFile(mainAppDest, '__PACKAGE_NAME__', packageName);
+
+    // Fix android:name in AndroidManifest.xml to point to app's MainApplication
+    const manifestFile = path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml');
+    replaceTextInFile(manifestFile,
+        'android:name="com.salesforce.androidsdk.phonegap.app.HybridApp"',
+        `android:name="${packageName}.MainApplication"`);
+    console.log(`MainApplication.kt injected at ${mainAppDest}`);
+} else {
+    console.warn('WARNING: Could not determine applicationId from app/build.gradle — MainApplication.kt not injected');
+}
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
