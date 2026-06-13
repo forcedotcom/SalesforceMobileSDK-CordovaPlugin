@@ -75,8 +75,10 @@ if (data.indexOf("SalesforceHybrid") < 0)
 }
 
 console.log('Injecting MainApplication.kt into generated app');
-const buildGradle = fs.readFileSync(path.join(appProjectRoot, 'app', 'build.gradle'), 'utf8');
-const packageMatch = buildGradle.match(/applicationId\s+["']([^"']+)["']/);
+// Read package name from config.xml (widget id attribute) — more reliable than build.gradle
+// which uses a Gradle variable reference rather than a literal string.
+const configXml = fs.readFileSync('config.xml', 'utf8');
+const packageMatch = configXml.match(/<widget[^>]+\bid=["']([^"']+)["']/);
 if (packageMatch) {
     const packageName = packageMatch[1];
     const packagePath = packageName.replace(/\./g, path.sep);
@@ -94,7 +96,7 @@ if (packageMatch) {
         `android:name="${packageName}.MainApplication"`);
     console.log(`MainApplication.kt injected at ${mainAppDest}`);
 } else {
-    console.warn('WARNING: Could not determine applicationId from app/build.gradle — MainApplication.kt not injected');
+    console.warn('WARNING: Could not determine package name from config.xml — MainApplication.kt not injected');
 }
 
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
