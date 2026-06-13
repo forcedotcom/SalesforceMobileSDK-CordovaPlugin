@@ -87,7 +87,7 @@ if (packageMatch) {
     const mainAppSrc = path.join(pluginRoot, 'src', 'android', 'MainApplication.kt');
     const mainAppDest = path.join(mainAppSrcDir, 'MainApplication.kt');
     shelljs.cp(mainAppSrc, mainAppDest);
-    replaceTextInFile(mainAppDest, 'com.salesforce.androidsdk.phonegap.app', packageName);
+    replaceTextInFile(mainAppDest, 'package com.salesforce.androidsdk.phonegap.app', `package ${packageName}`);
 
     // Set android:name in AndroidManifest.xml to point to the app's MainApplication.
     // plugin.xml no longer sets android:name, so we inject it here into the <application> tag.
