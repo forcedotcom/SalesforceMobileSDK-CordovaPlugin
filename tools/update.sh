@@ -158,6 +158,8 @@ copy_android_sdk()
     cp $ANDROID_SDK_FOLDER/gradlew.bat ./
     cp $ANDROID_SDK_FOLDER/gradlew ./
     cp -RL $ANDROID_SDK_FOLDER/gradle ./
+    echo "Copying MainApplication.kt template for postinstall injection"
+    cp $ANDROID_SDK_FOLDER/libs/SalesforceHybrid/src/com/salesforce/androidsdk/phonegap/app/MainApplication.kt src/android/MainApplication.kt
 }
 
 parse_opts "$@"

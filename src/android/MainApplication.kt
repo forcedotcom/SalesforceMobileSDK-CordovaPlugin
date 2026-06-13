@@ -18,13 +18,12 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package __PACKAGE_NAME__
+package com.salesforce.androidsdk.phonegap.app
 
 import android.app.Application
-import com.salesforce.androidsdk.phonegap.app.SalesforceHybridSDKManager
 
 /**
- * Application class for the hybrid app.
+ * Application class for hybrid apps.
  * Customize SDK initialization here.
  */
 class MainApplication : Application() {
