@@ -21,6 +21,7 @@
 package com.salesforce.androidsdk.phonegap.app
 
 import android.app.Application
+import com.salesforce.androidsdk.phonegap.app.SalesforceHybridSDKManager
 
 /**
  * Application class for hybrid apps.
