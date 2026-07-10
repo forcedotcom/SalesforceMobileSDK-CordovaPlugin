@@ -100,4 +100,38 @@ if (packageMatch) {
     console.warn('WARNING: Could not determine package name from config.xml — MainApplication.kt not injected');
 }
 
+// Add the LoginActivity browser-redirect intent-filter with placeholder tokens. forcehybrid
+// substitutes the real callback scheme/host/path via template.js; a direct `cordova plugin add`
+// leaves the placeholders for the developer to fill in. Theme must be @style/SalesforceSDK to
+// match the SalesforceSDK library's LoginActivity or the manifest merger fails. Idempotent.
+console.log('Injecting LoginActivity redirect intent-filter (placeholders) into AndroidManifest.xml');
+const redirectManifestFile = path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml');
+const redirectManifest = fs.readFileSync(redirectManifestFile, 'utf8');
+if (redirectManifest.indexOf('com.salesforce.androidsdk.ui.LoginActivity') === -1) {
+    const loginActivityBlock =
+        '        <!-- Salesforce Mobile SDK OAuth redirect. Replace the __INSERT_..._HERE__ tokens\n' +
+        '             with your callback URL\'s scheme/host/path (forcehybrid does this automatically).\n' +
+        '             Keep android:theme="@style/SalesforceSDK" to match the SDK library. -->\n' +
+        '        <activity\n' +
+        '            android:name="com.salesforce.androidsdk.ui.LoginActivity"\n' +
+        '            android:exported="true"\n' +
+        '            android:launchMode="singleTask"\n' +
+        '            android:theme="@style/SalesforceSDK">\n' +
+        '            <intent-filter>\n' +
+        '                <action android:name="android.intent.action.VIEW" />\n' +
+        '                <category android:name="android.intent.category.DEFAULT" />\n' +
+        '                <category android:name="android.intent.category.BROWSABLE" />\n' +
+        '                <data\n' +
+        '                    android:scheme="__INSERT_CALLBACK_URL_SCHEME_HERE__"\n' +
+        '                    android:host="__INSERT_CALLBACK_URL_HOST_HERE__"\n' +
+        '                    android:path="/__INSERT_CALLBACK_URL_PATH_HERE__" />\n' +
+        '            </intent-filter>\n' +
+        '        </activity>\n';
+    const updatedRedirectManifest = redirectManifest.replace(/([ \t]*)<\/application>/, loginActivityBlock + '$1</application>');
+    fs.writeFileSync(redirectManifestFile, updatedRedirectManifest, 'utf8');
+    console.log('Injected LoginActivity redirect intent-filter with placeholder tokens');
+} else {
+    console.log('LoginActivity already present in manifest — skipping redirect intent-filter injection');
+}
+
 console.log("Done running SalesforceMobileSDK plugin android post-install script");
