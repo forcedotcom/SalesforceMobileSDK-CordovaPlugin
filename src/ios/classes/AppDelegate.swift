@@ -50,25 +50,24 @@ extension AppDelegate {
         let sharedCache = SFLocalhostSubstitutionCache(memoryCapacity: cacheSizeMemory, diskCapacity: cacheSizeDisk, diskPath: "nsurlcache")
         URLCache.shared = sharedCache
 
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.autoresizesSubviews = true
-
-        initializeAppViewState()
-
-        AuthHelper.loginIfRequired { [weak self] in
-            self?.setupRootViewController()
+        if Bundle.main.object(forInfoDictionaryKey: "UIApplicationSceneManifest") != nil {
+            // Cordova creates the app's window while connecting its scene. Wait until
+            // that window is available before starting authentication so AuthHelper
+            // receives the scene that owns the hybrid UI.
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleInitialSceneWillEnterForeground(_:)),
+                name: UIScene.willEnterForegroundNotification,
+                object: nil
+            )
+        } else {
+            // Direct iOS-Hybrid sample apps still use the legacy application lifecycle.
+            // Preserve their AppDelegate-owned window and immediate startup behavior.
+            startApp()
         }
 
-        // Register for user-change notifications so view state is reset on account switch
-        AuthHelper.registerBlock(forCurrentUserChangeNotifications: { [weak self] in
-            self?.resetViewState {
-                self?.setupRootViewController()
-            }
-        })
-
-        // Return false: Cordova's super implementation would create a second window
-        // with a bare WebView. We handle window setup entirely here.
-        return false
+        // CDVAppDelegate's implementation also returns true and creates no window.
+        return true
     }
 
     public override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
@@ -86,6 +85,67 @@ extension AppDelegate {
     }
 
     // MARK: - Private helpers
+
+    @objc private func handleInitialSceneWillEnterForeground(_ notification: Notification) {
+        guard let scene = notification.object as? UIWindowScene,
+              scene.session.role == .windowApplication else {
+            return
+        }
+
+        NotificationCenter.default.removeObserver(
+            self,
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
+        startApp(in: scene)
+    }
+
+    private func startApp() {
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.autoresizesSubviews = true
+        completeAppStartup()
+    }
+
+    private func startApp(in scene: UIWindowScene) {
+        // Prefer Cordova's delegate-owned storyboard window. Salesforce auth
+        // and snapshot windows can temporarily be key during scene transitions.
+        let sceneDelegateWindow = (scene.delegate as? UIWindowSceneDelegate)?.window ?? nil
+        window = sceneDelegateWindow
+            ?? scene.windows.first(where: { $0.windowLevel == .normal })
+            ?? UIWindow(windowScene: scene)
+        window?.autoresizesSubviews = true
+
+        completeAppStartup(in: scene)
+    }
+
+    private func completeAppStartup(in scene: UIWindowScene? = nil) {
+        // Register for user-change notifications so view state is reset on account switch.
+        if let scene {
+            AuthHelper.registerBlock(forCurrentUserChangeNotifications: scene) { [weak self] in
+                self?.resetViewState {
+                    self?.setupRootViewController()
+                }
+            }
+        } else {
+            AuthHelper.registerBlock(forCurrentUserChangeNotifications: { [weak self] in
+                self?.resetViewState {
+                    self?.setupRootViewController()
+                }
+            })
+        }
+
+        initializeAppViewState()
+
+        if let scene {
+            AuthHelper.loginIfRequired(scene) { [weak self] in
+                self?.setupRootViewController()
+            }
+        } else {
+            AuthHelper.loginIfRequired { [weak self] in
+                self?.setupRootViewController()
+            }
+        }
+    }
 
     private func initializeAppViewState() {
         guard Thread.isMainThread else {
