@@ -34,6 +34,8 @@ import SalesforceSDKCore
 #endif
 extension AppDelegate {
 
+    private final var hasStartedApp = false
+
     public override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Initialize SalesforceHybridSDKManager — required for hybrid apps
         SalesforceHybridSDKManager.initializeSDK()
@@ -56,8 +58,15 @@ extension AppDelegate {
             // receives the scene that owns the hybrid UI.
             NotificationCenter.default.addObserver(
                 self,
-                selector: #selector(handleInitialSceneWillEnterForeground(_:)),
+                selector: #selector(handleInitialSceneLifecycle(_:)),
                 name: UIScene.willEnterForegroundNotification,
+                object: nil
+            )
+            // Scene activation is a fallback in case the foreground notification is missed.
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleInitialSceneLifecycle(_:)),
+                name: UIScene.didActivateNotification,
                 object: nil
             )
         } else {
@@ -66,7 +75,10 @@ extension AppDelegate {
             startApp()
         }
 
-        // CDVAppDelegate's implementation also returns true and creates no window.
+        // Cordova iOS 8.1.0's CDVAppDelegate implementation only returns true and performs
+        // no launch setup, so this override intentionally does not call super. The return
+        // value itself cannot invoke CDVAppDelegate. Revisit this when upgrading Cordova
+        // if its launch implementation gains required behavior.
         return true
     }
 
@@ -86,29 +98,33 @@ extension AppDelegate {
 
     // MARK: - Private helpers
 
-    @objc private func handleInitialSceneWillEnterForeground(_ notification: Notification) {
+    @objc private func handleInitialSceneLifecycle(_ notification: Notification) {
         guard let scene = notification.object as? UIWindowScene,
               scene.session.role == .windowApplication else {
             return
         }
 
-        NotificationCenter.default.removeObserver(
-            self,
-            name: UIScene.willEnterForegroundNotification,
-            object: nil
-        )
         startApp(in: scene)
     }
 
     private func startApp() {
+        guard beginAppStartup() else {
+            return
+        }
+
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.autoresizesSubviews = true
         completeAppStartup()
     }
 
     private func startApp(in scene: UIWindowScene) {
+        guard beginAppStartup() else {
+            return
+        }
+
         // Prefer Cordova's delegate-owned storyboard window. Salesforce auth
         // and snapshot windows can temporarily be key during scene transitions.
+        // The optional delegate and its optional window produce UIWindow??; flatten it here.
         let sceneDelegateWindow = (scene.delegate as? UIWindowSceneDelegate)?.window ?? nil
         window = sceneDelegateWindow
             ?? scene.windows.first(where: { $0.windowLevel == .normal })
@@ -118,32 +134,54 @@ extension AppDelegate {
         completeAppStartup(in: scene)
     }
 
-    private func completeAppStartup(in scene: UIWindowScene? = nil) {
+    private func beginAppStartup() -> Bool {
+        guard !hasStartedApp else {
+            return false
+        }
+
+        hasStartedApp = true
+
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.removeObserver(
+            self,
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
+        notificationCenter.removeObserver(
+            self,
+            name: UIScene.didActivateNotification,
+            object: nil
+        )
+        return true
+    }
+
+    private func completeAppStartup() {
         // Register for user-change notifications so view state is reset on account switch.
-        if let scene {
-            AuthHelper.registerBlock(forCurrentUserChangeNotifications: scene) { [weak self] in
-                self?.resetViewState {
-                    self?.setupRootViewController()
-                }
+        AuthHelper.registerBlock(forCurrentUserChangeNotifications: { [weak self] in
+            self?.resetViewState {
+                self?.setupRootViewController()
             }
-        } else {
-            AuthHelper.registerBlock(forCurrentUserChangeNotifications: { [weak self] in
-                self?.resetViewState {
-                    self?.setupRootViewController()
-                }
-            })
+        })
+
+        initializeAppViewState()
+
+        AuthHelper.loginIfRequired { [weak self] in
+            self?.setupRootViewController()
+        }
+    }
+
+    private func completeAppStartup(in scene: UIWindowScene) {
+        // Register for user-change notifications so view state is reset on account switch.
+        AuthHelper.registerBlock(forCurrentUserChangeNotifications: scene) { [weak self] in
+            self?.resetViewState {
+                self?.setupRootViewController()
+            }
         }
 
         initializeAppViewState()
 
-        if let scene {
-            AuthHelper.loginIfRequired(scene) { [weak self] in
-                self?.setupRootViewController()
-            }
-        } else {
-            AuthHelper.loginIfRequired { [weak self] in
-                self?.setupRootViewController()
-            }
+        AuthHelper.loginIfRequired(scene) { [weak self] in
+            self?.setupRootViewController()
         }
     }
 
