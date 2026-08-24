@@ -198,11 +198,6 @@
       <feature name="com.salesforce.mobilesync"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.MobileSyncPlugin"/></feature>
     </config-file>
 
-    <config-file target="res/values/strings.xml" parent="/resources">
-      <string name="account_type">$PACKAGE_NAME.login</string>
-      <string name="app_package">$PACKAGE_NAME</string>
-    </config-file>
-
     <!-- Post install script -->
     <hook type="after_plugin_install" src="tools/postinstall-android.js" />
   </platform>
