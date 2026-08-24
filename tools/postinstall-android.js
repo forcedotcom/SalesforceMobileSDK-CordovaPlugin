@@ -34,6 +34,40 @@ function replaceTextInFile(fileName, textInFile, replacementText) {
     fs.writeFileSync(fileName, result, 'utf8');
 }
 
+function upsertStringResource(fileName, name, value) {
+    const stringResource = `    <string name="${name}">${value}</string>`;
+    const resourcePattern = new RegExp(`^[ \\t]*<string\\s+[^>]*\\bname\\s*=\\s*["']${name}["'][^>]*>[\\s\\S]*?</string>`, 'm');
+    const contents = fs.existsSync(fileName)
+        ? fs.readFileSync(fileName, 'utf8')
+        : '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n</resources>\n';
+    const updatedContents = resourcePattern.test(contents)
+        ? contents.replace(resourcePattern, stringResource)
+        : contents.replace('</resources>', `${stringResource}\n</resources>`);
+    fs.writeFileSync(fileName, updatedContents, 'utf8');
+}
+
+function setApplicationName(fileName, applicationName) {
+    const contents = fs.readFileSync(fileName, 'utf8');
+    const applicationPattern = /<application\b[^>]*>/;
+    const applicationTag = contents.match(applicationPattern);
+    if (!applicationTag) {
+        throw new Error(`Application tag not found in ${fileName}`);
+    }
+    const updatedApplicationTag = /\bandroid:name="[^"]*"/.test(applicationTag[0])
+        ? applicationTag[0].replace(/\bandroid:name="[^"]*"/, `android:name="${applicationName}"`)
+        : applicationTag[0].replace(/>$/, ` android:name="${applicationName}">`);
+    fs.writeFileSync(fileName, contents.replace(applicationPattern, updatedApplicationTag), 'utf8');
+}
+
+function getAndroidPackageName(appProjectRoot) {
+    const config = JSON.parse(fs.readFileSync(path.join(appProjectRoot, 'cdv-gradle-config.json'), 'utf8'));
+    const packageName = config.PACKAGE_NAMESPACE;
+    if (!/^[A-Za-z_]\w*(\.[A-Za-z_]\w*)+$/.test(packageName)) {
+        throw new Error(`Invalid Android package name: ${packageName}`);
+    }
+    return packageName;
+}
+
 
 //--------------------------------------
 // Doing actual post installation work
@@ -75,30 +109,26 @@ if (data.indexOf("SalesforceHybrid") < 0)
 }
 
 console.log('Injecting MainApplication.kt into generated app');
-// Read package name from config.xml (widget id attribute) — more reliable than build.gradle
-// which uses a Gradle variable reference rather than a literal string.
-const configXml = fs.readFileSync('config.xml', 'utf8');
-const packageMatch = configXml.match(/<widget[^>]+\bid=["']([^"']+)["']/);
-if (packageMatch) {
-    const packageName = packageMatch[1];
-    const packagePath = packageName.replace(/\./g, path.sep);
-    const mainAppSrcDir = path.join(appProjectRoot, 'app', 'src', 'main', 'java', packagePath);
-    shelljs.mkdir('-p', mainAppSrcDir);
-    const mainAppSrc = path.join(pluginRoot, 'src', 'android', 'MainApplication.kt');
-    const mainAppDest = path.join(mainAppSrcDir, 'MainApplication.kt');
-    shelljs.cp(mainAppSrc, mainAppDest);
-    replaceTextInFile(mainAppDest, 'package com.salesforce.androidsdk.phonegap.app', `package ${packageName}`);
+// Cordova writes the effective package name here, including android-packageName overrides.
+const packageName = getAndroidPackageName(appProjectRoot);
+const packagePath = packageName.replace(/\./g, path.sep);
+const mainAppSrcDir = path.join(appProjectRoot, 'app', 'src', 'main', 'java', packagePath);
+shelljs.mkdir('-p', mainAppSrcDir);
+const mainAppSrc = path.join(pluginRoot, 'src', 'android', 'MainApplication.kt');
+const mainAppDest = path.join(mainAppSrcDir, 'MainApplication.kt');
+shelljs.cp(mainAppSrc, mainAppDest);
+replaceTextInFile(mainAppDest, 'package com.salesforce.androidsdk.phonegap.app', `package ${packageName}`);
 
-    // Set android:name in AndroidManifest.xml to point to the app's MainApplication.
-    // plugin.xml no longer sets android:name, so we inject it here into the <application> tag.
-    const manifestFile = path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml');
-    replaceTextInFile(manifestFile,
-        'android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity"',
-        `android:manageSpaceActivity="com.salesforce.androidsdk.ui.ManageSpaceActivity" android:name="${packageName}.MainApplication"`);
-    console.log(`MainApplication.kt injected at ${mainAppDest}`);
-} else {
-    console.warn('WARNING: Could not determine package name from config.xml — MainApplication.kt not injected');
-}
+// Set android:name in AndroidManifest.xml to point to the app's MainApplication.
+// plugin.xml no longer sets android:name, so we inject it here into the <application> tag.
+const manifestFile = path.join(appProjectRoot, 'app', 'src', 'main', 'AndroidManifest.xml');
+setApplicationName(manifestFile, `${packageName}.MainApplication`);
+
+// Cordova Android 15 no longer creates strings.xml, so config-file entries targeting it are ignored.
+const stringsFile = path.join(appProjectRoot, 'app', 'src', 'main', 'res', 'values', 'strings.xml');
+upsertStringResource(stringsFile, 'account_type', `${packageName}.login`);
+upsertStringResource(stringsFile, 'app_package', packageName);
+console.log(`MainApplication.kt injected at ${mainAppDest}`);
 
 // Add the LoginActivity browser-redirect intent-filter with placeholder tokens. forcehybrid
 // substitutes the real callback scheme/host/path via template.js; a direct `cordova plugin add`
