@@ -31,7 +31,7 @@ play-integrity = "1.6.0"
 accompanist = "0.37.3"
 
 # SmartStore
-sqlcipher-android = "4.16.0"
+sqlcipher-android = "4.17.0"
 
 # Hybrid / React Native
 cordova-framework = "15.0.0"
@@ -49,7 +49,13 @@ androidx-test-espresso = "3.7.0"
 androidx-test-uiautomator = "2.3.0"
 androidx-test-orchestrator = "1.6.1"
 androidx-arch-core-testing = "2.2.0"
-mockk-android = "1.14.9"
+# TODO: Update when resolved or min API > 32
+# Pinned to 1.14.5 — the highest release before mockk's `isKotlinInline()` check
+# (added in 1.14.6) crashes with ArrayIndexOutOfBoundsException on Android 12/12L
+# (API 31/32) due to a platform bug where Context/ContextWrapper abstract methods
+# report empty getParameterAnnotations(). https://github.com/mockk/mockk/issues/1512
+#noinspection NewerVersionAvailable
+mockk-android = "1.14.5"
 
 [libraries]
 # Kotlin / serialization
@@ -71,6 +77,7 @@ androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "androidx-s
 androidx-window = { module = "androidx.window:window", version.ref = "androidx-window" }
 androidx-window-core = { module = "androidx.window:window-core", version.ref = "androidx-window" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
+androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "androidx-work" }
 
 # Lifecycle
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
