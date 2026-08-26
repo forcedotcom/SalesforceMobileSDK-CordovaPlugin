@@ -1,5 +1,5 @@
 rootProject.ext["PUBLISH_GROUP_ID"] = "com.salesforce.mobilesdk"
-rootProject.ext["PUBLISH_VERSION"] = "14.0.0"
+rootProject.ext["PUBLISH_VERSION"] = "14.0.0-rc.0"
 rootProject.ext["PUBLISH_ARTIFACT_ID"] = "SalesforceSDK"
 
 plugins {
@@ -54,6 +54,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.arch.core.testing)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.mockk.android)
 }
 
