@@ -295,7 +295,7 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
 
     private static RequestBody buildRequestBody(JSONObject params, JSONObject fileParams) throws URISyntaxException {
         if (fileParams == null || fileParams.length() == 0) {
-            return RequestBody.create(RestRequest.MEDIA_TYPE_JSON, params.toString());
+            return RequestBody.create(params.toString(), RestRequest.MEDIA_TYPE_JSON);
         } else {
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
             final Iterator<String> keys = params.keys();
@@ -324,7 +324,7 @@ public class SalesforceNetworkPlugin extends ForcePlugin {
                             final URI url = new URI(fileParam.optString(FILE_URL_KEY));
                             final File file = new File(url);
                             final MediaType mediaType = MediaType.parse(mimeType);
-                            builder.addFormDataPart(fileKeyStr, name, RequestBody.create(mediaType, file));
+                            builder.addFormDataPart(fileKeyStr, name, RequestBody.create(file, mediaType));
                         }
                     }
                 }

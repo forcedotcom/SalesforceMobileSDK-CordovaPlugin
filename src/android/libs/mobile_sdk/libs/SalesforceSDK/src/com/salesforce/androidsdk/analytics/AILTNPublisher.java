@@ -125,8 +125,8 @@ public class AILTNPublisher implements AnalyticsPublisher {
              * required to achieve this by adding an additional interceptor to determine content length.
              * See this post for more details: https://github.com/square/okhttp/issues/350#issuecomment-123105641.
              */
-            final RequestBody requestBody = setContentLength(gzipCompressedBody(RequestBody.create(RestRequest.MEDIA_TYPE_JSON,
-                    body.toString())));
+            final RequestBody requestBody = setContentLength(gzipCompressedBody(RequestBody.create(body.toString(),
+                    RestRequest.MEDIA_TYPE_JSON)));
             final Map<String, String> requestHeaders = new HashMap<>();
             requestHeaders.put(CONTENT_ENCODING, GZIP);
             requestHeaders.put(CONTENT_LENGTH, Long.toString(requestBody.contentLength()));

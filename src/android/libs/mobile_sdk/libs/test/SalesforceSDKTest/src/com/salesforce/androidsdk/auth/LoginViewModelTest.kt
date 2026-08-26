@@ -41,6 +41,7 @@ import com.salesforce.androidsdk.config.OAuthConfig
 import com.salesforce.androidsdk.security.SalesforceKeyGenerator.getSHA256Hash
 import com.salesforce.androidsdk.ui.LoginActivity.Companion.ABOUT_BLANK
 import com.salesforce.androidsdk.ui.LoginViewModel
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -69,6 +70,10 @@ import java.net.URI
 private const val FAKE_SERVER_URL = "shouldMatchNothing.salesforce.com"
 private const val FAKE_JWT = "1234"
 private const val FAKE_JWT_FLOW_AUTH = "5678"
+private const val TEST_ATTESTATION_SERVER = "test.salesforce.com"
+private const val TEST_CHALLENGE_VALUE = "__TEST_CHALLENGE_VALUE__"
+private const val TEST_APP_ATTESTATION = "__TEST_APP_ATTESTATION__"
+private const val ATTESTATION_QUERY_PARAM_PREFIX = "attestation="
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -572,6 +577,7 @@ class LoginViewModelTest {
                 scopes = listOf("api"),
             )
         }
+        every { sdkManagerMock.appAttestationClient } returns null
         val debugConsumerKey = "debug_override_key_789"
         val debugRedirectUri = "debug://redirect"
         val debugScopes = listOf("api", "debug_scope")
@@ -579,6 +585,13 @@ class LoginViewModelTest {
             consumerKey = debugConsumerKey,
             redirectUri = debugRedirectUri,
             scopes = debugScopes,
+        )
+        coEvery {
+            sdkManagerMock.resolveOAuthConfigForLoginServer(any())
+        } returns OAuthConfig(
+            consumerKey = appConfigConsumerKey,
+            redirectUri = appConfigRedirectUri,
+            scopes = listOf("api"),
         )
 
         // Verify the URL contains the app config values, not the debug override config values
@@ -606,7 +619,7 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun generateMigrationAuthorizationPath_UsesMigrationConfig_OverAppConfigForLoginHost() {
+    fun generateMigrationAuthorizationPath_UsesMigrationConfig_OverAppConfigForLoginHost() = runTest {
         val sdkManagerMock = mockk<SalesforceSDKManager>(relaxed = false)
         val appConfigConsumerKey = "app_config_key_should_not_be_used"
         val appConfigRedirectUri = "appconfig://should_not_be_used"
@@ -618,6 +631,7 @@ class LoginViewModelTest {
                 scopes = listOf("api"),
             )
         }
+        every { sdkManagerMock.appAttestationClient } returns null
         val debugConsumerKey = "debug_override_key_789"
         val debugRedirectUri = "debug://redirect"
         val debugScopes = listOf("api", "debug_scope")
@@ -869,6 +883,397 @@ class LoginViewModelTest {
         } finally {
             sdkManager.appConfigForLoginHost = originalAppConfigForLoginHost
         }
+    }
+
+    @Test
+    fun getAuthorizationUrl_WithNullAppAttestationClient_OmitsAttestationParam() = runBlocking {
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        val migrationConsumerKey = "migration_override_key_789"
+        val migrationRedirectUri = "migration://redirect"
+        val migrationScopes = listOf("api", "migration_scope")
+
+        val loginUrl = freshViewModel.generateMigrationAuthorizationPath(
+            server = TEST_ATTESTATION_SERVER,
+            migrationOAuthConfig = OAuthConfig(
+                migrationConsumerKey,
+                migrationRedirectUri,
+                migrationScopes,
+            ),
+        )
+
+        assertFalse(
+            "URL should NOT contain an attestation parameter but was '$loginUrl'.",
+            loginUrl.contains(ATTESTATION_QUERY_PARAM_PREFIX),
+        )
+    }
+
+    @Test
+    fun getAuthorizationUrl_WithAppAttestationClient_IncludesAttestationParam() = runBlocking {
+        val appAttestationClient = createMockAppAttestationClient(attestation = TEST_APP_ATTESTATION)
+        val sdkManagerMock = createSdkManagerMockForAttestation(appAttestationClient = appAttestationClient)
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        val migrationConsumerKey = "migration_override_key_789"
+        val migrationRedirectUri = "migration://redirect"
+        val migrationScopes = listOf("api", "migration_scope")
+
+        val loginUrl = freshViewModel.generateMigrationAuthorizationPath(
+            server = TEST_ATTESTATION_SERVER,
+            migrationOAuthConfig = OAuthConfig(
+                migrationConsumerKey,
+                migrationRedirectUri,
+                migrationScopes,
+            ),
+            sdkManager = sdkManagerMock,
+        )
+
+        assertTrue(
+            "URL should contain '$ATTESTATION_QUERY_PARAM_PREFIX$TEST_APP_ATTESTATION' but was '$loginUrl'.",
+            loginUrl.contains("$ATTESTATION_QUERY_PARAM_PREFIX$TEST_APP_ATTESTATION"),
+        )
+        coVerify(exactly = 1) {
+            appAttestationClient.fetchMobileAppAttestationChallenge()
+            appAttestationClient.createAppAttestation(appAttestationChallenge = TEST_CHALLENGE_VALUE)
+        }
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WhenCreateAppAttestationReturnsNull_OmitsAttestationParam() = runBlocking {
+        val appAttestationClient = createMockAppAttestationClient(attestation = null)
+        val sdkManagerMock = createSdkManagerMockForAttestation(appAttestationClient = appAttestationClient)
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        freshViewModel.generateAuthorizationUrl(
+            server = TEST_ATTESTATION_SERVER,
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+        assertFalse(
+            "URL should NOT contain an attestation parameter but was '$loginUrl'.",
+            loginUrl.contains(ATTESTATION_QUERY_PARAM_PREFIX),
+        )
+        coVerify(exactly = 1) {
+            appAttestationClient.fetchMobileAppAttestationChallenge()
+            appAttestationClient.createAppAttestation(appAttestationChallenge = TEST_CHALLENGE_VALUE)
+        }
+    }
+
+    @Test
+    fun getAuthorizationUrl_WhenCreateAppAttestationReturnsNull_OmitsAttestationParam() = runBlocking {
+        val appAttestationClient = createMockAppAttestationClient(attestation = null)
+        val sdkManagerMock = createSdkManagerMockForAttestation(appAttestationClient = appAttestationClient)
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        val migrationConsumerKey = "migration_override_key_789"
+        val migrationRedirectUri = "migration://redirect"
+        val migrationScopes = listOf("api", "migration_scope")
+
+        val loginUrl = freshViewModel.generateMigrationAuthorizationPath(
+            server = TEST_ATTESTATION_SERVER,
+            migrationOAuthConfig = OAuthConfig(
+                migrationConsumerKey,
+                migrationRedirectUri,
+                migrationScopes,
+            ),
+            sdkManager = sdkManagerMock,
+        )
+
+        assertFalse(
+            "URL should NOT contain an attestation parameter but was '$loginUrl'.",
+            loginUrl.contains(ATTESTATION_QUERY_PARAM_PREFIX),
+        )
+        coVerify(exactly = 1) {
+            appAttestationClient.fetchMobileAppAttestationChallenge()
+            appAttestationClient.createAppAttestation(appAttestationChallenge = TEST_CHALLENGE_VALUE)
+        }
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WithJwtFlow_IgnoresAdditionalParameters() = runBlocking {
+        val sdkManagerMock = mockk<SalesforceSDKManager>(relaxed = true)
+        every { sdkManagerMock.isDebugBuild } returns false
+        every { sdkManagerMock.useHybridAuthentication } returns false
+        every { sdkManagerMock.isBrowserLoginEnabled } returns false
+        every { sdkManagerMock.appConfigForLoginHost } returns { _ -> null }
+        every { sdkManagerMock.debugOverrideAppConfig } returns null
+        every { sdkManagerMock.appAttestationClient } returns null
+
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        // Set up JWT flow - both jwt and authCodeForJwtFlow must be non-null/blank
+        freshViewModel.jwt = FAKE_JWT
+        freshViewModel.authCodeForJwtFlow = FAKE_JWT_FLOW_AUTH
+
+        // Set additional parameters that should be ignored in JWT flow
+        freshViewModel.additionalParameters["custom_param"] = "should_not_appear"
+
+        freshViewModel.generateAuthorizationUrl(
+            server = "test.salesforce.com",
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+
+        // Verify custom_param from additionalParameters is NOT in the URL
+        // In JWT flow, additionalParams is set to empty map, ignoring viewModel.additionalParameters
+        // This covers lines 511 and 514 where jwtFlow is evaluated and mutableMapOf() is used
+        assertFalse(
+            "URL should NOT contain custom_param from additionalParameters when JWT flow is active but was '$loginUrl'.",
+            loginUrl.contains("custom_param"),
+        )
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WithJwtFlowAndAppAttestation_IncludesAttestationParam() = runBlocking {
+        val appAttestationClient = createMockAppAttestationClient(attestation = TEST_APP_ATTESTATION)
+        val sdkManagerMock = createSdkManagerMockForAttestation(appAttestationClient = appAttestationClient)
+
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        // Set up JWT flow - even with JWT flow active, attestation should still be added
+        freshViewModel.jwt = FAKE_JWT
+        freshViewModel.authCodeForJwtFlow = FAKE_JWT_FLOW_AUTH
+
+        // Set additional parameters that should be ignored in JWT flow
+        freshViewModel.additionalParameters["custom_param"] = "should_not_appear"
+
+        freshViewModel.generateAuthorizationUrl(
+            server = TEST_ATTESTATION_SERVER,
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+
+        // Verify attestation IS in the URL (even with JWT flow, app attestation adds to additionalParams)
+        assertTrue(
+            "URL should contain attestation parameter but was '$loginUrl'.",
+            loginUrl.contains(ATTESTATION_QUERY_PARAM_PREFIX),
+        )
+
+        // Verify custom_param is NOT in URL (JWT flow ignores viewModel.additionalParameters)
+        // This covers lines 511 and 514
+        assertFalse(
+            "URL should NOT contain custom_param when JWT flow is active but was '$loginUrl'.",
+            loginUrl.contains("custom_param"),
+        )
+
+        // App attestation client should be called (covering the code path)
+        coVerify(exactly = 1) {
+            appAttestationClient.fetchMobileAppAttestationChallenge()
+            appAttestationClient.createAppAttestation(appAttestationChallenge = TEST_CHALLENGE_VALUE)
+        }
+    }
+
+    @Test
+    fun generateMigrationAuthorizationPath_WhenCreateAppAttestationReturnsNull_OmitsAttestationParam() = runBlocking {
+        val appAttestationClient = createMockAppAttestationClient(attestation = null)
+        val sdkManagerMock = createSdkManagerMockForAttestation(appAttestationClient = appAttestationClient)
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        val migrationConsumerKey = "migration_override_key_789"
+        val migrationRedirectUri = "migration://redirect"
+        val migrationScopes = listOf("api", "migration_scope")
+
+        val loginUrl = freshViewModel.generateMigrationAuthorizationPath(
+            server = TEST_ATTESTATION_SERVER,
+            migrationOAuthConfig = OAuthConfig(
+                migrationConsumerKey,
+                migrationRedirectUri,
+                migrationScopes,
+            ),
+            sdkManager = sdkManagerMock,
+        )
+
+        assertFalse(
+            "URL should NOT contain an attestation parameter but was '$loginUrl'.",
+            loginUrl.contains(ATTESTATION_QUERY_PARAM_PREFIX),
+        )
+        coVerify(exactly = 1) {
+            appAttestationClient.fetchMobileAppAttestationChallenge()
+            appAttestationClient.createAppAttestation(appAttestationChallenge = TEST_CHALLENGE_VALUE)
+        }
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WhenFetchChallengeReturnsNull_OmitsAttestationParam() = runBlocking {
+        verifyAttestationOmittedWhenChallengeIsNull { viewModel, sdkManager ->
+            viewModel.generateAuthorizationUrl(
+                server = TEST_ATTESTATION_SERVER,
+                sdkManager = sdkManager,
+            )
+            viewModel.loginUrl.value!!
+        }
+    }
+
+    @Test
+    fun generateMigrationAuthorizationPath_WhenFetchChallengeReturnsNull_OmitsAttestationParam() = runBlocking {
+        verifyAttestationOmittedWhenChallengeIsNull { viewModel, sdkManager ->
+            val migrationConsumerKey = "migration_override_key_789"
+            val migrationRedirectUri = "migration://redirect"
+            val migrationScopes = listOf("api", "migration_scope")
+
+            viewModel.generateMigrationAuthorizationPath(
+                server = TEST_ATTESTATION_SERVER,
+                migrationOAuthConfig = OAuthConfig(
+                    migrationConsumerKey,
+                    migrationRedirectUri,
+                    migrationScopes,
+                ),
+                sdkManager = sdkManager,
+            )
+        }
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WithEmptyJwtString_DoesNotActivateJwtFlow() = runBlocking {
+        val sdkManagerMock = mockk<SalesforceSDKManager>(relaxed = true)
+        every { sdkManagerMock.isDebugBuild } returns false
+        every { sdkManagerMock.useHybridAuthentication } returns false
+        every { sdkManagerMock.isBrowserLoginEnabled } returns false
+        every { sdkManagerMock.appConfigForLoginHost } returns { _ -> null }
+        every { sdkManagerMock.debugOverrideAppConfig } returns null
+        every { sdkManagerMock.appAttestationClient } returns null
+
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        // Set jwt to empty string - should not activate JWT flow
+        freshViewModel.jwt = ""
+        freshViewModel.authCodeForJwtFlow = FAKE_JWT_FLOW_AUTH
+
+        freshViewModel.generateAuthorizationUrl(
+            server = "test.salesforce.com",
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+
+        // Verify JWT flow is NOT activated (should use regular OAuth URL, not frontdoor)
+        assertFalse(
+            "URL should NOT contain frontdoor path when jwt is empty but was '$loginUrl'.",
+            loginUrl.contains("/frontdoor.jsp"),
+        )
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WithBlankJwtString_DoesNotActivateJwtFlow() = runBlocking {
+        val sdkManagerMock = mockk<SalesforceSDKManager>(relaxed = true)
+        every { sdkManagerMock.isDebugBuild } returns false
+        every { sdkManagerMock.useHybridAuthentication } returns false
+        every { sdkManagerMock.isBrowserLoginEnabled } returns false
+        every { sdkManagerMock.appConfigForLoginHost } returns { _ -> null }
+        every { sdkManagerMock.debugOverrideAppConfig } returns null
+        every { sdkManagerMock.appAttestationClient } returns null
+
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        // Set jwt to blank string (whitespace) - should not activate JWT flow
+        freshViewModel.jwt = "   "
+        freshViewModel.authCodeForJwtFlow = FAKE_JWT_FLOW_AUTH
+
+        freshViewModel.generateAuthorizationUrl(
+            server = "test.salesforce.com",
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+
+        // Verify JWT flow is NOT activated
+        assertFalse(
+            "URL should NOT contain frontdoor path when jwt is blank but was '$loginUrl'.",
+            loginUrl.contains("/frontdoor.jsp"),
+        )
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WithEmptyAuthCodeString_DoesNotActivateJwtFlow() = runBlocking {
+        val sdkManagerMock = mockk<SalesforceSDKManager>(relaxed = true)
+        every { sdkManagerMock.isDebugBuild } returns false
+        every { sdkManagerMock.useHybridAuthentication } returns false
+        every { sdkManagerMock.isBrowserLoginEnabled } returns false
+        every { sdkManagerMock.appConfigForLoginHost } returns { _ -> null }
+        every { sdkManagerMock.debugOverrideAppConfig } returns null
+        every { sdkManagerMock.appAttestationClient } returns null
+
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        // Set authCodeForJwtFlow to empty string - should not activate JWT flow
+        freshViewModel.jwt = FAKE_JWT
+        freshViewModel.authCodeForJwtFlow = ""
+
+        freshViewModel.generateAuthorizationUrl(
+            server = "test.salesforce.com",
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+
+        // Verify JWT flow is NOT activated
+        assertFalse(
+            "URL should NOT contain frontdoor path when authCodeForJwtFlow is empty but was '$loginUrl'.",
+            loginUrl.contains("/frontdoor.jsp"),
+        )
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WithBlankAuthCodeString_DoesNotActivateJwtFlow() = runBlocking {
+        val sdkManagerMock = mockk<SalesforceSDKManager>(relaxed = true)
+        every { sdkManagerMock.isDebugBuild } returns false
+        every { sdkManagerMock.useHybridAuthentication } returns false
+        every { sdkManagerMock.isBrowserLoginEnabled } returns false
+        every { sdkManagerMock.appConfigForLoginHost } returns { _ -> null }
+        every { sdkManagerMock.debugOverrideAppConfig } returns null
+        every { sdkManagerMock.appAttestationClient } returns null
+
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        // Set authCodeForJwtFlow to blank string - should not activate JWT flow
+        freshViewModel.jwt = FAKE_JWT
+        freshViewModel.authCodeForJwtFlow = "   "
+
+        freshViewModel.generateAuthorizationUrl(
+            server = "test.salesforce.com",
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+
+        // Verify JWT flow is NOT activated
+        assertFalse(
+            "URL should NOT contain frontdoor path when authCodeForJwtFlow is blank but was '$loginUrl'.",
+            loginUrl.contains("/frontdoor.jsp"),
+        )
+    }
+
+    @Test
+    fun generateAuthorizationUrl_WithNullAuthCodeString_DoesNotActivateJwtFlow() = runBlocking {
+        val sdkManagerMock = mockk<SalesforceSDKManager>(relaxed = true)
+        every { sdkManagerMock.isDebugBuild } returns false
+        every { sdkManagerMock.useHybridAuthentication } returns false
+        every { sdkManagerMock.isBrowserLoginEnabled } returns false
+        every { sdkManagerMock.appConfigForLoginHost } returns { _ -> null }
+        every { sdkManagerMock.debugOverrideAppConfig } returns null
+        every { sdkManagerMock.appAttestationClient } returns null
+
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        // Set jwt to valid value but leave authCodeForJwtFlow as null - should not activate JWT flow
+        freshViewModel.jwt = FAKE_JWT
+        freshViewModel.authCodeForJwtFlow = null
+
+        freshViewModel.generateAuthorizationUrl(
+            server = "test.salesforce.com",
+            sdkManager = sdkManagerMock,
+        )
+
+        val loginUrl = freshViewModel.loginUrl.value!!
+
+        // Verify JWT flow is NOT activated
+        assertFalse(
+            "URL should NOT contain frontdoor path when authCodeForJwtFlow is null but was '$loginUrl'.",
+            loginUrl.contains("/frontdoor.jsp"),
+        )
     }
 
     @Test
@@ -1176,6 +1581,59 @@ class LoginViewModelTest {
         val result = "https://www.example.com" // IETF-Reserved Test Domain
 
         assertEquals(result, viewModel.getValidServerUrl(value))
+    }
+
+    private fun createSdkManagerMockForAttestation(
+        appAttestationClient: AppAttestationClient?,
+    ): SalesforceSDKManager = mockk<SalesforceSDKManager>(relaxed = true).also { mock ->
+        every { mock.useHybridAuthentication } returns false
+        every { mock.isDebugBuild } returns false
+        every { mock.debugOverrideAppConfig } returns null
+        every { mock.appConfigForLoginHost } returns { _ -> null }
+        every { mock.appAttestationClient } returns appAttestationClient
+    }
+
+    private fun createMockAppAttestationClient(
+        attestation: String?,
+    ): AppAttestationClient = mockk<AppAttestationClient>(relaxed = true).also { client ->
+        coEvery { client.fetchMobileAppAttestationChallenge() } returns TEST_CHALLENGE_VALUE
+        coEvery {
+            client.createAppAttestation(appAttestationChallenge = TEST_CHALLENGE_VALUE)
+        } returns attestation
+    }
+
+    /**
+     * Creates a mock [AppAttestationClient] where
+     * [AppAttestationClient.fetchMobileAppAttestationChallenge] returns null,
+     * simulating the case where [AppAttestationClient.apiHostName] is null
+     * (Salesforce App Attestation is disabled for the current login server).
+     */
+    private fun createMockAppAttestationClientWithNullChallenge(): AppAttestationClient =
+        mockk<AppAttestationClient>(relaxed = true).also { client ->
+            coEvery { client.fetchMobileAppAttestationChallenge() } returns null
+        }
+
+    /**
+     * Helper to verify that attestation is omitted when fetchMobileAppAttestationChallenge returns null.
+     *
+     * @param urlGenerator Function that generates a URL string given a view model and SDK manager
+     */
+    private suspend fun verifyAttestationOmittedWhenChallengeIsNull(
+        urlGenerator: suspend (LoginViewModel, SalesforceSDKManager) -> String
+    ) {
+        val appAttestationClient = createMockAppAttestationClientWithNullChallenge()
+        val sdkManagerMock = createSdkManagerMockForAttestation(appAttestationClient = appAttestationClient)
+        val freshViewModel = LoginViewModel(bootConfig)
+
+        val url = urlGenerator(freshViewModel, sdkManagerMock)
+
+        assertFalse(
+            "URL should NOT contain an attestation parameter when challenge fetch returns null, but was '$url'.",
+            url.contains(ATTESTATION_QUERY_PARAM_PREFIX),
+        )
+        coVerify(exactly = 0) {
+            appAttestationClient.createAppAttestation(any())
+        }
     }
 
     private fun generateExpectedAuthorizationUrl(

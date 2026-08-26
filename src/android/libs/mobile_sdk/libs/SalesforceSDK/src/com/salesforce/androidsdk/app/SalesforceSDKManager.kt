@@ -64,6 +64,7 @@ import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat.RECEIVER_EXPORTED
 import androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
 import androidx.core.content.ContextCompat.registerReceiver
+import androidx.core.net.toUri
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -89,6 +90,7 @@ import com.salesforce.androidsdk.app.Features.FEATURE_BROWSER_LOGIN
 import com.salesforce.androidsdk.app.Features.FEATURE_NATIVE_LOGIN
 import com.salesforce.androidsdk.app.SalesforceSDKManager.Theme.DARK
 import com.salesforce.androidsdk.app.SalesforceSDKManager.Theme.SYSTEM_DEFAULT
+import com.salesforce.androidsdk.auth.AppAttestationClient
 import com.salesforce.androidsdk.auth.AuthenticatorService.KEY_INSTANCE_URL
 import com.salesforce.androidsdk.auth.HttpAccess
 import com.salesforce.androidsdk.auth.HttpAccess.DEFAULT
@@ -96,6 +98,7 @@ import com.salesforce.androidsdk.auth.NativeLoginManager
 import com.salesforce.androidsdk.auth.OAuth2.LogoutReason
 import com.salesforce.androidsdk.auth.OAuth2.LogoutReason.UNKNOWN
 import com.salesforce.androidsdk.auth.OAuth2.revokeRefreshToken
+import com.salesforce.androidsdk.auth.RemoteAccessConsumerKeyProvider
 import com.salesforce.androidsdk.auth.idp.SPConfig
 import com.salesforce.androidsdk.auth.idp.interfaces.IDPManager
 import com.salesforce.androidsdk.auth.idp.interfaces.SPManager
@@ -175,6 +178,9 @@ import com.salesforce.androidsdk.security.interfaces.ScreenLockManager as Screen
  * @param context The Android context
  * @param mainActivity Activity that should be launched after the login flow
  * @param loginActivity Login activity
+ * @param googleCloudProjectId The Google Cloud Project ID to use with
+ * Google Play Integrity API and Salesforce App Attestation or null to
+ * disable both features
  */
 open class SalesforceSDKManager protected constructor(
     @JvmField
@@ -182,6 +188,7 @@ open class SalesforceSDKManager protected constructor(
     mainActivity: Class<out Activity>,
     private val loginActivity: Class<out Activity>? = null,
     internal val nativeLoginActivity: Class<out Activity>? = null,
+    googleCloudProjectId: Long? = null,
 ) : DefaultLifecycleObserver {
 
     constructor(
@@ -227,6 +234,44 @@ open class SalesforceSDKManager protected constructor(
     val loginActivityClass: Class<out Activity> = nativeLoginActivity ?: webViewLoginActivityClass
 
     /**
+     * The client side implementation of the Salesforce App Attestation External
+     * Client App (ECA) Plugin or null when Salesforce App Attestation is
+     * disabled.
+     *
+     * This property is not intended for public use outside of Salesforce Mobile
+     * SDK
+     *
+     * TODO: Make this Kotlin-internal once it is no longer referenced by Java. ECJ20260420
+     */
+    val appAttestationClient: AppAttestationClient? by lazy {
+        googleCloudProjectId?.let { createAppAttestationClient(it) }
+    }
+
+    /**
+     * Creates the Salesforce App Attestation ECA Plugin Client for the selected
+     * Google Cloud Project ID.  When using Salesforce App Attestation, this
+     * value must match the linked Google Cloud Project ID for the app in Google
+     * Play Console's Play Integrity API and provided to the Salesforce App
+     * Attestation External Client App Plugin.
+     *
+     * @param googleCloudProjectId The Google Cloud Project ID or null to
+     * disable Salesforce App Attestation
+     */
+    fun createAppAttestationClient(
+        googleCloudProjectId: Long? = null
+    ) = googleCloudProjectId?.let { appAttestationGoogleCloudProjectId ->
+        AppAttestationClient(
+            context = appContext,
+            deviceId = deviceId,
+            googleCloudProjectId = appAttestationGoogleCloudProjectId,
+            remoteAccessConsumerKeyProvider = RemoteAccessConsumerKeyProvider { loginServer ->
+                resolveOAuthConfigForLoginServer(loginServer).consumerKey
+            },
+            restClient = clientManager.peekUnauthenticatedRestClient()
+        )
+    }
+
+    /**
      * ViewModel Factory the SDK will use in LoginActivity and composable functions.  Setting this will allow for
      * visual customization without overriding LoginActivity.
      */
@@ -244,6 +289,32 @@ open class SalesforceSDKManager protected constructor(
     }
 
     internal var debugOverrideAppConfig: OAuthConfig? = null
+
+    /**
+     * Resolves the OAuth configuration for the specified login server.
+     *
+     * Resolution order:
+     * 1. Debug override configuration (when [isDebugBuild] is true and override
+     * is set)
+     * 2. Dynamic app configuration for the login host via
+     * [appConfigForLoginHost]
+     * 3. Static boot configuration from bootconfig.xml
+     *
+     * This allows apps to use different OAuth configs per server while
+     * supporting debug overrides for development/testing.
+     *
+     * @param loginServer The login server URL
+     * @return The OAuth configuration for the specified server
+     */
+    internal suspend fun resolveOAuthConfigForLoginServer(
+        loginServer: String
+    ): OAuthConfig {
+        val debugOverride = debugOverrideAppConfig
+        return when {
+            isDebugBuild && debugOverride != null -> debugOverride
+            else -> appConfigForLoginHost(loginServer) ?: OAuthConfig(getBootConfig(appContext))
+        }
+    }
 
     /** The class for the account switcher activity */
     var accountSwitcherActivityClass = AccountSwitcherActivity::class.java
@@ -1479,7 +1550,7 @@ open class SalesforceSDKManager protected constructor(
     }
 
     /** Indicates if this is a debug build */
-    internal val isDebugBuild
+    internal open val isDebugBuild
         get() = DEBUG
 
 
@@ -1599,7 +1670,7 @@ open class SalesforceSDKManager protected constructor(
         protected var INSTANCE: SalesforceSDKManager? = null
 
         /** The current version of this SDK */
-        const val SDK_VERSION = "13.2.1"
+        const val SDK_VERSION = "14.0.0.dev"
 
         /**
          * An intent action meant for instances of Salesforce SDK manager
@@ -1668,12 +1739,16 @@ open class SalesforceSDKManager protected constructor(
          * @param context The Android context
          * @param mainActivity The app's main activity class
          * @param loginActivity The app login activity class
+         * @param googleCloudProjectId The Google Cloud Project ID to use with
+         * Google Play Integrity API and Salesforce App Attestation or null to
+         * disable both features
          */
         private fun init(
             context: Context,
             mainActivity: Class<out Activity>,
             loginActivity: Class<out Activity>? = null,
             nativeLoginActivity: Class<out Activity>? = null,
+            googleCloudProjectId: Long? = null,
         ) {
             if (INSTANCE == null) {
                 INSTANCE = SalesforceSDKManager(
@@ -1681,6 +1756,7 @@ open class SalesforceSDKManager protected constructor(
                     mainActivity,
                     loginActivity,
                     nativeLoginActivity,
+                    googleCloudProjectId,
                 )
             }
             initInternal(context)
@@ -1909,6 +1985,9 @@ open class SalesforceSDKManager protected constructor(
                     shareBrowserSessionEnabled = false
                 )
 
+                // Disable Salesforce App Attestation for login servers that are not My Domain servers.
+                appAttestationClient?.apiHostName = null
+
                 return@withTimeoutOrNull
             }
 
@@ -1917,6 +1996,9 @@ open class SalesforceSDKManager protected constructor(
                     browserLoginEnabled = authConfig?.isBrowserLoginEnabled ?: false,
                     shareBrowserSessionEnabled = authConfig?.isShareBrowserSessionEnabled ?: false
                 )
+
+                // Consider enabling Salesforce App Attestation for login servers that are My Domain servers.
+                appAttestationClient?.apiHostName = loginServer.toUri().host
             }
         }
 

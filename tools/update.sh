@@ -5,23 +5,31 @@ set -e   # stop at first error
 
 OPT_BRANCH=""
 OPT_OS=""
+OPT_IOS_HYBRID_ORG="forcedotcom"
+OPT_ANDROID_ORG="forcedotcom"
 
 usage ()
 {
-    echo "usage: $0 -b <branch name> -o <os name>"
+    echo "usage: $0 -b <branch name> -o <os name> [-i <ios_hybrid_org>] [-a <android_org>]"
     echo "  Where <branch name> is the branch to update to."
     echo "  Where <os name> is the name of the platform to update."
+    echo "  Where <ios_hybrid_org> is the GitHub org for iOS-Hybrid repo (default: forcedotcom)."
+    echo "  Where <android_org> is the GitHub org for Android repo (default: forcedotcom)."
 }
 
 parse_opts ()
 {
-    while getopts :b:o: command_line_opt
+    while getopts :b:o:i:a: command_line_opt
     do
         case ${command_line_opt} in
             b)
                 OPT_BRANCH=${OPTARG};;
             o)
                 OPT_OS=${OPTARG};;
+            i)
+                OPT_IOS_HYBRID_ORG=${OPTARG};;
+            a)
+                OPT_ANDROID_ORG=${OPTARG};;
             ?)
                 echo "Unknown option '-${OPTARG}'."
                 usage
@@ -66,7 +74,7 @@ update_repo ()
 {
     local repo_dir=$1
     local git_repo_url=$2
-    local git_branch="${OPT_BRANCH}"
+    local git_branch="${3:-${OPT_BRANCH}}"
 
     if [ ! -d "$repo_dir" ]
     then
@@ -79,9 +87,7 @@ update_repo ()
 }
 
 ROOT_FOLDER=$(get_root_folder)
-ANDROID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-Android.git"
 ANDROID_SDK_FOLDER="SalesforceMobileSDK-Android"
-IOS_HYBRID_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid.git"
 IOS_HYBRID_SDK_FOLDER="SalesforceMobileSDK-iOS-Hybrid"
 IOS_SDK_REPO_PATH="https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git"
 IOS_SDK_FOLDER="SalesforceMobileSDK-iOS"
@@ -91,7 +97,8 @@ SHARED_SDK_FOLDER="SalesforceMobileSDK-Shared"
 update_ios_repo ()
 {
     update_repo "${IOS_HYBRID_SDK_FOLDER}" "${IOS_HYBRID_SDK_REPO_PATH}"
-    update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}"
+    # iOS SDK is always cloned at dev since it is not branched for plugin upgrades
+    update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}" "dev"
     cd ${ROOT_FOLDER}
 }
 
@@ -119,7 +126,7 @@ copy_ios_sdk()
 {
     echo "*** iOS ***"
     echo "Copying AppDelegate, UIApplication+SalesforceHybridSDK and InitialViewController"
-    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.m  src/ios/classes
+    cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/AppDelegate.swift  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/UIApplication+SalesforceHybridSDK.*  src/ios/classes
     cp $IOS_HYBRID_SDK_FOLDER/shared/hybrid/InitialViewController.*  src/ios/classes
 
@@ -151,9 +158,15 @@ copy_android_sdk()
     cp $ANDROID_SDK_FOLDER/gradlew.bat ./
     cp $ANDROID_SDK_FOLDER/gradlew ./
     cp -RL $ANDROID_SDK_FOLDER/gradle ./
+    echo "Copying MainApplication.kt template for postinstall injection"
+    cp $ANDROID_SDK_FOLDER/libs/SalesforceHybrid/src/com/salesforce/androidsdk/phonegap/app/MainApplication.kt src/android/MainApplication.kt
 }
 
 parse_opts "$@"
+
+# Set repo paths after opts are parsed so org overrides take effect
+ANDROID_SDK_REPO_PATH="https://github.com/${OPT_ANDROID_ORG}/SalesforceMobileSDK-Android.git"
+IOS_HYBRID_SDK_REPO_PATH="https://github.com/${OPT_IOS_HYBRID_ORG}/SalesforceMobileSDK-iOS-Hybrid.git"
 
 # Work from the root of the repo.
 cd ${ROOT_FOLDER}
@@ -175,7 +188,8 @@ then
     update_ios_repo
     update_android_repo
 fi
-update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}"
+# Shared is always cloned at dev since it is not branched for plugin upgrades
+update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}" "dev"
 
 cd ${ROOT_FOLDER}
 echo "*** Creating directories ***"
