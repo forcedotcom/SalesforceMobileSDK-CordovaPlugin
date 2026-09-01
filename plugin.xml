@@ -128,6 +128,8 @@
 
     <!-- Post install script -->
     <hook type="after_plugin_install" src="tools/postinstall-ios.js" />
+    <!-- Raise pod deployment targets to 15.0 for Xcode 27 compatibility (after_prepare runs after pod install) -->
+    <hook type="after_prepare" src="tools/postprepare-ios.js" />
   </platform>
 
   <!-- android -->

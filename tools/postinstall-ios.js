@@ -44,30 +44,4 @@ if (fs.existsSync(bridgingHeaderFile)) {
     console.warn('WARNING: Bridging-Header.h not found at ' + bridgingHeaderFile + ' — InitialViewController will not be visible from Swift. The build will likely fail.');
 }
 
-// Fix Xcode 27 compatibility: raise any pod deployment target below iOS 15.0
-console.log('Patching Podfile to raise minimum pod deployment target to 15.0 for Xcode 27 compatibility');
-const podfilePath = path.join(appProjectRoot, 'Podfile');
-if (fs.existsSync(podfilePath)) {
-    const podfileContents = fs.readFileSync(podfilePath, 'utf8');
-    if (!podfileContents.includes('post_install')) {
-        const postInstallBlock = `
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      dt = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
-      if dt && dt.to_f < 15.0
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-      end
-    end
-  end
-end
-`;
-        fs.appendFileSync(podfilePath, postInstallBlock, 'utf8');
-    }
-}
-
 console.log('Done running SalesforceMobileSDK plugin ios post-install script');
-
-
-
-
