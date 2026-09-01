@@ -45,7 +45,3 @@ if (fs.existsSync(bridgingHeaderFile)) {
 }
 
 console.log('Done running SalesforceMobileSDK plugin ios post-install script');
-
-
-
-
