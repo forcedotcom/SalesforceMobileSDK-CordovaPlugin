@@ -217,6 +217,7 @@ public class OAuth2 {
     private static final String COOKIE_SID_CLIENT = "cookie-sid_Client";
     private static final String SID_COOKIE_NAME = "sidCookieName";
     private static final String PARENT_SID = "parent_sid";
+    private static final String UI_SID = "ui_sid";
     private static final String TOKEN_FORMAT = "token_format";
     private static final String BEACON_CHILD_CONSUMER_SECRET = "auto_installed_app_org_consumer_secret";
     private static final String BEACON_CHILD_CONSUMER_KEY = "auto_installed_app_org_consumer_key";
@@ -691,7 +692,7 @@ public class OAuth2 {
      * @param tokenType Token type (e.g. "Bearer" or "DPoP"), or null for default Bearer.
      */
     public static Request.Builder addAuthorizationHeader(Request.Builder builder, String authToken, @Nullable String tokenType) {
-        final String scheme = DPoPKeyManager.DPOP_TOKEN_TYPE.equals(tokenType) ? DPoPKeyManager.DPOP_TOKEN_TYPE + " " : BEARER;
+        final String scheme = DPoPKeyManager.isDPoPTokenType(tokenType) ? DPoPKeyManager.DPOP_TOKEN_TYPE + " " : BEARER;
         return builder.header(AUTHORIZATION, scheme + authToken);
     }
 
@@ -1154,6 +1155,7 @@ public class OAuth2 {
         public String cookieSidClient;
         public String sidCookieName;
         public String parentSid;
+        public String uiSid;
         public String tokenFormat;
         public String beaconChildConsumerKey;
         public String beaconChildConsumerSecret;
@@ -1202,6 +1204,7 @@ public class OAuth2 {
                 tokenFormat = callbackUrlParams.getOrDefault(TOKEN_FORMAT, "");
                 scope = callbackUrlParams.get(SCOPE);
                 tokenType = callbackUrlParams.get(TOKEN_TYPE);
+                uiSid = DPoPKeyManager.isDPoPTokenType(tokenType) ?callbackUrlParams.get(UI_SID) : null;
 
                 // NB: beacon apps not supported with user agent flow so no beacon child fields expected
 
@@ -1285,6 +1288,7 @@ public class OAuth2 {
                 }
                 scope = parsedResponse.optString(SCOPE);
                 tokenType = parsedResponse.optString(TOKEN_TYPE, null);
+                uiSid = DPoPKeyManager.isDPoPTokenType(tokenType) ?parsedResponse.optString(UI_SID, null) : null;
 
             } catch (Exception e) {
                 SalesforceSDKLogger.w(TAG, "Could not parse token endpoint response", e);
