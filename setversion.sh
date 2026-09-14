@@ -46,7 +46,7 @@ update_tools_postinstall_android_sh ()
 {
     local file=$1
     local version=$2
-    gsed -i "s/\(com.salesforce.mobilesdk:SalesforceHybrid:\)[0-9]\+.[0-9]\+.[0-9]\+/\1$version/g" ${file}
+    gsed -i "s/\(com\.salesforce\.mobilesdk:SalesforceHybrid:\)[^']\+/\1$version/g" ${file}
 }
 
 update_plugin_xml ()
@@ -77,4 +77,3 @@ update_tools_postinstall_android_sh "./tools/postinstall-android.js" "${OPT_VERS
 
 echo "*** Updating plugin.xml ***"
 update_plugin_xml "./plugin.xml" "${OPT_VERSION}" "${OPT_IS_DEV}"
-
