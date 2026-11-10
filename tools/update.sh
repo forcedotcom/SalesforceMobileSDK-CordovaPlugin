@@ -98,7 +98,7 @@ update_ios_repo ()
 {
     update_repo "${IOS_HYBRID_SDK_FOLDER}" "${IOS_HYBRID_SDK_REPO_PATH}"
     # iOS SDK is always cloned at dev since it is not branched for plugin upgrades
-    update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}" "dev"
+    update_repo "${IOS_SDK_FOLDER}" "${IOS_SDK_REPO_PATH}" "dev141"
     cd ${ROOT_FOLDER}
 }
 
@@ -189,7 +189,7 @@ then
     update_android_repo
 fi
 # Shared is always cloned at dev since it is not branched for plugin upgrades
-update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}" "dev"
+update_repo "${SHARED_SDK_FOLDER}" "${SHARED_SDK_REPO_PATH}" "dev141"
 
 cd ${ROOT_FOLDER}
 echo "*** Creating directories ***"
