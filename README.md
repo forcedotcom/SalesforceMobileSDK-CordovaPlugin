@@ -273,3 +273,7 @@ contains the upstream fix.
 Run `npm install` and `npm test` to verify the hook against the real 8.2.0 parser.
 
 Automatic recovery is limited to generated single-target Podfiles. A declaration in another target does not configure the main target. When declarations were erased, recovery restores the recorded defaults; `pods.json` cannot recover lost arguments such as static framework linkage. Restore those options from the original project configuration. Ambiguous multi-target or custom declaration sections require manual restoration and are left unchanged.
+
+### After removing an iOS plugin with CocoaPods dependencies
+
+Run `cordova prepare ios` after `cordova plugin remove <plugin>` and before building directly in Xcode. Cordova 8.2.0 can temporarily regenerate the Podfile with its own iOS 13 default during removal; the next prepare restores the SDK's configured iOS 18 deployment target and complete pod graph. `cordova build ios` already includes prepare. The declaration compatibility hook does not change deployment-target policy.
