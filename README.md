@@ -271,3 +271,5 @@ be enabled. Remove this compatibility code when the supported Cordova release
 contains the upstream fix.
 
 Run `npm install` and `npm test` to verify the hook against the real 8.2.0 parser.
+
+Automatic recovery is limited to generated single-target Podfiles. A declaration in another target does not configure the main target. When declarations were erased, recovery restores the recorded defaults; `pods.json` cannot recover lost arguments such as static framework linkage. Restore those options from the original project configuration. Ambiguous multi-target or custom declaration sections require manual restoration and are left unchanged.

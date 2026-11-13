@@ -109,6 +109,14 @@ test('does not restore removed, unknown or unrecorded declarations', () => {
     assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
 });
 
+test('leaves an unrelated custom Podfile alone when no declarations are recorded', () => {
+    const text = '# custom Podfile without SDK declarations\n';
+    fs.writeFileSync(path.join(ios, 'Podfile'), text);
+    record({});
+    hook(context);
+    assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
+});
+
 test('preserves an existing framework linkage option', () => {
     const text = seed('use_frameworks! :linkage => :static');
     record({ 'use_frameworks!': { count: 1 } });
@@ -119,6 +127,37 @@ test('preserves an existing framework linkage option', () => {
     const rewritten = fs.readFileSync(path.join(ios, 'Podfile'), 'utf8');
     assert.match(rewritten, /use_frameworks! :linkage => :static/);
     assert.equal((rewritten.match(/use_frameworks!/g) || []).length, 1);
+});
+
+test('does not confuse another target declaration with the main declaration', () => {
+    const text = seed() + "target 'Other' do\nuse_frameworks!\nend\n";
+    fs.writeFileSync(path.join(ios, 'Podfile'), text);
+    record({ 'use_frameworks!': { count: 1 } });
+    assert.throws(() => hook(context), /customized Cordova Podfile/);
+    assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
+});
+
+test('does not treat a Ruby block comment as an active declaration', () => {
+    const text = seed('=begin\nuse_frameworks!\n=end');
+    record({ 'use_frameworks!': { count: 1 } });
+    assert.throws(() => hook(context), /customized Cordova Podfile/);
+    assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
+});
+
+test('rejects ambiguous custom code when recorded declarations are missing', () => {
+    const text = seed("configure_frameworks_from_environment!");
+    record({ 'use_frameworks!': { count: 1 } });
+    assert.throws(() => hook(context), /customized Cordova Podfile/);
+    assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
+});
+
+test('explains that erased custom arguments require the original configuration', t => {
+    seed();
+    record({ 'use_frameworks!': { count: 1 } });
+    const warning = t.mock.method(console, 'warn', () => {});
+    hook(context);
+    assert.match(warning.mock.calls[0].arguments[0], /Erased custom arguments are not recorded/);
+    assert.match(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), /use_frameworks!/);
 });
 
 test('preserves old quoted platform lines and arbitrary existing declarations', () => {

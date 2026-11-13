@@ -51,29 +51,54 @@ module.exports = function (context) {
     }
 
     const pods = JSON.parse(fs.readFileSync(podsPath, 'utf8'));
-    const text = fs.readFileSync(podfilePath, 'utf8');
-    const lines = text.split(/\r?\n/).map(line => line.split('#')[0].trim());
-    const missing = ['use_frameworks!', 'inhibit_all_warnings!'].filter(declaration => {
+    const recorded = ['use_frameworks!', 'inhibit_all_warnings!'].filter(declaration => {
         const record = (pods.declarations || {})[declaration];
-        return record && Number.isInteger(record.count) && record.count > 0 &&
-            !lines.some(line => line === declaration ||
-                line.startsWith(declaration + ' ') ||
-                line.startsWith(declaration + '\t') ||
-                line.startsWith(declaration + '('));
+        return record && Number.isInteger(record.count) && record.count > 0;
     });
+    if (!recorded.length) {
+        return;
+    }
+    const text = fs.readFileSync(podfilePath, 'utf8');
+    const platformLine = /^[ \t]*platform :ios,[^\r\n]*(?:\r?\n|$)/m;
+    const platform = platformLine.exec(text);
+    if (!platform) {
+        throw new Error('Cannot restore Cordova Podfile declarations: platform line missing');
+    }
+    const afterPlatform = text.slice(platform.index + platform[0].length);
+    const targets = [...afterPlatform.matchAll(/^[ \t]*target\s+'[^']+'\s+do\b/gm)];
+    const section = afterPlatform.slice(0, targets.length ? targets[0].index : 0);
+    let blockComment = false;
+    const lines = section.split(/\r?\n/).map(line => {
+        if (line === '=begin') {
+            blockComment = true;
+        } else if (line === '=end') {
+            blockComment = false;
+            return '';
+        }
+        return blockComment ? '' : line.split('#')[0].trim();
+    });
+    const missing = recorded.filter(declaration => !lines.some(line =>
+        line === declaration || line.startsWith(declaration + ' ') ||
+        line.startsWith(declaration + '\t') || line.startsWith(declaration + '(')));
     if (!missing.length) {
         return;
     }
 
-    /* Restore declarations erased before this hook was installed. Preserve the
-     * generated deployment-target expression and all existing pod options. */
-    const platformLine = /^[ \t]*platform :ios,[^\r\n]*(?:\r?\n|$)/m;
-    if (!platformLine.test(text)) {
-        throw new Error('Cannot restore Cordova Podfile declarations: platform line missing');
+    /*
+     * Recover generated single-target files only. A different target's settings
+     * cannot establish the main target's linkage, and erased custom arguments
+     * cannot be reconstructed from Cordova's declaration reference counts.
+     */
+    const knownLine = /^(?:use_frameworks!|inhibit_all_warnings!)(?:\s|\(|$)/;
+    if (targets.length !== 1 || lines.some(line => line && !knownLine.test(line)) ||
+            /^=begin\b/m.test(section)) {
+        throw new Error('Cannot automatically restore a customized Cordova Podfile. ' +
+            'Restore its original declarations and custom options before preparing iOS.');
     }
     const newline = text.includes('\r\n') ? '\r\n' : '\n';
     fs.writeFileSync(podfilePath, text.replace(platformLine, line =>
         (line.endsWith('\n') ? line : line + newline) + missing.join(newline) + newline
     ), 'utf8');
-    console.log('Restored recorded Cordova Podfile declarations: ' + missing.join(', '));
+    console.warn('Restored default Cordova Podfile declarations: ' + missing.join(', ') +
+        '. Erased custom arguments are not recorded in pods.json; restore them from your original configuration.');
 };
