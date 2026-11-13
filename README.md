@@ -2,6 +2,9 @@
 
 This repository is an **aggregation-only distribution package**. Source code is NOT developed here. The plugin assembles JavaScript from `SalesforceMobileSDK-Shared`, iOS bridge code from `SalesforceMobileSDK-iOS-Hybrid`, iOS resources from `SalesforceMobileSDK-iOS`, and the entire Android SDK from `SalesforceMobileSDK-Android` into a single Cordova plugin distributed via npm.
 
+See [Android status-bar compatibility](docs/android-status-bar.md) for the optional
+statusbar plugin interaction and the upstream fractional-alpha limitation.
+
 ## Repository Structure
 
 ```
