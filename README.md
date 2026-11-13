@@ -261,14 +261,7 @@ Salesforce Mobile SDK License. See [LICENSE.md](LICENSE.md) for details.
 
 ## Cordova iOS 8.2.0 compatibility
 
-The iOS plugin hooks preserve Podfile declarations affected by
-[cordova-ios issue 1751](https://github.com/apache/cordova-ios/issues/1751). They
-adapt the loaded declaration parser only for 8.2.0 and restore missing framework
-or warning declarations recorded in `pods.json`. Cordova package files and the
-Podfile deployment-target expression are preserved. First plugin installation,
-prepare and later plugin additions/removals run the hook automatically. Hooks must
-be enabled. Remove this compatibility code when the supported Cordova release
-contains the upstream fix.
+The iOS plugin hooks preserve Podfile declarations affected by [cordova-ios issue 1751](https://github.com/apache/cordova-ios/issues/1751). They adapt the loaded declaration parser only for 8.2.0 and restore missing framework or warning declarations recorded in `pods.json`. Cordova package files and the Podfile deployment-target expression are preserved. First plugin installation, prepare and later plugin additions/removals run the hook automatically. Hooks must be enabled. Remove this compatibility code when the supported Cordova release contains the upstream fix.
 
 Run `npm install` and `npm test` to verify the hook against the real 8.2.0 parser.
 
