@@ -70,15 +70,19 @@ extension AppDelegate {
                 object: nil
             )
         } else {
-            // Direct iOS-Hybrid sample apps still use the legacy application lifecycle.
-            // Preserve their AppDelegate-owned window and immediate startup behavior.
+            /*
+             Apps without a scene manifest use the legacy application lifecycle.
+             Preserve their AppDelegate-owned window and immediate startup.
+             */
             startApp()
         }
 
-        // Cordova iOS 8.1.0's CDVAppDelegate implementation only returns true and performs
-        // no launch setup, so this override intentionally does not call super. The return
-        // value itself cannot invoke CDVAppDelegate. Revisit this when upgrading Cordova
-        // if its launch implementation gains required behavior.
+        /*
+         In Cordova iOS 8.1.0, 8.1.1 and 8.2.0, CDVAppDelegate's launch method
+         only returns true and performs no setup, so this override intentionally
+         does not call super. Revisit this when upgrading Cordova if its launch
+         implementation gains required behavior.
+         */
         return true
     }
 

@@ -30,7 +30,7 @@
   <js-module src="www/com.salesforce.util.push.js" name="util.push"></js-module>
 
   <engines>
-    <engine name="cordova-ios" version="8.1.0" />
+    <engine name="cordova-ios" version="8.2.0" />
     <engine name="cordova-android" version="15.0.0" />
   </engines>
 
@@ -105,7 +105,7 @@
         <pod name="SalesforceAnalytics" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev141" />
         <pod name="SalesforceSDKCommon" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev141" />
         <!-- Needed until cordova-ios gets posted to cocoapod.org -->
-        <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="rel/8.1.0" />
+        <pod name="Cordova" git="https://github.com/apache/cordova-ios" tag="rel/8.2.0" />
       </pods>
     </podspec>
 
@@ -125,6 +125,12 @@
     <framework src="UIKit.framework" weak="true" />
     <framework src="AssetsLibrary.framework" weak="true" />
     <framework src="ImageIO.framework" weak="true" />
+
+    <!-- Preserve Podfile declarations before Cordova 8.2.0 reads them. -->
+    <hook type="before_plugin_install" src="tools/cordova-ios-podfile.js" />
+    <hook type="before_prepare" src="tools/cordova-ios-podfile.js" />
+    <hook type="before_plugin_add" src="tools/cordova-ios-podfile.js" />
+    <hook type="before_plugin_rm" src="tools/cordova-ios-podfile.js" />
 
     <!-- Post install script -->
     <hook type="after_plugin_install" src="tools/postinstall-ios.js" />
