@@ -270,3 +270,9 @@ Automatic recovery is limited to generated single-target Podfiles. A declaration
 ### After removing an iOS plugin with CocoaPods dependencies
 
 Run `cordova prepare ios` after `cordova plugin remove <plugin>` and before building directly in Xcode. Cordova 8.2.0 can temporarily regenerate the Podfile with its own iOS 13 default during removal; the next prepare restores the SDK's configured iOS 18 deployment target and complete pod graph. `cordova build ios` already includes prepare. The declaration compatibility hook does not change deployment-target policy.
+
+## Matched iOS source promotion
+
+The Hybrid pod uses an immutable commit, and the companion Package CLI must select the matching immutable plugin commit. Publish the reviewed Hybrid source first, then the plugin that references it, and expose the Package default only after both exact commits are available through their declared upstream Git URLs. Keep the referenced commits reachable. Other SDK pod sources retain their existing release-branch policy; an app's Podfile.lock records the resolved dependency graph.
+
+Review branches may reference unpublished companion commits. If squash or rebase changes a commit ID, replace the dependent pin with the final upstream ID and repeat fresh-consumer installation through the public Git URLs before promotion. Local source overrides or Git URL mappings verify only the mapped source set and do not establish public availability. Coordinate the development-branch transition so consumers are not exposed to an unmatched intermediate source set.
