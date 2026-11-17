@@ -1,0 +1,55 @@
+name: Cordova iOS Podfile compatibility
+
+on:
+  pull_request:
+    branches: [dev141]
+    paths:
+      - '.github/workflows/cordova-ios-podfile.yaml'
+      - 'tools/**'
+      - 'package.json'
+      - 'plugin.xml'
+  push:
+    branches: [dev141]
+    paths:
+      - '.github/workflows/cordova-ios-podfile.yaml'
+      - 'tools/**'
+      - 'package.json'
+      - 'plugin.xml'
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Pull request number containing the parser test suite
+        required: true
+        type: number
+      expected_head:
+        description: Full reviewed commit SHA of that pull request
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', inputs.pull_request) || github.sha }}
+      - name: Verify requested PR head
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          EXPECTED_HEAD: ${{ inputs.expected_head }}
+        run: |
+          actual_head=$(git rev-parse HEAD)
+          test "$actual_head" = "$EXPECTED_HEAD"
+          echo "Verified requested PR revision."
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.22.2'
+      - name: Install test dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+      - name: Test the real Cordova parser
+        run: npm test
