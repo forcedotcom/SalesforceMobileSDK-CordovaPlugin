@@ -129,8 +129,8 @@ Six plugin modules plus `smartstore.client`, plus six utility modules -- all ser
 
 ```xml
 <engines>
-  <engine name="cordova-ios" version="7.1.1" />
-  <engine name="cordova-android" version="15.0.0" />
+  <engine name="cordova-ios" version="8.1.0" />
+  <engine name="cordova-android" version="15.1.0" />
 </engines>
 ```
 
@@ -193,15 +193,21 @@ replaceTextInFile(projectFile,
 
 ### `postinstall-android.js`
 
-Performs four operations on the generated Cordova Android project:
+Configures the generated Cordova Android project:
 
-1. **Fixes `CordovaLib/cordova.gradle`** -- Adds a missing `import groovy.xml.XmlParser` (workaround for a cordova-android 15.0.0 bug).
+1. **Patches `settings.gradle`** — Removes `include ":CordovaLib"` and conditionally includes `mobile_sdk/SalesforceMobileSDK-Android` as a composite build.
 
-2. **Patches `settings.gradle`** -- Removes `include ":CordovaLib"` and adds an `includeBuild` pointing to `mobile_sdk/SalesforceMobileSDK-Android`, so the Android SDK is consumed as a composite build instead of CordovaLib.
+2. **Copies Gradle wrapper files** (`gradle.properties`, `gradlew`, `gradlew.bat`, `gradle/`) from the plugin into the app project directory.
 
-3. **Patches `app/build.gradle`** -- Adds packaging exclusions for duplicate META-INF files, and replaces `implementation(project(path: ":CordovaLib"))` with `api 'com.salesforce.mobilesdk:SalesforceHybrid:14.0.0'`.
+3. **Patches `app/build.gradle`** — Adds packaging exclusions for duplicate META-INF files and replaces the CordovaLib project dependency with `api 'com.salesforce.mobilesdk:SalesforceHybrid:14.1.0'`.
 
-4. **Copies Gradle wrapper files** (`gradle.properties`, `gradlew`, `gradlew.bat`, `gradle/`) from the plugin into the app project directory.
+4. **Injects `MainApplication.kt`** — Uses the effective Android package namespace and sets the manifest's application class.
+
+5. **Updates `strings.xml`** — Supplies the app's `account_type` and `app_package` resources.
+
+6. **Adds the `LoginActivity` redirect intent-filter** — Inserts callback placeholders when the activity is absent. The hybrid template substitutes the app's callback scheme, host and path; direct plugin installations must fill them in.
+
+Cordova Android 15.1.0 already imports `groovy.xml.XmlParser`; the hook no longer injects that workaround.
 
 ## What NOT to Edit Here
 
