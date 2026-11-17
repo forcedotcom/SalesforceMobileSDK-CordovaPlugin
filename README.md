@@ -261,9 +261,11 @@ Salesforce Mobile SDK License. See [LICENSE.md](LICENSE.md) for details.
 
 ## Cordova iOS 8.2.0 compatibility
 
+### Podfile declaration hook
+
 The iOS plugin hooks preserve Podfile declarations affected by [cordova-ios issue 1751](https://github.com/apache/cordova-ios/issues/1751). They adapt the loaded declaration parser only for 8.2.0 and restore missing framework or warning declarations recorded in `pods.json`. Cordova package files and the Podfile deployment-target expression are preserved. First plugin installation, prepare and later plugin additions/removals run the hook automatically. Hooks must be enabled. Remove this compatibility code when the supported Cordova release contains the upstream fix.
 
-Run `npm install` and `npm test` to verify the hook against the real 8.2.0 parser.
+### Restoring damaged declarations
 
 Automatic recovery is limited to generated single-target Podfiles. A declaration in another target does not configure the main target. When declarations were erased, recovery restores the recorded defaults; `pods.json` cannot recover lost arguments such as static framework linkage. Restore those options from the original project configuration. Ambiguous multi-target or custom declaration sections require manual restoration and are left unchanged.
 
@@ -271,8 +273,6 @@ Automatic recovery is limited to generated single-target Podfiles. A declaration
 
 Run `cordova prepare ios` after `cordova plugin remove <plugin>` and before building directly in Xcode. Cordova 8.2.0 can temporarily regenerate the Podfile with its own iOS 13 default during removal; the next prepare restores the SDK's configured iOS 18 deployment target and complete pod graph. `cordova build ios` already includes prepare. The declaration compatibility hook does not change deployment-target policy.
 
-## Matched iOS source promotion
+### Maintaining the compatibility hook
 
-The Hybrid pod uses an immutable commit, and the companion Package CLI must select the matching immutable plugin commit. Publish the reviewed Hybrid source first, then the plugin that references it, and expose the Package default only after both exact commits are available through their declared upstream Git URLs. Keep the referenced commits reachable. Other SDK pod sources retain their existing release-branch policy; an app's Podfile.lock records the resolved dependency graph.
-
-Review branches may reference unpublished companion commits. If squash or rebase changes a commit ID, replace the dependent pin with the final upstream ID and repeat fresh-consumer installation through the public Git URLs before promotion. Local source overrides or Git URL mappings verify only the mapped source set and do not establish public availability. Coordinate the development-branch transition so consumers are not exposed to an unmatched intermediate source set.
+Run `npm install` and `npm test` to verify the hook against the real 8.2.0 parser. See [matched iOS source promotion](docs/hybrid/README.md) for maintainer publication and dependency-pin requirements.

@@ -92,8 +92,9 @@ module.exports = function (context) {
     const knownLine = /^(?:use_frameworks!|inhibit_all_warnings!)(?:\s|\(|$)/;
     if (targets.length !== 1 || lines.some(line => line && !knownLine.test(line)) ||
             /^=begin\b/m.test(section)) {
-        throw new Error('Cannot automatically restore a customized Cordova Podfile. ' +
-            'Restore its original declarations and custom options before preparing iOS.');
+        throw new Error('Cannot automatically restore a customized Cordova Podfile at ' +
+            podfilePath + '. Missing declarations: ' + missing.join(', ') + '. ' +
+            'Restore its original declarations and custom options before running cordova prepare ios.');
     }
     const newline = text.includes('\r\n') ? '\r\n' : '\n';
     fs.writeFileSync(podfilePath, text.replace(platformLine, line =>

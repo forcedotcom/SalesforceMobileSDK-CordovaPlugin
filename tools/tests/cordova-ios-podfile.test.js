@@ -151,6 +151,29 @@ test('rejects ambiguous custom code when recorded declarations are missing', () 
     assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
 });
 
+test('reports the damaged Podfile path and each missing declaration', () => {
+    const text = seed('configure_frameworks_from_environment!');
+    record({ 'use_frameworks!': { count: 1 }, 'inhibit_all_warnings!': { count: 1 } });
+    assert.throws(() => hook(context), error => {
+        assert.ok(error.message.includes(path.join(ios, 'Podfile')));
+        assert.match(error.message, /Missing declarations: use_frameworks!, inhibit_all_warnings!/);
+        assert.match(error.message, /original declarations and custom options/);
+        return true;
+    });
+    assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
+});
+
+test('reports only declarations that need manual restoration', () => {
+    const text = seed('use_frameworks! :linkage => :static\ncustom_setting!');
+    record({ 'use_frameworks!': { count: 1 }, 'inhibit_all_warnings!': { count: 1 } });
+    assert.throws(() => hook(context), error => {
+        assert.match(error.message, /Missing declarations: inhibit_all_warnings!\./);
+        assert.doesNotMatch(error.message, /use_frameworks!/);
+        return true;
+    });
+    assert.equal(fs.readFileSync(path.join(ios, 'Podfile'), 'utf8'), text);
+});
+
 test('explains that erased custom arguments require the original configuration', t => {
     seed();
     record({ 'use_frameworks!': { count: 1 } });
