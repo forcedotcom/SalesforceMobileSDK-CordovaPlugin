@@ -2,14 +2,14 @@ name: Cordova iOS Podfile compatibility
 
 on:
   pull_request:
-    branches: [dev141]
+    branches: ['dev[0-9]*']
     paths:
       - '.github/workflows/cordova-ios-podfile.yaml'
       - 'tools/**'
       - 'package.json'
       - 'plugin.xml'
   push:
-    branches: [dev141]
+    branches: ['dev[0-9]*']
     paths:
       - '.github/workflows/cordova-ios-podfile.yaml'
       - 'tools/**'
