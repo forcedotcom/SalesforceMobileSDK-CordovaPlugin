@@ -3,8 +3,10 @@ const path = require('node:path');
 
 /*
  * Cordova iOS 8.2.0 writes a variable in its platform declaration, but its
- * declaration parser expects a quoted literal. Remove this compatibility hook
- * when the supported Cordova version includes the upstream fix:
+ * declaration parser expects a quoted literal. This hook is gated to exactly
+ * 8.2.0. On each Cordova iOS upgrade, check whether the issue is fixed. If it
+ * is not, extend the version gate to the newly validated version. If it is,
+ * remove this hook, its plugin.xml registrations and its tests:
  * https://github.com/apache/cordova-ios/issues/1751
  */
 module.exports = function (context) {
