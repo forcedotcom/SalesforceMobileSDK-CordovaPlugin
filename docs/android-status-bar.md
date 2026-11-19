@@ -19,6 +19,10 @@ For example, the computed color `rgba(255, 0, 153, 0.5)` is forwarded as
 `#7f.8ff0099`, which is not a valid Android hex color. This is upstream platform
 JavaScript, not a change to the Salesforce plugin.
 
+Upstream tracking: [Cordova Android issue 2048](https://github.com/apache/cordova-android/issues/2048).
+Revisit this limitation when adopting a Cordova Android release containing a
+verified fix.
+
 Without the optional plugin, the same call passes numeric RGBA components to
 Cordova's native `SystemBar` plugin. That native implementation rounds the alpha
 component. The malformed hex conversion belongs to the optional forwarding path.
@@ -31,7 +35,8 @@ and its show/hide window flags updated as expected. These observations cover
 native window state, not pixel rendering, every edge-to-edge configuration or
 installation into an application generated from a custom template.
 
-This upgrade keeps the published platform JavaScript and existing plugin choices.
+Mobile SDK 14.1 intentionally ships with this documented limitation, preserving
+the published Cordova Android 15.1.0 JavaScript and existing plugin choices.
 It does not remove the optional plugin or add a vendor patch. An affected Android
 app can avoid fractional alpha on the forwarding path, or use the optional
 plugin's own color API with an explicitly valid Android color after checking its
