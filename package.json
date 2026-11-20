@@ -39,5 +39,11 @@
             "name": "Wolfgang Mathurin",
             "email": "wmathurin@salesforce.com"
         }
-    ]
+    ],
+    "scripts": {
+        "test": "node --test tools/tests/*.test.js"
+    },
+    "devDependencies": {
+        "cordova-ios": "8.2.0"
+    }
 }
