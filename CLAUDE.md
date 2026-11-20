@@ -118,7 +118,8 @@ This script is the **heart of the distribution process**. It clones source repos
    - `Shared/gen/plugins/com.salesforce/*.js` → `www/`
 
 3. **Copies iOS code**:
-   - iOS-Hybrid: `shared/hybrid/*.{h,m}` → `src/ios/classes/`
+   - iOS-Hybrid: `shared/hybrid/AppDelegate.swift` and `shared/hybrid/*.{h,m}`
+     → `src/ios/classes/`
    - iOS SDK: `shared/resources/*` → `src/ios/resources/`
 
 4. **Copies Android code**:
@@ -206,10 +207,12 @@ Maps JavaScript files to Cordova namespaces:
 
 ### iOS (`tools/postinstall-ios.js`)
 Runs after plugin installation:
-- Modifies Xcode project settings
-- Configures app transport security
-- Sets up entitlements for push notifications
-- Configures build settings for Cordova
+- Copies the SDK's `AppDelegate.swift` into the app target's plugin directory
+- Redirects the app target's Xcode project reference to that copy
+- Imports `InitialViewController.h` in the Swift bridging header
+
+The iOS entries in `plugin.xml` configure push entitlements and other platform
+settings.
 
 ### Android (`tools/postinstall-android.js`)
 Runs after plugin installation:
