@@ -1,6 +1,6 @@
 # Cordova Plugin for Salesforce Mobile SDK
 
-This repository is an **aggregation-only distribution package**. Source code is NOT developed here. The plugin assembles JavaScript from `SalesforceMobileSDK-Shared`, iOS bridge code from `SalesforceMobileSDK-iOS-Hybrid`, iOS resources from `SalesforceMobileSDK-iOS`, and the entire Android SDK from `SalesforceMobileSDK-Android` into a single Cordova plugin distributed via npm.
+This repository is an **aggregation-only distribution package**. Source code is NOT developed here. The plugin assembles JavaScript from `SalesforceMobileSDK-Shared`, iOS app delegate and bridge code from `SalesforceMobileSDK-iOS-Hybrid`, iOS resources from `SalesforceMobileSDK-iOS`, and the entire Android SDK from `SalesforceMobileSDK-Android` into a single Cordova plugin distributed via npm.
 
 ## Repository Structure
 
@@ -22,8 +22,8 @@ SalesforceMobileSDK-CordovaPlugin/
 │   └── com.salesforce.util.push.js
 │
 ├── src/ios/
-│   ├── classes/                      # Objective-C bridge (copied from iOS-Hybrid)
-│   │   ├── AppDelegate.m
+│   ├── classes/                      # App delegate and bridge (copied from iOS-Hybrid)
+│   │   ├── AppDelegate.swift
 │   │   ├── InitialViewController.h
 │   │   ├── InitialViewController.m
 │   │   ├── UIApplication+SalesforceHybridSDK.h
@@ -84,7 +84,7 @@ Examples:
 2. **Wipes both `src/ios/` and `src/android/`** regardless of the `-o` flag, then recreates only the directories matching the requested platform.
 
 3. **Copies iOS bridge code** from iOS-Hybrid:
-   - `iOS-Hybrid/shared/hybrid/AppDelegate.m` -> `src/ios/classes/`
+   - `iOS-Hybrid/shared/hybrid/AppDelegate.swift` -> `src/ios/classes/`
    - `iOS-Hybrid/shared/hybrid/UIApplication+SalesforceHybridSDK.{h,m}` -> `src/ios/classes/`
    - `iOS-Hybrid/shared/hybrid/InitialViewController.{h,m}` -> `src/ios/classes/`
 
@@ -126,7 +126,7 @@ Six plugin modules plus `smartstore.client`, plus six utility modules -- all ser
 
 ```xml
 <engines>
-  <engine name="cordova-ios" version="7.1.1" />
+  <engine name="cordova-ios" version="8.2.0" />
   <engine name="cordova-android" version="15.0.0" />
 </engines>
 ```
@@ -143,8 +143,8 @@ Six plugin modules plus `smartstore.client`, plus six utility modules -- all ser
   ```xml
   <podspec>
     <pods use-frameworks="true">
-      <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
-      <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+      <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" commit="fb880a6c138c1668da8970b164694e1c8d82f67c" />
+      <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev141" />
       ...
     </pods>
   </podspec>
@@ -180,12 +180,12 @@ These scripts run automatically when a developer executes `cordova plugin add co
 
 ### `postinstall-ios.js`
 
-Patches `project.pbxproj` to redirect `AppDelegate.m` to `Plugins/com.salesforce/AppDelegate.m`, so the SDK's bootstrap app delegate is used instead of the default Cordova stub:
+Copies the SDK's `AppDelegate.swift` into the generated app's plugin directory and redirects the app target's reference to that copy. The app delegate remains in the app target because the CordovaPlugins Swift package cannot link the CocoaPods frameworks. The hook also imports `InitialViewController.h` in the bridging header for Swift interoperability:
 
 ```javascript
 replaceTextInFile(projectFile,
-    'path = AppDelegate.m;',
-    'name = AppDelegate.m; path = Plugins/com.salesforce/AppDelegate.m;');
+    'path = AppDelegate.swift;',
+    'name = AppDelegate.swift; path = Plugins/com.salesforce/AppDelegate.swift;');
 ```
 
 ### `postinstall-android.js`
@@ -232,6 +232,11 @@ Only edit these files directly in this repository:
    ```
    This updates `package.json`, bumps `SalesforceHybrid:<version>` in `postinstall-android.js`, and switches `plugin.xml` pod references between `branch="dev"` and `tag="v14.0.0"`.
 
+For development builds, `setversion.sh` also replaces the immutable Hybrid commit
+with a branch. Restore the reviewed Hybrid commit and coordinate the matching
+Package plugin pin before publishing; see [matched iOS source
+promotion](docs/hybrid/README.md).
+
 4. Commit, tag, push:
    ```bash
    git add .
@@ -258,3 +263,21 @@ Only edit these files directly in this repository:
 ## License
 
 Salesforce Mobile SDK License. See [LICENSE.md](LICENSE.md) for details.
+
+## Cordova iOS 8.2.0 compatibility
+
+### Podfile declaration hook
+
+The iOS plugin hooks preserve Podfile declarations affected by [cordova-ios issue 1751](https://github.com/apache/cordova-ios/issues/1751). They adapt the loaded declaration parser only for 8.2.0 and restore missing framework or warning declarations recorded in `pods.json`. Cordova package files and the Podfile deployment-target expression are preserved. First plugin installation, prepare and later plugin additions/removals run the hook automatically. Hooks must be enabled. Remove this compatibility code when the supported Cordova release contains the upstream fix.
+
+### Restoring damaged declarations
+
+Automatic recovery is limited to generated single-target Podfiles. A declaration in another target does not configure the main target. When declarations were erased, recovery restores the recorded defaults; `pods.json` cannot recover lost arguments such as static framework linkage. Restore those options from the original project configuration. Ambiguous multi-target or custom declaration sections require manual restoration and are left unchanged.
+
+### After removing an iOS plugin with CocoaPods dependencies
+
+Run `cordova prepare ios` after `cordova plugin remove <plugin>` and before building directly in Xcode. Cordova 8.2.0 can temporarily regenerate the Podfile with its own iOS 13 default during removal; the next prepare restores the SDK's configured iOS 18 deployment target and complete pod graph. `cordova build ios` already includes prepare. The declaration compatibility hook does not change deployment-target policy.
+
+### Maintaining the compatibility hook
+
+Run `npm install` and `npm test` to verify the hook against the real 8.2.0 parser. See [matched iOS source promotion](docs/hybrid/README.md) for maintainer publication and dependency-pin requirements.
