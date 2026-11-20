@@ -126,7 +126,7 @@ Six plugin modules plus `smartstore.client`, plus six utility modules -- all ser
 
 ```xml
 <engines>
-  <engine name="cordova-ios" version="7.1.1" />
+  <engine name="cordova-ios" version="8.2.0" />
   <engine name="cordova-android" version="15.0.0" />
 </engines>
 ```
@@ -143,8 +143,8 @@ Six plugin modules plus `smartstore.client`, plus six utility modules -- all ser
   ```xml
   <podspec>
     <pods use-frameworks="true">
-      <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" branch="dev" />
-      <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev" />
+      <pod name="SalesforceHybridSDK" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS-Hybrid" commit="fb880a6c138c1668da8970b164694e1c8d82f67c" />
+      <pod name="MobileSync" git="https://github.com/forcedotcom/SalesforceMobileSDK-iOS" branch="dev141" />
       ...
     </pods>
   </podspec>
