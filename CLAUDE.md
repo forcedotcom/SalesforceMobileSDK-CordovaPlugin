@@ -61,7 +61,7 @@ SalesforceMobileSDK-CordovaPlugin/
 ├── src/
 │   ├── ios/                          # iOS implementation
 │   │   ├── classes/                  # Copied from iOS-Hybrid
-│   │   │   ├── AppDelegate.m
+│   │   │   ├── AppDelegate.swift
 │   │   │   ├── InitialViewController.{h,m}
 │   │   │   └── UIApplication+SalesforceHybridSDK.{h,m}
 │   │   └── resources/                # Copied from iOS SDK
@@ -118,7 +118,8 @@ This script is the **heart of the distribution process**. It clones source repos
    - `Shared/gen/plugins/com.salesforce/*.js` → `www/`
 
 3. **Copies iOS code**:
-   - iOS-Hybrid: `shared/hybrid/*.{h,m}` → `src/ios/classes/`
+   - iOS-Hybrid: `shared/hybrid/AppDelegate.swift` and `shared/hybrid/*.{h,m}`
+     → `src/ios/classes/`
    - iOS SDK: `shared/resources/*` → `src/ios/resources/`
 
 4. **Copies Android code**:
@@ -162,14 +163,15 @@ Maps JavaScript files to Cordova namespaces:
   <!-- CocoaPods dependencies -->
   <podspec>
     <pods use-frameworks="true">
-      <pod name="SalesforceHybridSDK" git="..." branch="dev" />
-      <pod name="MobileSync" git="..." branch="dev" />
+      <pod name="SalesforceHybridSDK" git="..." commit="fb880a6c138c1668da8970b164694e1c8d82f67c" />
+      <pod name="MobileSync" git="..." branch="dev141" />
       <!-- ... -->
     </pods>
   </podspec>
 
   <!-- Source files and resources -->
-  <source-file src="src/ios/classes/AppDelegate.m" />
+  <!-- postinstall-ios.js copies AppDelegate.swift into the app target;
+       omit it from source-file entries in the CordovaPlugins Swift package. -->
   <resource-file src="src/ios/resources/..." />
 
   <!-- Post-install hook -->
@@ -205,10 +207,12 @@ Maps JavaScript files to Cordova namespaces:
 
 ### iOS (`tools/postinstall-ios.js`)
 Runs after plugin installation:
-- Modifies Xcode project settings
-- Configures app transport security
-- Sets up entitlements for push notifications
-- Configures build settings for Cordova
+- Copies the SDK's `AppDelegate.swift` into the app target's plugin directory
+- Redirects the app target's Xcode project reference to that copy
+- Imports `InitialViewController.h` in the Swift bridging header
+
+The iOS entries in `plugin.xml` configure push entitlements and other platform
+settings.
 
 ### Android (`tools/postinstall-android.js`)
 Runs after plugin installation:
@@ -358,6 +362,7 @@ npm publish
 
 | Cordova Plugin | Shared | iOS Hybrid | Android | Cordova iOS | Cordova Android |
 |---------------|--------|------------|---------|-------------|-----------------|
+| 14.1.0 (dev141) | 14.1.0 | 14.1.0     | 14.1.0  | 8.2.0       | 15.1.0          |
 | 14.0.0        | 14.0.0 | 14.0.0     | 14.0.0  | 7.1.1       | 15.0.0          |
 | 13.2.0        | 13.2.0 | 13.2.0     | 13.2.0  | 7.1.1       | 14.0.1          |
 | 13.1.0        | 13.1.0 | 13.1.0     | 13.1.0  | 7.1.0       | 13.0.0          |
