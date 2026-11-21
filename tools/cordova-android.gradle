@@ -1,0 +1,11 @@
+/*
+ * Copyright (c) 2026-present, salesforce.com, inc.
+ * All rights reserved.
+ */
+
+// Apply the minor API after Cordova configures the app's compile SDK.
+cdvPluginPostBuildExtras.add({
+    if (android.compileSdk == 36) {
+        android.compileSdkMinor = Math.max(android.compileSdkMinor ?: 0, 1)
+    }
+})

@@ -186,7 +186,7 @@ Maps JavaScript files to Cordova namespaces:
   <preference name="android-minSdkVersion" value="31" />
   <preference name="android-targetSdkVersion" value="36" />
   <preference name="GradleVersion" value="9.4.1" />
-  <preference name="AndroidGradlePluginVersion" value="9.1.1"/>
+  <preference name="AndroidGradlePluginVersion" value="9.2.1"/>
 
   <!-- Cordova plugins → Native classes -->
   <feature name="com.salesforce.oauth">

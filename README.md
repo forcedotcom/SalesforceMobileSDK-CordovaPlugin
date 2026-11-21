@@ -50,6 +50,7 @@ SalesforceMobileSDK-CordovaPlugin/
 │
 ├── tools/
 │   ├── update.sh                     # Copies source files from upstream repos
+│   ├── cordova-android.gradle         # Applies the Android compile SDK minor API
 │   ├── postinstall-ios.js            # Runs after `cordova plugin add` on iOS
 │   └── postinstall-android.js        # Runs after `cordova plugin add` on Android
 │
@@ -165,17 +166,19 @@ Six plugin modules plus `smartstore.client`, plus six utility modules -- all ser
   <feature name="com.salesforce.smartstore"><param name="android-package" value="com.salesforce.androidsdk.phonegap.plugin.SmartStorePlugin"/></feature>
   ```
 
-- **Manifest edits** set `SalesforceDroidGapActivity` as the main activity and `HybridApp` as the application class.
+- **Manifest edits** set `SalesforceDroidGapActivity` as the main activity; the post-install hook sets the generated `MainApplication` as the application class.
 
 - **Gradle/Kotlin version preferences**:
   ```xml
   <preference name="GradleVersion" value="9.4.1" />
-  <preference name="AndroidGradlePluginVersion" value="9.1.1"/>
+  <preference name="AndroidGradlePluginVersion" value="9.2.1"/>
   <preference name="GradlePluginKotlinEnabled" value="true" />
   <preference name="GradlePluginKotlinVersion" value="2.1.21" />
   ```
 
 - **Post-install hook**: `tools/postinstall-android.js`.
+
+Android builds use AGP 9.2.1 and compile against SDK 36.1. The Android Gradle extension selects minor API 1 after Cordova configures the app's compile SDK, preserving a higher compile SDK or minor API selection. The minimum SDK remains 31 and the target SDK remains 36.
 
 ## Post-Install Hooks
 
@@ -221,6 +224,7 @@ Cordova Android 15.1.0 already imports `groovy.xml.XmlParser`; the hook no longe
 Only edit these files directly in this repository:
 - `plugin.xml`
 - `tools/update.sh`, `tools/postinstall-ios.js`, `tools/postinstall-android.js`
+- `tools/cordova-android.gradle`
 - `package.json`
 
 ## Release Workflow
